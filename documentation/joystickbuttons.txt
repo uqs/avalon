@@ -1,0 +1,12 @@
+1 extended rudder range
+2 used to confirm several other commands
+3 switch to DOCK MODE --> set sail to wind (confirm with button 2)
+4 switch to MAX ENERGY SAVING MODE (confirm with button 2)
+4 and 5 set sail angle (in REMOTECONTROL MODE)
+4 and 5 set desired heading (in NORMAL SAILING MODE)
+6 switch to NORMAL SAILING MODE (confirm with button 2)
+7 switch to REMOTE CONTROL MODE (confirm with button 2)
+8 calibrate left rudder (confirm with button 2)
+9 calibrate right rudder (confirm with button 2)
+10 calibrate sail (confirm with button 2)
+11 switch to Motion Stop on the Boom

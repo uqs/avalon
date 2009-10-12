@@ -1,0 +1,166 @@
+Change Log für das AVALON Main-PC System
+========================================
+
+
+System Setup
+------------
+Netinst-Minimal-Installation vom USB-Stick.
+Files sind bei SW.
+
+
+VPN-Client
+----------
+Installierte Packages: (in dieser Reihenfolge)
+libatm1_2.4.1-17_i386 (libatm1)
+iproute_20061002-3_i386 (iproute)
+vpnc_0.3.3+SVN20051028-3_i386 (vpnc)
+
+*.deb-Files sind aus dem Internet; sind bei SW
+
+
+Autologin
+---------
+apt-get install mingetty
+vi /etc/inittab
+diese Linie auskommentieren:
+# 1:2345:respawn:/sbin/getty 38400 tty1
+und mit dieser ersetzen
+1:2345:respawn:/sbin/mingetty --autologin usernamehiereinfuegen tty1
+
+
+Setting up git-Repository
+-------------------------
+done by HE
+
+
+Bildschirmauflösung
+-------------------
+Kernelzeile: vga=791 anhängen (oder HE fragen)
+
+
+Patch für Edgeport/8 Treiber
+----------------------------
+### !! Funktioniert derzeit noch nicht. !! ###
+
+Patch-File ist bei SW
+
+Komplette Kernelsource Runterladen. (HE oder Cedric fragen. apt-get source irgendwas.)
+patchfile in das toplevel source-directory kopieren.
+patch -p1 < patchfilenamehiereinfuegen
+make modules modules_install
+
+dann noch das modul neu laden.
+rmmod io_ti
+modprobe io_ti
+
+
+Baud-Rate für Ports setzen
+--------------------------
+stty 19200 -F /dev/ttyS0
+Setzt ttyS0 auf 19200 Baud
+
+
+Swap-Memory deaktivieren
+------------------------
+in /etc/fstab
+Zeile mit dem swap memory auskommentiert (by Cedric)
+
+
+Setting up DDX
+--------------
+Mostly done by Cedric, quite complicated...
+
+
+Configure eth-Ports on Startup
+------------------------------
+nötig für Shared Memory mit DDX. (by Cedric)
+
+new file: /etc/init.d/castor
+changed file: /etc/network/interfaces
+
+Beide files sind bei SW
+
+
+Smaller Changes
+---------------
+installed htop (by HE)
+set colors for the shell (by Cedric)
+
+
+Editing the serial interface of rtx
+-----------------------------------
+adding "const" on the first parameter of rtx_serial_open and rtx_serial_open_with_prio. Both in serial.h and serial.cpp
+
+
+Jerome and Cedric making the system read-only (and a few other things)
+----------------------------------------------------------------------
+
+1. Remove some unused stuff (local things...)
+# apt-get install localepurge
+# localepurge
+
+2. strange stuff
+# rm /etc/mtab
+# ln -s /proc/mounts /etc/mtab
+
+3. move EVERYTHING that might be written drung bootup (or anywhere else) to temp-directories.
+# mv /etc/resolv.conf /var/log
+# ln -s /var/log/resolv.conf
+
+# mv /var/lib/urandom/random-seed /var/run
+# ln -s /var/run/random-seed /var/lib/urandom
+
+### more of that has to be done later, after checking the errors on bootup ###
+
+4. File-Fixes (whole /etc can be found ond SW's laptop)
+
+/etc/rcS.d/S55: eine Zeile auskommentiert
+/etc/fstab: created all the tempfs; flash rom to ext2
+/etc/init.d/checkroot.sh: rootmode=ro (that's the whole point of 2 hours of work)
+/etc/init.d/rootmisc: touch some files (again - check /etc files)
+/bash.bashrc: aliases on ro and rw
+/etc/default/rcS: UTC = true und verbose for bootup to on
+/etc/S35mountall.sh
+/etc/rcS.d/S30checkfs.sh (removed some logging)
+
+# touch /var/run/ifstate
+# ln -s /var/run/ifstate /etc/networks/run
+
+5. Änderungen im GRUB-file (list irgendwas)
+
+vga=791 only on demand...
+
+6. SSH installieren 
+### Does not work at the moment ###
+
+# apt-get install openssh-server
+
+7. Reboot over and over, correct error until there are no errors left.
+
+
+Changes to get all software running
+-----------------------------------
+
+- some more changes in /etc/init.d/castor    
+  (to make the network work permanently)
+
+- libaries for epos & can installed (from epos-serial directory on laptop from
+  SW
+
+- libaries for imu (libcmt.a) and gnuplot (libCGpl.a) copypasted in
+  /usr/local/lib (!! Check rights to work !!)
+
+
+Changes done by Cedric (31.3.09)
+--------------------------------
+
+-installed:
+	-cmake 2.6
+	-cherokee
+	-screen
+	-php5-client, php5-cgi, php5-curl, php5-dev
+
+-compiled the cmt-library on the main pc, IMU worked afterwards!
+
+
+

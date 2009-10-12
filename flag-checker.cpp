@@ -399,7 +399,7 @@ void * translation_thread(void * dummy)
 
 
 int
-main (int argc, char * argv[])
+main (int argc, const char * argv[])
 {
 	RtxThread * th;
     int ret;

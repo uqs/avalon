@@ -1,0 +1,124 @@
+/************************************************************************/
+/*																		*/
+/*      		       P R O J E K T    A V A L O N						*/
+/*																		*/
+/*	              Checklists for the Remote-Control Testing             */
+/*																		*/
+/*	                   March 24, 2009; Stefan Wismer					*/
+/*																	  	*/
+/************************************************************************/
+
+
+Starting the AVALON-System
+--------------------------
+
+- Plug the Power-Source to the Device, it should boot by itsself.
+
+    x   IF Power is already connected and green light is blinking
+        Press Power Button for some time
+
+- Wait until system is fully booted (2 minutes should be enough)
+
+- Make sure the WLAN-Device is powered up and the right LEDs are on
+
+- Start the controlling Laptop, connect to the avalon-Network and start a shell
+
+- $ ssh castor@192.168.1.2
+  login with the password
+
+  From now on this shell is representing the ship-pc
+
+
+Starting all the Programms (on laptop)
+--------------------------------------
+
+- Plug the joystick to the Laptop and wait at least 10 seconds
+
+- Start another shell. This shell will be used for the laptop.
+
+- Now you have to find out which device your WLAN card is. To do so type
+
+    $ ifconfig
+
+    In the output generated search for something like 'inet Adresse:192.168.1.xxx'
+    where xxx is a 1 to 3 digit number. The name printed left of this block is the
+    name of your wlan device. Usual names are 'eth0', 'eth1' or 'wlan0'
+
+- Now tell the pc to use the route over the wlan
+
+    $ sudo route add -net 224.0.0.0 netmask 240.0.0.0 dev xxxx
+    where xxxx shall be replaced with the name of your WLAN-Device
+    and confirm with your root password
+
+- Next you start the store an the joystick driver
+
+    $ store -catalog 192.168.1.2 &
+    $ ddxjoystick -sample 0.01 &
+
+Starting all the Programms (on MainPC)
+--------------------------------------
+
+- change back to the other shell (the ship-shell) and change to the program directory
+
+    $ cd gitdir/ssa
+
+- to simply start all needed programs do
+
+    $ sh remotecontrol.sh
+
+- to stop all the programs
+
+    $ sh remotecontrolkill.sh
+
+These two commands should take care of everything. The commands below are not
+needed ideally.
+
+- start the flag-checker
+
+    & ./flag-checker &
+
+- start the remotecontrol interface
+
+    $ ./remotecontrol &
+
+- start the two ruddermotor controllers and the sail controller
+
+    $ ./ruddermain -side left &
+    $ ./ruddermain -side right &
+    $ ./sailmain &
+
+- Test if all works fine
+
+    x IF you want to have direct feedback of the sail and rudder angles
+      kill the remotecontrol and restart it. (this shouldn't be done be-
+      fore starting the motor-drivers, because it blocks the shell...)
+
+      $ su
+        login with the password
+
+      $ killall remotecontrol
+      $ exit
+      $ ./remotecontrol -talk 1
+
+- Thats it.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -4,11 +4,11 @@
 ADD_DEFINITIONS( -ggdb -Wall )
 
 INCLUDE_DIRECTORIES(
-	/usr/local/include
+	 ${CMAKE_HOME_DIRECTORY}/eposlib-test /usr/local/include
 )
 
 LINK_DIRECTORIES(
-	/usr/local/lib
+	 ${CMAKE_HOME_DIRECTORY}/eposlib-test /usr/local/lib
 )
 
 ADD_EXECUTABLE(windsensor windsensor.cpp)
@@ -53,8 +53,9 @@ TARGET_LINK_LIBRARIES(sailmain ddxx ddx rtx can epos pthread rt )
 ADD_EXECUTABLE(sailmain_keepalive sailmain_keepalive.cpp)
 TARGET_LINK_LIBRARIES(sailmain_keepalive ddxx ddx rtx can epos pthread rt )
 
-ADD_EXECUTABLE(imu imu.cpp)
-TARGET_LINK_LIBRARIES(imu ddxx ddx rtx pthread rt cmt -fno-stack-protector)
+# Commented out while I don't have cmt
+# ADD_EXECUTABLE(imu imu.cpp)
+# TARGET_LINK_LIBRARIES(imu ddxx ddx rtx pthread rt cmt -fno-stack-protector)
 
 ADD_EXECUTABLE(windcleaner windcleaner.cpp)
 TARGET_LINK_LIBRARIES(windcleaner ddxx ddx rtx can epos pthread rt )
