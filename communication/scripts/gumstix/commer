@@ -1,0 +1,35 @@
+#! /bin/sh
+
+MM=/usr/bin/MessageManager
+DL=/usr/bin/WatchDog
+WD=/usr/bin/DataLogger
+PM=/usr/bin/PowerManager
+
+case "$1" in
+  start)
+#    modprobe sa1100_wdt
+    modprobe sht1x
+    slattach -p slip -s 115200 -L /dev/ttyS0 &
+    sleep 3
+    ifconfig sl0 192.168.33.2 pointopoint 192.168.33.3
+
+    start-stop-daemon --start --exec $PM -- -f
+    start-stop-daemon --start --exec $WD -- -f
+    sleep 1
+    start-stop-daemon --start --exec $MM -- -f
+    start-stop-daemon --start --exec $DL -- -f
+    ;;
+  stop)
+    start-stop-daemon --stop --exec $WD
+    start-stop-daemon --stop --exec $MM
+    start-stop-daemon --stop --exec $DL
+    start-stop-daemon --stop --exec $PM
+    ifconfig sl0 down
+    killall slattach
+    ;;
+  *)
+    echo "Usage: /etc/init.d/serial {start|stop}"
+    exit 1
+esac
+
+exit 0

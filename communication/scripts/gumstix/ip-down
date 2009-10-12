@@ -1,0 +1,5 @@
+#! /bin/sh
+
+PROGRAM=/usr/bin/MessageManagerNotifier
+
+$PROGRAM $PPP_IPPARAM down

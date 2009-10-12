@@ -1,0 +1,2 @@
+flags 5.0 ./flag-checker
+joystick 5.0 ddxjoystick

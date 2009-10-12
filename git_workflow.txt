@@ -1,0 +1,88 @@
+$ git config --global user.name "Your Name Comes Here"
+$ git config --global user.email you@yourdomain.example.com
+
+$ cd project
+$ git init
+$ git add .
+$ git commit -a -m "Your commit message goes here"
+
+####### set up remote #######
+git clone git@78.47.117.21:ssa.git
+git clone git@78.47.117.21:logfiles_ssa.git
+
+# To push a new repository onto the remote server 
+# for the first time (only gitosis-admin can do that) do:
+$ git remote rm origin
+$ git remote add origin git@78.47.117.21:logfiles_ssa.git
+$ git push origin master
+
+####### set up AVALON as remote #######
+git remote add avalon castor@192.168.1.2:/home/castor/gitdir/ssa
+git pull avalon master
+git push avalon
+
+# after that, if you want to see the pushed changes on Avalon
+$ git reset --hard
+
+# alternatively you could also create a whole new directory, which will not be
+# linked to our normal remote server:
+$ git clone castor@192.168.1.2:/home/castor/gitdir/ssa
+
+###### Normal Workflow: ########
+
+# In the morning, do:
+$ git pull
+
+$ git branch devel_branch    # create new branch "devel_branch"
+$ git checkout devel_branch  # change working directory to "devel_branch"
+
+# To look at and edit some other remote branch, do:
+git checkout --track -b <local name> origin/<remote name>
+# Note: this creates a local branch <local name> based on the upstream branch
+# and switches your working copy to that branch.
+$ git pull
+$ git push origin <local name>
+
+#modify files and add the newly modified to the index by
+$ git add file1 file2 file3
+
+#see what is about to be committed by:
+$ git diff --cached    #very detailed, complete diffs
+#or:
+$ git status           #brief overview
+
+#when you are done modifying
+$ git commit -a -m "commit message"
+
+# At the end of the day:
+!!!!! NEVER just "git push"!!!!!! That would overwrite the remote master!
+$ git push origin devel_branch
+# if "devel_branch" doesn't exist on the remote server it will be created.
+
+# Then, when branches are finished, someone (an immensely important person) will do:
+$ git pull
+$ git checkout master
+$ git merge devel_branch          # merge "devel_branch" to "master"
+$ git push
+$ git push origin :devel_branch   # to delete "devel_branch"
+
+####### End Normal Workflow #######
+
+# View Project History:
+$ git log      # brief summary
+$ git log -p   # detailed, complete diffs
+$ git log --stat --summary  # overview of changes
+
+# undo all uncommited changes:
+$ git reset --hard
+
+undo one commit between others. Works only when there are no uncommited changes:
+$ git revert <commit>
+
+#### In .git/config zusätzlich eintragen, damit "git pull" ohne parameter funktioniert:
+[branch "master"]
+        remote = origin
+        merge = refs/heads/master
+####
+
+git pull origin master
