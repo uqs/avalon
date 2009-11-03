@@ -1,0 +1,47 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	1	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.7	//
+ASL_DEBUG	can_serial.c	46;"	d	file:
+BAUDRATE	can_serial.h	35;"	d
+DEBUG	can_serial.c	47;"	d	file:
+EPOS_ERROR_SERIAL	can_serial.h	/^typedef struct EPOS_ERROR_SERIAL{$/;"	s
+EPOS_ERROR_SERIAL	can_serial.h	/^} EPOS_ERROR_SERIAL;$/;"	t	typeref:struct:EPOS_ERROR_SERIAL
+FAILED	can_serial.h	28;"	d
+MAXERRORSERIAL	can_serial.h	47;"	d
+MAXRETRY	can_serial.h	44;"	d
+OKAY	can_serial.h	25;"	d
+PREFIX	Makefile	/^PREFIX = \/usr\/local$/;"	m
+RESPONSE	can_serial.h	31;"	d
+TIMEOUTNSEC	can_serial.h	41;"	d
+TIMEOUTSEC	can_serial.h	38;"	d
+_CAN_SERIAL_H	can_serial.h	8;"	d
+c2w	can_serial.c	/^int c2w(unsigned char *data, word *buffer, int no_chars)$/;"	f
+calc_crc	can_serial.c	/^int calc_crc(unsigned char *data, unsigned char *crc_value, int no_char)$/;"	f
+can_close	can_serial.c	/^void can_close()$/;"	f
+can_init	can_serial.c	/^void can_init(const char* dev)$/;"	f
+can_read_message	can_serial.c	/^void can_read_message()$/;"	f
+can_send_message	can_serial.c	/^void can_send_message(can_message_t* message)$/;"	f
+chg_byte_order	can_serial.c	/^int chg_byte_order(unsigned char *data, int no_chars)$/;"	f
+chg_word_order	can_serial.c	/^int chg_word_order(unsigned char *data, int no_chars)$/;"	f
+clear_iobuffer	can_serial.c	/^int clear_iobuffer(int fd)$/;"	f
+close_device	can_serial.c	/^int close_device(int fd)$/;"	f
+code	can_serial.h	/^  long int code;$/;"	m	struct:EPOS_ERROR_SERIAL
+crc_alg	can_serial.c	/^word crc_alg(word *buffer, int no) \/* EPOS CRC-CCITT Calcu. p.8 *\/$/;"	f
+epos2serial	can_serial.c	/^int epos2serial(int can_id, unsigned char *msg, unsigned char *data)$/;"	f
+error_serial	can_serial.c	/^EPOS_ERROR_SERIAL error_serial[MAXERRORSERIAL] = {$/;"	v
+fd	can_serial.c	/^int fd = 0;$/;"	v
+message	can_serial.c	/^static can_message_t message;$/;"	v	file:
+msg	can_serial.h	/^  char *msg;$/;"	m	struct:EPOS_ERROR_SERIAL
+open_device	can_serial.c	/^int open_device(const char *name)$/;"	f
+prtmsg	can_serial.c	/^void prtmsg(char *desc, unsigned char *msg, int no)$/;"	f
+read_byte	can_serial.c	/^int read_byte(int fd, unsigned char *buffer)$/;"	f
+receive_dataframe	can_serial.c	/^int receive_dataframe(int fd, unsigned char *data)$/;"	f
+send_dataframe	can_serial.c	/^int send_dataframe(int fd, unsigned char *data, int no_bytes_send)$/;"	f
+serial2epos	can_serial.c	/^void serial2epos(unsigned char *data_send, unsigned char *data_recv)$/;"	f
+w2c	can_serial.c	/^int w2c(word *buffer, unsigned char *data, int no_words)$/;"	f
+word	can_serial.h	/^typedef unsigned short word;$/;"	t
+write_byte	can_serial.c	/^int write_byte(int fd, unsigned char data)$/;"	f
+write_string	can_serial.c	/^int write_string(int fd, unsigned char *data, int len)$/;"	f

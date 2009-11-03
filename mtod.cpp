@@ -1,4 +1,4 @@
-#include "../ssa/avalon.h"
+#include "avalon.h"
 /**general includes**/
 #include <ctype.h>
 #include <memory.h>

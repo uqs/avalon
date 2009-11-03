@@ -2,8 +2,8 @@
 
 #undef ASL_DEBUG
 
-#include "can.h"
-#include "pdebug.h"
+#include <can/can.h>
+#include <can/pdebug.h>
 
 #include "epos.h"
 
@@ -1767,10 +1767,11 @@ void epos_get_RS232_baudrate(int id)
 	can_send_message(&message);
 }
 
-void can_read_message_handler(const can_message_t* message)
+int can_read_message_handler(const can_message_t* message)
 {
 	int i=0;
 	int errorcode;
+	int errorfound=0;
 
 	PDEBUG("mhm... something to read... ");
 	PDEBUG_SNIP("id: %lx Data: ",message->id);
@@ -1797,7 +1798,6 @@ void can_read_message_handler(const can_message_t* message)
 	if ((message->id > 0x80) && (message->id < 0x100)) {
 		//EMERGENCY object
 		PDEBUG("ERROR ERROR ERROR ERROR ERROR ERROR ERROR ERROR\n");
-		int errorfound=0;
 
 		errorcode = (message->content[0]+(message->content[1]<<8));
 
@@ -2277,6 +2277,7 @@ void can_read_message_handler(const can_message_t* message)
 			}
 		}
 	}
+	return errorfound?-1:0;
 }
 
 

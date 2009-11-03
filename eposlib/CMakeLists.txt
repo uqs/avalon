@@ -1,0 +1,22 @@
+SET(CMAKE_INSTALL_PREFIX "/usr/local")
+
+
+ADD_DEFINITIONS( -ggdb -Wall )
+
+
+INCLUDE_DIRECTORIES(
+	${CMAKE_HOME_DIRECTORIES}
+	./
+    /usr/local/include
+)
+
+LINK_DIRECTORIES(
+)
+
+
+# SUBDIRS(can can-serial epos)
+SUBDIRS(can can-serial epos example)
+
+
+
+
