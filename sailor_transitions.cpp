@@ -261,7 +261,7 @@ void * translation_thread(void * dummy)
                 if((fabs(wind_clean.bearing_real) > 90.0)
                         && (remainder((imu.attitude.yaw - wind_clean.global_direction_real),360.0) 
                          * remainder((desired_heading.heading - sign(remainder(desired_heading.heading - wind_clean.global_direction_real,360.0))
-                         * AV_SAILOR_JIBE_HYSTERESIS - wind_clean.global_direction_real),360.0) < 0))
+					 * AV_SAILOR_JIBE_HYSTERESIS - wind_clean.global_direction_real),360.0) < 0) && (sign(sailstate.degrees_sail)*sign(wind_clean.bearing_real)>0))
                 {
                     if(jibetimeout_diff > 20.0) // next jibe only if 20 seconds after the previous
                     {

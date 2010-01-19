@@ -1,0 +1,7 @@
+theta_dot/P    0.02
+theta_dot/I    0
+theta_dot/Imin	-20.0
+theta_dot/Imax 20.0
+theta_dot/D    -2
+theta_dot/min  -10.0
+theta_dot/max  10.0

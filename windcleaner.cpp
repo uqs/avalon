@@ -166,7 +166,7 @@ void * translation_thread(void * dummy)
 		    /**bearing real:**/
 
 		    bearing_app_X = dirtyWind.speed * cos(workingWind.bearing_app * AV_PI / 180.0 ); //attention: here we used apparent wind speed, is that correct????
-		    bearing_app_Y = dirtyWind.speed * sin (workingWind.bearing_app * AV_PI / 180.0 );
+		    bearing_app_Y = dirtyWind.speed * sin(workingWind.bearing_app * AV_PI / 180.0 );
 
 		    workingWind.bearing_real = atan2((bearing_app_Y + boatData.velocity.y),(bearing_app_X - boatData.velocity.x));
 		    workingWind.bearing_real = remainder((workingWind.bearing_real * 180.0/AV_PI),360.0); 

@@ -238,6 +238,8 @@ void * translation_thread(void * dummy)
                 *boatData.position.longitude);
             current_pos_latitude =double (AV_EARTHRADIUS
                 *(AV_PI/180)*boatData.position.latitude);
+
+
             ///////
             vec_dist_wyp_x = waypoints.Data[current_wyp].longitude - current_pos_longitude; //everything already in meters
             vec_dist_wyp_y = waypoints.Data[current_wyp].latitude - current_pos_latitude; //everything already in meters
