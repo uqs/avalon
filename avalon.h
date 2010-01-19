@@ -58,7 +58,7 @@
 /////////////////////////////
 
 // Rudder
-#define AV_MAX_RUDDER_ANGLE			    45.0
+#define AV_MAX_RUDDER_ANGLE			    30.0
 #define AV_RUDDER_TICKS_PER_DEGREE	    (-1583)	        // Convert Ticks to degrees (rudder)
 #define AV_NOF_RUDDER_EPOS			    2	            // How many Epos on the Rudders?
 #define AV_MAX_RUDDER_CURRENT		    10000	        // mA max per Rudder EPOS
@@ -119,7 +119,7 @@
 #define AV_SAILOR_TACK_END_TIMEOUT      30.0            // s, after this time TACK is aborted
 #define AV_SAILOR_JIBE_END_TIMEOUT      40.0            // s, after this time JIBE is aborted
 #define AV_SAILOR_HEADINGCHANGE_END_TIMEOUT      40.0   // s, after this time HEADINGCHANGE is aborted
-#define AV_SAILOR_HEADINGCHANGE_ERROR   50.0            // if heading error is bigger than this, trans to HEADINGCHANGE
+#define AV_SAILOR_HEADINGCHANGE_ERROR   180.0            // if heading error is bigger than this, trans to HEADINGCHANGE
 
 /////////////////////////////
 // Settings for the Navigators
@@ -127,7 +127,7 @@
 
 #define AV_NEIGHBORHOOD                    8              // define the grid range: OPTIONS: _8,_24
 // #define GNUPLOT_ENABLED				               //enable the gnuplot-drawing
-#define AV_NAVI_GRID_SIZE	           200            //distance in meters between two nodes!
+#define AV_NAVI_GRID_SIZE	           8            //distance in meters between two nodes!
 
 #define AV_NAUT_MILE                    1852           //1 nautical mile in meters!!
 ////

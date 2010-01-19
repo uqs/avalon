@@ -29,8 +29,8 @@ TARGET_LINK_LIBRARIES(ruddermain ddxx ddx rtx can epos pthread rt )
 ADD_EXECUTABLE(porttracker porttracker.cpp RudderMotor.cpp)
 TARGET_LINK_LIBRARIES(porttracker ddxx ddx rtx can epos pthread rt )
 
-# ADD_EXECUTABLE(eposdebug eposdebug.cpp RudderMotor.cpp SailMotor.cpp)
-# TARGET_LINK_LIBRARIES(eposdebug ddxx ddx rtx can epos pthread rt )
+ADD_EXECUTABLE(eposdebug eposdebug.cpp RudderMotor.cpp SailMotor.cpp)
+TARGET_LINK_LIBRARIES(eposdebug ddxx ddx rtx can epos pthread rt )
 
 # ADD_EXECUTABLE(ais ais.cpp)
 # TARGET_LINK_LIBRARIES(ais ddxx ddx rtx can epos pthread rt )
