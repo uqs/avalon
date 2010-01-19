@@ -174,20 +174,26 @@ void * translation_thread(void * dummy)
     DesiredHeading desired_heading;
     
     double u;  // the input that will be written to rudderangle
+    double theta_dot_des; //desired theta_dot by first controller
     double e;  // the current error
     RtxPid* mypid = NULL;
+    RtxPid* thetapid = NULL;
     RtxParamStream* myparamstream = NULL;
+    RtxParamStream* paramstream_theta_dot = NULL;
 
     int sign_wanted_sail_angle = 1; // 1 or -1 depending on port or starboard driving
     int sign_wanted_rudder_angle = 1; // 1 or -1 depending on port or starboard driving before maneuver
     int sign_wanted_sail_angle_after_tack;
     int sign_wanted_sail_angle_after_change;
     int last_state;
+    double sail_pre_jibe;
+    double heading_pre_jibe;
+
     double wind_global_pre_tack;
     double wind_global_pre_jibe;
     double wind_global_pre_change;
-    double desired_heading_after_jibe;
-    double desired_bearing_after_jibe;
+    //double desired_heading_after_jibe;
+    //double desired_bearing_after_jibe;
     double desired_heading_after_change;
     double desired_bearing_after_change;
     double wanted_sail_angle_after_change;
@@ -225,347 +231,449 @@ void * translation_thread(void * dummy)
                 }
                 desired_heading.heading = desired_heading_while_no_tack_or_jibe;
             }
+
+	    FILE * thetafile;
+	    thetafile = fopen("thetaplot.txt","a+");
        
             switch(flags.state)
-            {
-                case AV_FLAGS_ST_IDLE:
-                    rtx_timer_sleep(0.1);
-                    last_state = AV_FLAGS_ST_IDLE;
-                    continue;   // don't do anything
-                    break;
+	    {
+		    case AV_FLAGS_ST_IDLE:
+			    rtx_timer_sleep(0.1);
+			    last_state = AV_FLAGS_ST_IDLE;
+			    continue;   // don't do anything
+			    break;
 
-                case AV_FLAGS_ST_DOCK:
-                    /* Sail: */
-                    avalon.wanted_sail_angle_to_wind = 0;
-                    sail.degrees = remainder((wind_clean.bearing_app
-                                - sign_wanted_sail_angle * avalon.wanted_sail_angle_to_wind),360.0);
+		    case AV_FLAGS_ST_DOCK:
+			    /* Sail: */
+			    avalon.wanted_sail_angle_to_wind = 0;
+			    sail.degrees = remainder((wind_clean.bearing_app
+						    - sign_wanted_sail_angle * avalon.wanted_sail_angle_to_wind),360.0);
 
-                    /* Rudder: */
-                    rudder.degrees_left = -45.0;
-                    rudder.degrees_right = 45.0;
-                    last_state = AV_FLAGS_ST_DOCK;
-                    break;
+			    /* Rudder: */
+			    rudder.degrees_left = -45.0;
+			    rudder.degrees_right = 45.0;
+			    last_state = AV_FLAGS_ST_DOCK;
+			    break;
 
-                case AV_FLAGS_ST_NORMALSAILING:
-                    /* Sail: */
-                    sign_wanted_sail_angle = sign(wind_clean.bearing_app);  // +1 for wind from starboard, -1 for port
-                    avalon.wanted_sail_angle_to_wind = AV_SAILOR_WANTED_AOA * get_sail_AOA_coeff(wind_clean.speed);
-                    // The following ensures that the sail is never set to the wrong side
-                    // of closer than AV_SAILOR_UPWIND_MIN_SAIL_DEGREES
-                    calculated_sail_degrees = remainder((wind_clean.bearing_app
-                                - sign_wanted_sail_angle * avalon.wanted_sail_angle_to_wind),360.0);
-                    if(sign_wanted_sail_angle * calculated_sail_degrees > AV_SAILOR_UPWIND_MIN_SAIL_DEGREES)
-                    {
-                        // slack the sail
-                        sail.degrees = calculated_sail_degrees;
-                    }
-                    else
-                    {
-                        // set tight
-                        sail.degrees = sign_wanted_sail_angle * AV_SAILOR_UPWIND_MIN_SAIL_DEGREES;
-                    }
-                    
-                    /* Rudder: */
-                    if(last_state != flags.state) // initialize only when newly in this state
-                    {
-                        myparamstream = rtx_param_open("sailor_pidparams.txt", 0, NULL); //NULL = errorfunction
-                        mypid = rtx_pid_init(mypid, myparamstream, "rudder", 0.01, 0); //0.01=dt
-                        rtx_pid_integral_enable(mypid);
-                    }
-                    // compensate drift
-                    if(imu_clean.velocity.x > 0.5) // below 0.5kn it probably doesn't make sense to compensate drift
-                    {
-                        desired_heading.heading = remainder(desired_heading.heading + atan2(imu_clean.velocity.y, imu_clean.velocity.x),360.0);
-                    }
-                    e = desired_heading.heading - imu.attitude.yaw;
-                    if(fabs(e) > 180)
-                    {
-                        imu.attitude.yaw = 0;
-                        desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
-                    }
-                    u = rtx_pid_eval(mypid, imu.attitude.yaw, desired_heading.heading, 0) * sign(imu.velocity.x);
-                    if(imu.velocity.x > AV_SAILOR_DECREASE_RUDDER_THRESHOLD)
-                    {
-                        // rudder angle is small if speed is high
-                        u = u * AV_SAILOR_DECREASE_RUDDER_THRESHOLD / imu.velocity.x;
-                    }
-                    rudder.degrees_left = u;
-                    rudder.degrees_right = u;
-                    last_state = AV_FLAGS_ST_NORMALSAILING;
-                    break;
+		    case AV_FLAGS_ST_NORMALSAILING:
+			    /* Sail: */
+			    sign_wanted_sail_angle = sign(wind_clean.bearing_app);  // +1 for wind from starboard, -1 for port
+			    avalon.wanted_sail_angle_to_wind = AV_SAILOR_WANTED_AOA * get_sail_AOA_coeff(wind_clean.speed);
+			    // The following ensures that the sail is never set to the wrong side
+			    // of closer than AV_SAILOR_UPWIND_MIN_SAIL_DEGREES
+			    calculated_sail_degrees = remainder((wind_clean.bearing_app
+						    - sign_wanted_sail_angle * avalon.wanted_sail_angle_to_wind),360.0);
+			    if(sign_wanted_sail_angle * calculated_sail_degrees > AV_SAILOR_UPWIND_MIN_SAIL_DEGREES)
+			    {
+				    // slack the sail
+				    sail.degrees = calculated_sail_degrees;
+			    }
+			    else
+			    {
+				    // set tight
+				    sail.degrees = sign_wanted_sail_angle * AV_SAILOR_UPWIND_MIN_SAIL_DEGREES;
+			    }
 
-                case AV_FLAGS_ST_UPWINDSAILING:
-                    /* Sail: */
-                    sign_wanted_sail_angle = sign(wind_clean.bearing_app);  // +1 for wind from starboard, -1 for port
-                    avalon.wanted_sail_angle_to_wind = AV_SAILOR_WANTED_AOA * get_sail_AOA_coeff(wind_clean.speed);
-                    // The following ensures that the sail is never set to the wrong side
-                    // of closer than AV_SAILOR_UPWIND_MIN_SAIL_DEGREES
-                    calculated_sail_degrees = remainder((sign_wanted_sail_angle * AV_SAILOR_UPWIND_MIN_SAIL_DEGREES
-                                - sign_wanted_sail_angle * (avalon.wanted_sail_angle_to_wind - AV_SAILOR_WANTED_AOA)),360.0);
-                    if(sign_wanted_sail_angle * calculated_sail_degrees > AV_SAILOR_UPWIND_MIN_SAIL_DEGREES)
-                    {
-                        // slack the sail
-                        sail.degrees = calculated_sail_degrees;
-                    }
-                    else
-                    {
-                        // set tight
-                        sail.degrees = sign_wanted_sail_angle * AV_SAILOR_UPWIND_MIN_SAIL_DEGREES;
-                    }
-                    
-                    /* Rudder: */
-                    if(last_state != flags.state) // initialize only when newly in this state
-                    {
-                        myparamstream = rtx_param_open("sailor_pidparams.txt", 0, NULL); //NULL = errorfunction
-                        mypid = rtx_pid_init(mypid, myparamstream, "rudder", 0.01, 0); //0.01=dt
-                    }
-                    // redefine desired heading to stay "close to the wind":
-                    desired_heading.heading = remainder(wind_clean.global_direction_real - sign_wanted_sail_angle * AV_SAILOR_MAX_HEIGHT_TO_WIND, 360.0);
-                    e = desired_heading.heading - imu.attitude.yaw;
-                    if(fabs(e) > 180) //TODO: check: why not remainder???
-                    {
-                        imu.attitude.yaw = 0;
-                        desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
-                    }
-                    u = rtx_pid_eval(mypid, imu.attitude.yaw, desired_heading.heading, 0) * sign(imu.velocity.x);
-                    if(imu.velocity.x > AV_SAILOR_DECREASE_RUDDER_THRESHOLD)
-                    {
-                        // rudder angle is small if speed is high
-                        u = u * AV_SAILOR_DECREASE_RUDDER_THRESHOLD / imu.velocity.x;
-                    }
-                    rudder.degrees_left = u;
-                    rudder.degrees_right = u;
-                    last_state = AV_FLAGS_ST_UPWINDSAILING;
-                    break;
+			    /* Rudder: */
+			    if(last_state != flags.state) // initialize only when newly in this state
+			    {
+				    myparamstream = rtx_param_open("sailor_pidparams.txt", 0, NULL); //NULL = errorfunction
+				    mypid = rtx_pid_init(mypid, myparamstream, "rudder", 0.01, 0); //0.01=dt
+				    rtx_pid_integral_enable(mypid);
+			    }
+			    /* Theta_dot: */
+			    if(last_state != flags.state) // initialize only when newly in this state
+			    {
+				    paramstream_theta_dot = rtx_param_open("sailor_theta_dot_params.txt", 0, NULL); //NULL = errorfunction
+				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
+				    rtx_pid_integral_enable(thetapid);
+			    }
 
-                 case AV_FLAGS_ST_DOWNWINDSAILING:
-                    /* Sail: */
-                    sign_wanted_sail_angle = sign(wind_clean.bearing_app);  // +1 for wind from starboard, -1 for port
-                    avalon.wanted_sail_angle_to_wind = AV_SAILOR_WANTED_AOA * get_sail_AOA_coeff(wind_clean.speed);
-                    calculated_sail_degrees = remainder((wind_clean.bearing_app
-                                - sign_wanted_sail_angle * avalon.wanted_sail_angle_to_wind),360.0);
-                    if(sign_wanted_sail_angle * calculated_sail_degrees > 0) // if still on "correct" side
-                    {
-                        // slack the sail
-                        sail.degrees = calculated_sail_degrees;
-                    }
-                    else
-                    {
-                        // set to 179 deg
-                        sail.degrees = sign_wanted_sail_angle * 179.0;
-                    }
-                    sail.degrees = sign_wanted_sail_angle * AV_SAILOR_DOWNWIND_SAIL_DEGREES;
-                    
-                    /* Rudder: */
-                    if(last_state != flags.state) // initialize only when newly in this state
-                    {
-                        myparamstream = rtx_param_open("sailor_pidparams.txt", 0, NULL); //NULL = errorfunction
-                        mypid = rtx_pid_init(mypid, myparamstream, "rudder", 0.01, 0); //0.01=dt
-                    }
-                    // redefine desired heading to stay fixed to the wind:
-                    desired_heading.heading = remainder(wind_clean.global_direction_real - sign_wanted_sail_angle * AV_SAILOR_MAX_DOWNWIND_ANGLE, 360.0);
-                    e = desired_heading.heading - imu.attitude.yaw;
-                    if(fabs(e) > 180) // take care of +-180 thing
-                    {
-                        imu.attitude.yaw = 0;
-                        desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
-                    }
-                    u = rtx_pid_eval(mypid, imu.attitude.yaw, desired_heading.heading, 0) * sign(imu.velocity.x);
-                    if(imu.velocity.x > AV_SAILOR_DECREASE_RUDDER_THRESHOLD)
-                    {
-                        // rudder angle is small if speed is high
-                        u = u * AV_SAILOR_DECREASE_RUDDER_THRESHOLD / imu.velocity.x;
-                    }
-                    rudder.degrees_left = u;
-                    rudder.degrees_right = u;
-                    last_state = AV_FLAGS_ST_DOWNWINDSAILING;
-                    break;
+			    // compensate drift
+			    if(imu_clean.velocity.x > 0.5) // below 0.5kn it probably doesn't make sense to compensate drift
+			    {
+				    desired_heading.heading = remainder(desired_heading.heading + atan2(imu_clean.velocity.y, imu_clean.velocity.x),360.0);
+			    }
+			    e = desired_heading.heading - imu.attitude.yaw;
+			    if(fabs(e) > 180)
+			    {
+				    imu.attitude.yaw = 0;
+				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
+			    }
+			    theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading.heading, 0);
+			    u = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0) * sign(imu.velocity.x);
+#if 0
+			    if(imu.velocity.x > AV_SAILOR_DECREASE_RUDDER_THRESHOLD)
+			    {
+				    // rudder angle is small if speed is high
+				    u = u * AV_SAILOR_DECREASE_RUDDER_THRESHOLD / imu.velocity.x;
+			    }
+#endif
+			    rtx_message("des_heading = %f, heading = %f \n",desired_heading.heading,imu.attitude.yaw);
+			    rtx_message("des_head_dot = %f, head_dot = %f \n",theta_dot_des,imu.gyro.z);
+			    fprintf(thetafile,"%f %f \n",theta_dot_des,imu.gyro.z);
+			    rudder.degrees_left = u;
+			    rudder.degrees_right = u;
+			    last_state = AV_FLAGS_ST_NORMALSAILING;
+			    break;
 
-               case AV_FLAGS_ST_TACK:
-                    if(last_state != flags.state) // only when newly in this state, otherwise rudder angle changes in the middle of the tack
-                    {
-                        sign_wanted_rudder_angle = -sign(wind_clean.bearing_app);  // +1 for wind from starboard, -1 for port
-                        wind_global_pre_tack = wind_clean.global_direction_real;
-                        myparamstream = rtx_param_open("sailor_pidparams.txt", 0, NULL); //NULL = errorfunction
-                        mypid = rtx_pid_init(mypid, myparamstream, "rudder", 0.01, 0); //0.01=dt
-                        desired_heading_after_tack =
-                            remainder(wind_clean.global_direction_real - 45.0 *
-                                    sign(remainder(imu.attitude.yaw -
-                                            wind_clean.global_direction_real,360.0)),360.0);
-                        sign_wanted_sail_angle_after_tack = -sign(wind_clean.bearing_app);
-                    }
-                    /* Sail: */
-                    // if heading is still on 'wrong' side:
-                    if(remainder((wind_global_pre_tack - imu.attitude.yaw),360.0) * sign_wanted_sail_angle_after_tack < 0)
-                    {
-                        sail.degrees = AV_SAILOR_UPWIND_MIN_SAIL_DEGREES / AV_SAILOR_MAX_HEIGHT_TO_WIND * remainder((wind_global_pre_tack - imu.attitude.yaw),360.0);
-                    }
-                    else // sail on correct (for after tack) side
-                    {
-                        sail.degrees = sign_wanted_sail_angle_after_tack * AV_SAILOR_UPWIND_MIN_SAIL_DEGREES;
-                    }
+		    case AV_FLAGS_ST_UPWINDSAILING:
+			    /* Sail: */
+			    sign_wanted_sail_angle = sign(wind_clean.bearing_app);  // +1 for wind from starboard, -1 for port
+			    avalon.wanted_sail_angle_to_wind = AV_SAILOR_WANTED_AOA * get_sail_AOA_coeff(wind_clean.speed);
+			    // The following ensures that the sail is never set to the wrong side
+			    // of closer than AV_SAILOR_UPWIND_MIN_SAIL_DEGREES
+			    calculated_sail_degrees = remainder((sign_wanted_sail_angle * AV_SAILOR_UPWIND_MIN_SAIL_DEGREES
+						    - sign_wanted_sail_angle * (avalon.wanted_sail_angle_to_wind - AV_SAILOR_WANTED_AOA)),360.0);
+			    if(sign_wanted_sail_angle * calculated_sail_degrees > AV_SAILOR_UPWIND_MIN_SAIL_DEGREES)
+			    {
+				    // slack the sail
+				    sail.degrees = calculated_sail_degrees;
+			    }
+			    else
+			    {
+				    // set tight
+				    sail.degrees = sign_wanted_sail_angle * AV_SAILOR_UPWIND_MIN_SAIL_DEGREES;
+			    }
 
-                    /* Rudder: */
-                    //u = sign_wanted_sail_angle * 45.0 * sign(imu.velocity.x);
-                    
-                    /* the following is only for Q-tacks instead of jibes */
-                    //imu.attitude.yaw = remainder((imu.attitude.yaw - wind_global_pre_tack),360.0);
-                    //desired_heading_after_tack = remainder((desired_heading_after_tack - wind_global_pre_tack),360.0);
-                    /* end Q-tacks... */
+			    /* Rudder: */
+			    if(last_state != flags.state) // initialize only when newly in this state
+			    {
+				    myparamstream = rtx_param_open("sailor_pidparams.txt", 0, NULL); //NULL = errorfunction
+				    mypid = rtx_pid_init(mypid, myparamstream, "rudder", 0.01, 0); //0.01=dt
+			    }
 
-                    // Attention: if() mit e is missing(see normal sailing...) probably not needed though !!!!!!!!
-                    u = rtx_pid_eval(mypid, imu.attitude.yaw, desired_heading_after_tack, 0) * sign(imu.velocity.x);
-                    if(imu.velocity.x > AV_SAILOR_DECREASE_RUDDER_THRESHOLD)
-                    {
-                        // rudder angle is small if speed is high
-                        u = u * AV_SAILOR_DECREASE_RUDDER_THRESHOLD / imu.velocity.x;
-                    }
-                    rudder.degrees_left = u;
-                    rudder.degrees_right = u;
-                    last_state = AV_FLAGS_ST_TACK;
-                    break;
+			    /* Theta_dot: */
+			    if(last_state != flags.state) // initialize only when newly in this state
+			    {
+				    paramstream_theta_dot = rtx_param_open("sailor_theta_dot_params.txt", 0, NULL); //NULL = errorfunction
+				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
+				    rtx_pid_integral_enable(thetapid);
+			    }
 
-                case AV_FLAGS_ST_JIBE:
-                    if(last_state != flags.state) // only when newly in this state
-                    {
-                        wind_global_pre_jibe = wind_clean.global_direction_real;
-                        desired_heading_after_jibe = fabs(remainder((wind_clean.global_direction_real
-                                        + AV_SAILOR_MAX_DOWNWIND_ANGLE * sign(wind_clean.bearing_real)),360.0));
-                        desired_bearing_after_jibe = remainder((wind_global_pre_jibe - desired_heading_after_jibe),360.0);
-                        sign_wanted_sail_angle = sign(desired_bearing_after_jibe); // +1 for wind from starboard, -1 for port
-                    }
+			    // redefine desired heading to stay "close to the wind":
+			    desired_heading.heading = remainder(wind_clean.global_direction_real - sign_wanted_sail_angle * AV_SAILOR_MAX_HEIGHT_TO_WIND, 360.0);
+			    e = desired_heading.heading - imu.attitude.yaw;
+			    if(fabs(e) > 180) //TODO: check: why not remainder???
+			    {
+				    imu.attitude.yaw = 0;
+				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
+			    }
+			    theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading.heading, 0) ;
+			    u = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0) * sign(imu.velocity.x);
+#if 0
+			    if(imu.velocity.x > AV_SAILOR_DECREASE_RUDDER_THRESHOLD)
+			    {
+				    // rudder angle is small if speed is high
+				    u = u * AV_SAILOR_DECREASE_RUDDER_THRESHOLD / imu.velocity.x;
+			    }
+#endif
+			    rtx_message("des_heading = %f, heading = %f \n",desired_heading.heading,imu.attitude.yaw);
+			    rtx_message("des_head_dot = %f, head_dot = %f \n",theta_dot_des,imu.gyro.z);
+			    fprintf(thetafile,"%f %f \n",theta_dot_des,imu.gyro.z);
+			    rudder.degrees_left = u;
+			    rudder.degrees_right = u;
+			    last_state = AV_FLAGS_ST_UPWINDSAILING;
+			    break;
 
-                    /* Sail: */
-                    if(sailstate.degrees_sail * sign_wanted_sail_angle >= 0 || fabs(sailstate.degrees_sail) > 170.0)
-                        // sail already on "correct" side or turned out to the front
-                    {
-                        sail.degrees = sign_wanted_sail_angle * AV_SAILOR_DOWNWIND_SAIL_DEGREES;
-                    }
-                    else //sail still on "wrong/old" side
-                    {
-                        sail.degrees = 180.0; // set to front
-                    }
+		    case AV_FLAGS_ST_DOWNWINDSAILING:
+			    /* Sail: */
+			    sign_wanted_sail_angle = sign(wind_clean.bearing_app);  // +1 for wind from starboard, -1 for port
+			    avalon.wanted_sail_angle_to_wind = AV_SAILOR_WANTED_AOA * get_sail_AOA_coeff(wind_clean.speed);
+			    calculated_sail_degrees = remainder((wind_clean.bearing_app
+						    - sign_wanted_sail_angle * avalon.wanted_sail_angle_to_wind),360.0);
+			    if(sign_wanted_sail_angle * calculated_sail_degrees > 0) // if still on "correct" side
+			    {
+				    // slack the sail
+				    sail.degrees = calculated_sail_degrees;
+			    }
+			    else
+			    {
+				    // set to 179 deg
+				    sail.degrees = sign_wanted_sail_angle * 179.0;
+			    }
+			    sail.degrees = sign_wanted_sail_angle * AV_SAILOR_DOWNWIND_SAIL_DEGREES;
 
-                    /* Rudder: */
-                    if(last_state != flags.state) // initialize only when newly in this state
-                    {
-                        myparamstream = rtx_param_open("sailor_pidparams.txt", 0, NULL); //NULL = errorfunction
-                        mypid = rtx_pid_init(mypid, myparamstream, "rudder", 0.01, 0); //0.01=dt
-                        rtx_pid_integral_enable(mypid);
-                    }
+			    /* Rudder: */
+			    if(last_state != flags.state) // initialize only when newly in this state
+			    {
+				    myparamstream = rtx_param_open("sailor_pidparams.txt", 0, NULL); //NULL = errorfunction
+				    mypid = rtx_pid_init(mypid, myparamstream, "rudder", 0.01, 0); //0.01=dt
+			    }
 
-                    if(sailstate.degrees_sail * sign_wanted_sail_angle <= 0) // Sail still on "wrong" side
-                    {
-                        // desiredheading in function of sailstate.degrees_sail...
-                        desired_heading.heading = remainder((remainder((wind_global_pre_jibe + 180.0),360.0) 
-                                    - (180.0 - AV_SAILOR_MAX_DOWNWIND_ANGLE) * sign_wanted_sail_angle 
-                                    * (sailstate.degrees_sail - 180.0) / (AV_SAILOR_DOWNWIND_SAIL_DEGREES - 180.0)),360.0);
-                    }
-                    else // sail already on correct side
-                    {
-                        desired_heading.heading = remainder((remainder((wind_global_pre_jibe + 180.0),360.0) 
-                                    - (180.0 - AV_SAILOR_MAX_DOWNWIND_ANGLE) * sign_wanted_sail_angle 
-                                    * (sailstate.degrees_sail + 180.0) / (AV_SAILOR_DOWNWIND_SAIL_DEGREES - 180.0)),360.0);
-                    }
+			    /* Theta_dot: */
+			    if(last_state != flags.state) // initialize only when newly in this state
+			    {
+				    paramstream_theta_dot = rtx_param_open("sailor_theta_dot_params.txt", 0, NULL); //NULL = errorfunction
+				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
+				    rtx_pid_integral_enable(thetapid);
+			    }
 
-                    e = desired_heading.heading - imu.attitude.yaw;
-                    if(fabs(e) > 180) // +-180 thing...
-                    {
-                        imu.attitude.yaw = 0;
-                        desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
-                    }
-                    u = rtx_pid_eval(mypid, imu.attitude.yaw, desired_heading.heading, 0) * sign(imu.velocity.x);
-                    if(imu.velocity.x > AV_SAILOR_DECREASE_RUDDER_THRESHOLD)
-                    {
-                        // rudder angle is small if speed is high
-                        u = u * AV_SAILOR_DECREASE_RUDDER_THRESHOLD / imu.velocity.x;
-                    }
-                    rudder.degrees_left = u;
-                    rudder.degrees_right = u;
-                    last_state = AV_FLAGS_ST_JIBE;
-                    break;
+			    // redefine desired heading to stay fixed to the wind:
+			    desired_heading.heading = remainder(wind_clean.global_direction_real - sign_wanted_sail_angle * AV_SAILOR_MAX_DOWNWIND_ANGLE, 360.0);
+			    e = desired_heading.heading - imu.attitude.yaw;
+			    if(fabs(e) > 180) // take care of +-180 thing
+			    {
+				    imu.attitude.yaw = 0;
+				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
+			    }
+			    theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading.heading, 0) ;
+			    u = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0) * sign(imu.velocity.x);
+#if 0
+			    if(imu.velocity.x > AV_SAILOR_DECREASE_RUDDER_THRESHOLD)
+			    {
+				    // rudder angle is small if speed is high
+				    u = u * AV_SAILOR_DECREASE_RUDDER_THRESHOLD / imu.velocity.x;
+			    }
+#endif
+			    rtx_message("des_heading = %f, heading = %f \n",desired_heading.heading,imu.attitude.yaw);
+			    rtx_message("des_head_dot = %f, head_dot = %f \n",theta_dot_des,imu.gyro.z);
+			    fprintf(thetafile,"%f %f \n",theta_dot_des,imu.gyro.z);
+			    rudder.degrees_left = u;
+			    rudder.degrees_right = u;
+			    last_state = AV_FLAGS_ST_DOWNWINDSAILING;
+			    break;
 
-                case AV_FLAGS_ST_MAXENERGYSAVING:
-                    /* Sail: */
-                    sail.degrees = sign(sailstate.degrees_sail) * 179.0;
-                    /* Rudder: */
-                    rudder.degrees_left = -45.0;
-                    rudder.degrees_right = 45.0;
-                    last_state = AV_FLAGS_ST_MAXENERGYSAVING;
-                    break;
+		    case AV_FLAGS_ST_TACK:
+			    if(last_state != flags.state) // only when newly in this state, otherwise rudder angle changes in the middle of the tack
+			    {
+				    sign_wanted_rudder_angle = -sign(wind_clean.bearing_app);  // +1 for wind from starboard, -1 for port
+				    wind_global_pre_tack = wind_clean.global_direction_real;
+				    myparamstream = rtx_param_open("sailor_pidparams.txt", 0, NULL); //NULL = errorfunction
+				    mypid = rtx_pid_init(mypid, myparamstream, "rudder", 0.01, 0); //0.01=dt
+				    desired_heading_after_tack =
+					    remainder(wind_clean.global_direction_real - 45.0 *
+							    sign(remainder(imu.attitude.yaw -
+									    wind_clean.global_direction_real,360.0)),360.0);
+				    sign_wanted_sail_angle_after_tack = -sign(wind_clean.bearing_app);
+			    }
 
-                case AV_FLAGS_ST_HEADINGCHANGE:
-                    if(last_state != flags.state) // only when newly in this state
-                    {
-                        switch(last_state)
-                        {
-                            case AV_FLAGS_ST_TACK: // use old wind direction
-                                wind_global_pre_change = wind_global_pre_tack;
-                                break;
-                            case AV_FLAGS_ST_JIBE: // use old wind direction
-                                wind_global_pre_change = wind_global_pre_jibe;
-                                break;
-                            default: // get current wind reading
-                                wind_global_pre_change = wind_clean.global_direction_real;
-                        }
-                        avalon.wanted_sail_angle_to_wind = AV_SAILOR_WANTED_AOA * get_sail_AOA_coeff(wind_clean.speed);
-                        desired_heading_after_change = desired_heading.heading;
-                        desired_bearing_after_change = remainder((wind_clean.global_direction_real - desired_heading_after_change),360.0);
-                        sign_wanted_sail_angle_after_change = sign(desired_bearing_after_change);
-                        wanted_sail_angle_after_change = remainder((desired_bearing_after_change - avalon.wanted_sail_angle_to_wind * sign_wanted_sail_angle),360.0);
-                    }
+			    /* Theta_dot: */
+			    if(last_state != flags.state) // initialize only when newly in this state
+			    {
+				    paramstream_theta_dot = rtx_param_open("sailor_theta_dot_params.txt", 0, NULL); //NULL = errorfunction
+				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
+				    rtx_pid_integral_enable(thetapid);
+			    }
 
-                    /* Sail: */
-                    switch(flags.sail_direction)
-                    {
-                        case AV_FLAGS_SAIL_DIR_NOPREFERENCE:
-                            sail.degrees = wanted_sail_angle_after_change;
-                            break;
-                        case AV_FLAGS_SAIL_DIR_ZERO:
-                            sail.degrees = 0.0;
-                            break;
-                        case AV_FLAGS_SAIL_DIR_FRONT:
-                            sail.degrees = 179.0;
-                            break;
-                    }
+			    /* Sail: */
+			    // if heading is still on 'wrong' side:
+			    if(remainder((wind_global_pre_tack - imu.attitude.yaw),360.0) * sign_wanted_sail_angle_after_tack < 0)
+			    {
+				    sail.degrees = AV_SAILOR_UPWIND_MIN_SAIL_DEGREES / AV_SAILOR_MAX_HEIGHT_TO_WIND * remainder((wind_global_pre_tack - imu.attitude.yaw),360.0);
+			    }
+			    else // sail on correct (for after tack) side
+			    {
+				    sail.degrees = sign_wanted_sail_angle_after_tack * AV_SAILOR_UPWIND_MIN_SAIL_DEGREES;
+			    }
 
-                    /* Rudder: */
-                    if(last_state != flags.state) // initialize only when newly in this state
-                    {
-                        // TODO maybe use different parameters here (I=0)
-                        myparamstream = rtx_param_open("sailor_pidparams.txt", 0, NULL); //NULL = errorfunction
-                        mypid = rtx_pid_init(mypid, myparamstream, "rudder", 0.01, 0); //0.01=dt
-                        rtx_pid_integral_enable(mypid);
-                    }
+			    /* Rudder: */
+			    //u = sign_wanted_sail_angle * 45.0 * sign(imu.velocity.x);
 
-                    desired_heading.heading = remainder((wind_clean.global_direction_real 
-                                - avalon.wanted_sail_angle_to_wind * sign(sailstate.degrees_sail) 
-                                - sailstate.degrees_sail),360.0);
+			    /* the following is only for Q-tacks instead of jibes */
+			    //imu.attitude.yaw = remainder((imu.attitude.yaw - wind_global_pre_tack),360.0);
+			    //desired_heading_after_tack = remainder((desired_heading_after_tack - wind_global_pre_tack),360.0);
+			    /* end Q-tacks... */
 
-                    e = desired_heading.heading - imu.attitude.yaw;
-                    if(fabs(e) > 180) // +-180 thing...
-                    {
-                        imu.attitude.yaw = 0;
-                        desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
-                    }
-                    u = rtx_pid_eval(mypid, imu.attitude.yaw, desired_heading.heading, 0) * sign(imu.velocity.x);
-                    if(imu.velocity.x > AV_SAILOR_DECREASE_RUDDER_THRESHOLD)
-                    {
-                        // rudder angle is small if speed is high
-                        u = u * AV_SAILOR_DECREASE_RUDDER_THRESHOLD / imu.velocity.x;
-                    }
-                    rudder.degrees_left = u;
-                    rudder.degrees_right = u;
-                    last_state = AV_FLAGS_ST_HEADINGCHANGE;
-                    break;
+			    // Attention: if() mit e is missing(see normal sailing...) probably not needed though !!!!!!!!
+			    // u = rtx_pid_eval(mypid, imu.attitude.yaw, desired_heading_after_tack, 0) * sign(imu.velocity.x);
+			    theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading_after_tack, 0) ;
+			    u = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0) * sign(imu.velocity.x);
+#if 0
+			    if(imu.velocity.x > AV_SAILOR_DECREASE_RUDDER_THRESHOLD)
+			    {
+				    // rudder angle is small if speed is high
+				    u = u * AV_SAILOR_DECREASE_RUDDER_THRESHOLD / imu.velocity.x;
+			    }
+#endif
+			    rtx_message("des_heading = %f, heading = %f \n",desired_heading_after_tack,imu.attitude.yaw);
+			    rtx_message("des_head_dot = %f, head_dot = %f \n",theta_dot_des,imu.gyro.z);
+			    fprintf(thetafile,"%f %f \n",theta_dot_des,imu.gyro.z);
+			    rudder.degrees_left = u;
+			    rudder.degrees_right = u;
+			    last_state = AV_FLAGS_ST_TACK;
+			    break;
 
-                default:
-                    rtx_message("Sailor state machine is in some illegal state. Behaving as in IDLE --> stopping motion");
-                    sail.degrees = sailstate.degrees_sail;
-                    last_state = 0;
-                    break;
-            }
+		    case AV_FLAGS_ST_JIBE:
+			    if(last_state != flags.state) // only when newly in this state
+			    {
+                                    sail_pre_jibe = sailstate.degrees_sail;
+                                    heading_pre_jibe = imu.attitude.yaw;
+				    wind_global_pre_jibe = wind_clean.global_direction_real;
+				  //  desired_heading_after_jibe = fabs(remainder((wind_clean.global_direction_real
+				//				    + AV_SAILOR_MAX_DOWNWIND_ANGLE * sign(wind_clean.bearing_real)),360.0));
+				  //  desired_bearing_after_jibe = remainder((wind_global_pre_jibe - desired_heading_after_jibe),360.0);
+				    sign_wanted_sail_angle = sign(wind_clean.bearing_real); // +1 for wind from starboard, -1 for port
+			    }
 
+			    /* Sail: */
+			    if(sailstate.degrees_sail * sign_wanted_sail_angle <= 0 || fabs(sailstate.degrees_sail) > 170.0)
+				    // sail already on "correct" side or turned out to the front
+			    {
+				    sail.degrees = -sign_wanted_sail_angle * AV_SAILOR_DOWNWIND_SAIL_DEGREES;
+			    }
+			    else //sail still on "wrong/old" side
+			    {
+				    sail.degrees = 180.0; // set to front
+			    }
+
+			    /* Rudder: */
+			    if(last_state != flags.state) // initialize only when newly in this state
+			    {
+				    myparamstream = rtx_param_open("sailor_pidparams.txt", 0, NULL); //NULL = errorfunction
+				    mypid = rtx_pid_init(mypid, myparamstream, "rudder", 0.01, 0); //0.01=dt
+				    rtx_pid_integral_enable(mypid);
+			    }
+
+			    /* Theta_dot: */
+			    if(last_state != flags.state) // initialize only when newly in this state
+			    {
+				    paramstream_theta_dot = rtx_param_open("sailor_theta_dot_params.txt", 0, NULL); //NULL = errorfunction
+				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
+				    rtx_pid_integral_enable(thetapid);
+			    }
+
+			    if(sailstate.degrees_sail * sign_wanted_sail_angle <= 0) // Sail already on correct side
+			    {
+				    // desiredheading in function of sailstate.degrees_sail...
+				    desired_heading.heading = remainder(remainder((wind_global_pre_jibe + 180.0),360.0) 
+							    - sign_wanted_sail_angle * ((180-AV_SAILOR_MAX_DOWNWIND_ANGLE)  
+							    * fabs(fabs(sailstate.degrees_sail) - 180.0) / fabs(AV_SAILOR_DOWNWIND_SAIL_DEGREES - 180.0)),360.0);
+			    }
+			    else // sail still on wrong side
+			    {
+				    desired_heading.heading = remainder(remainder((wind_global_pre_jibe + 180.0),360.0) 
+							    - (remainder((remainder(wind_global_pre_jibe + 180,360.0) - heading_pre_jibe),360.0)  
+                                                            * (fabs(sailstate.degrees_sail) - 180.0) / (fabs(sail_pre_jibe) - 180.0)),360.0);
+			    }
+
+			    e = desired_heading.heading - imu.attitude.yaw;
+			    if(fabs(e) > 180) // +-180 thing...
+			    {
+				    imu.attitude.yaw = 0;
+				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
+			    }
+			    theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading.heading, 0) ;
+			    u = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0) * sign(imu.velocity.x);
+#if 0
+			    if(imu.velocity.x > AV_SAILOR_DECREASE_RUDDER_THRESHOLD)
+			    {
+				    // rudder angle is small if speed is high
+				    u = u * AV_SAILOR_DECREASE_RUDDER_THRESHOLD / imu.velocity.x;
+			    }                    rtx_message("des_head_dot = %f, head_dot = %f \n",theta_dot_des,imu.gyro.z);
+#endif  
+
+#if 0
+			    check_rudder_angle(double heading_speed, imu.velocity.x, imu.velocity.y, sail.degrees, wind_clean.global_direction_real, imu.attitude.yaw, wind_clean.speed, u);
+
+			    while vel_new3 > vel_3_max
+				    u = u - rudder_winkel_reduce;
+			    check_rudder_angle(double heading_speed, imu.velocity.x, imu.velocity.y, sail.degrees, wind_clean.global_direction_real, imu.attitude.yaw, wind_clean.speed, u);
+			    break;                
+#endif  
+			    rtx_message("des_heading = %f, heading = %f \n",desired_heading.heading,imu.attitude.yaw);
+			    rtx_message("des_head_dot = %f, head_dot = %f \n",theta_dot_des,imu.gyro.z);
+			    fprintf(thetafile,"%f %f \n",theta_dot_des,imu.gyro.z);
+			    rudder.degrees_left = u;
+			    rudder.degrees_right = u;
+			    last_state = AV_FLAGS_ST_JIBE;
+			    break;
+
+		    case AV_FLAGS_ST_MAXENERGYSAVING:
+			    /* Sail: */
+			    sail.degrees = sign(sailstate.degrees_sail) * 179.0;
+			    /* Rudder: */
+			    rudder.degrees_left = -45.0;
+			    rudder.degrees_right = 45.0;
+			    last_state = AV_FLAGS_ST_MAXENERGYSAVING;
+			    break;
+
+		    case AV_FLAGS_ST_HEADINGCHANGE:
+			    if(last_state != flags.state) // only when newly in this state
+			    {
+				    switch(last_state)
+				    {
+					    case AV_FLAGS_ST_TACK: // use old wind direction
+						    wind_global_pre_change = wind_global_pre_tack;
+						    break;
+					    case AV_FLAGS_ST_JIBE: // use old wind direction
+						    wind_global_pre_change = wind_global_pre_jibe;
+						    break;
+					    default: // get current wind reading
+						    wind_global_pre_change = wind_clean.global_direction_real;
+				    }
+				    avalon.wanted_sail_angle_to_wind = AV_SAILOR_WANTED_AOA * get_sail_AOA_coeff(wind_clean.speed);
+				    desired_heading_after_change = desired_heading.heading;
+				    desired_bearing_after_change = remainder((wind_clean.global_direction_real - desired_heading_after_change),360.0);
+				    sign_wanted_sail_angle_after_change = sign(desired_bearing_after_change);
+				    wanted_sail_angle_after_change = remainder((desired_bearing_after_change - avalon.wanted_sail_angle_to_wind * sign_wanted_sail_angle),360.0);
+			    }
+
+			    /* Sail: */
+			    switch(flags.sail_direction)
+			    {
+				    case AV_FLAGS_SAIL_DIR_NOPREFERENCE:
+					    sail.degrees = wanted_sail_angle_after_change;
+					    break;
+				    case AV_FLAGS_SAIL_DIR_ZERO:
+					    sail.degrees = 0.0;
+					    break;
+				    case AV_FLAGS_SAIL_DIR_FRONT:
+					    sail.degrees = 179.0;
+					    break;
+			    }
+
+			    /* Rudder: */
+			    if(last_state != flags.state) // initialize only when newly in this state
+			    {
+				    // TODO maybe use different parameters here (I=0)
+				    myparamstream = rtx_param_open("sailor_pidparams.txt", 0, NULL); //NULL = errorfunction
+				    mypid = rtx_pid_init(mypid, myparamstream, "rudder", 0.01, 0); //0.01=dt
+				    rtx_pid_integral_enable(mypid);
+			    }
+
+			    /* Theta_dot: */
+			    if(last_state != flags.state) // initialize only when newly in this state
+			    {
+				    paramstream_theta_dot = rtx_param_open("sailor_theta_dot_params.txt", 0, NULL); //NULL = errorfunction
+				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
+				    rtx_pid_integral_enable(thetapid);
+			    }
+
+			    desired_heading.heading = remainder((wind_clean.global_direction_real 
+						    - avalon.wanted_sail_angle_to_wind * sign(sailstate.degrees_sail) 
+						    - sailstate.degrees_sail),360.0);
+
+			    e = desired_heading.heading - imu.attitude.yaw;
+			    if(fabs(e) > 180) // +-180 thing...
+			    {
+				    imu.attitude.yaw = 0;
+				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
+			    }
+			    theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading.heading, 0) ;
+			    u = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0) * sign(imu.velocity.x);
+#if 0
+			    if(imu.velocity.x > AV_SAILOR_DECREASE_RUDDER_THRESHOLD)
+			    {
+				    // rudder angle is small if speed is high
+				    u = u * AV_SAILOR_DECREASE_RUDDER_THRESHOLD / imu.velocity.x;
+			    }
+#endif
+			    rtx_message("des_heading = %f, heading = %f \n",desired_heading.heading,imu.attitude.yaw);
+			    rtx_message("des_head_dot = %f, head_dot = %f \n",theta_dot_des,imu.gyro.z);
+			    rudder.degrees_left = u;
+			    rudder.degrees_right = u;
+			    last_state = AV_FLAGS_ST_HEADINGCHANGE;
+			    break;
+
+		    default:
+			    rtx_message("Sailor state machine is in some illegal state. Behaving as in IDLE --> stopping motion");
+			    sail.degrees = sailstate.degrees_sail;
+			    last_state = 0;
+			    break;
+	    }
+
+	    fclose(thetafile);
             // Bring to store
             dataRudder.t_writefrom(rudder);
             dataSail.t_writefrom(sail);
@@ -607,6 +715,142 @@ void * translation_thread(void * dummy)
 
 
 // Some self-defined utility functions:
+#if 0
+double check_rudder_angle(double heading_speed, double speed_x, double speed_y, double aoa_sail, double d_wind, double pose_3, double V_wind, double alpha_rudder) // returns a proper rudder_angle
+{
+    // transform angles into [deg] !
+    delta_t    = 0.1; // ???
+    dens_water = 1025;              
+    dens_air   = 1.184;    
+
+    I_z        = 150;
+    A_hull_3   = 2;   // m^2
+    A_kell     = 0.5;
+    A_sail     = 8.4;
+    A_rudder   = 0.095
+    c_d_keel   = 1.28;
+    C_d_3      = 1.2;
+    width      = 1.2;
+    length     = 3.95;
+
+    N_damp_rot     = sign(heading_speed)*1600*(width/2*heading_speed^2);
+    N_damping_norm = sign(heading_speed)*A_hull_3*0.5*dens_water*C_d_3*(width/2*heading_speed)^2;
+    Y_lateral      = sign(speed_y)*A_keel*0.5*dens_water*c_d_keel*speed_y^2;
+    N_damping      = N_damping_norm + N_damp_rot - 1*Y_lateral;
+    
+    h   = 0.5;         // variable               % [m] wave height
+    T   = 50;          // variable               % [s] sec
+    pi  = AV_PI;       //???
+    w   = 2*pi/T;
+    k   = 4*pi^2/(g*T^2);
+    chi = pi - (d_waves-pose(3));
+    w_e = w - k*vel(1,1)*cos(chi)+k*vel(2,1)*sin(chi);
+    a   = dens_water*g*(1-exp(-k*depth))/k^2;
+    b   = k*length/2*cos(chi);
+    c   = k*width/2*sin(chi);
+    s   = (k*h/2)*sin(w_e*t);
+    eps = h/2*cos(w_e*t);
+
+    N_waves = a*k*(width^2*sin(b)*(c*cos(c)-sin(c))/c^2-length^2*sin(c)*(b*cos(b)-sin(b))/b^2)*eps*1/6;       
+    N_wind  = 0;
+    
+
+aoa = aoa_sail;  // [rad]
+d_wind_r = d_wind - pose_3;  // [rad] 
+d_wind_r = reminder(d_wind_r*180/pi)*pi/180;
+d2aoa = reminder((-d_wind_r+aoa)*180/pi)*pi/180;
+    if fabs(d2aoa) <= 2*pi/180    
+        c_sail_lift = 0;
+    else if fabs(d2aoa) <= 25*pi/180
+        c_sail_lift = (2.24*fabs(d2aoa)-2.24*2*pi/180);  
+    else if (fabs(d2aoa) > 25*pi/180) && (fabs(d2aoa) <= 90*pi/180)
+        c_sail_lift = -0.79*fabs(d2aoa)+1.1;           
+    else if  (fabs(d2aoa) > 90*pi/180) && (fabs(d2aoa) <= pi)
+        c_sail_lift = 0;
+    
+    
+c_sail_drag = 1.28*sin(fabs(-d_wind_r+aoa));
+F_lift_V_w = 1/2*dens_air*c_sail_lift*V_wind^2*A_sail*cos(-d_wind_r+aoa);
+F_drag_V_w = 1/2*dens_air*c_sail_drag*V_wind^2*A_sail*sin(-d_wind_r+aoa)*sign(-d_wind_r+aoa);
+
+if d_wind_r >= 0
+    vorzeichen = 1;
+else
+    vorzeichen = -1;
+
+if fabs(aoa) <= 2*pi/180
+    x_to_sail_coa = 0; y_to_sail_coa = 0;
+else if fabs(aoa) <= 40*pi/180                           // else if, end ????????????????????
+    x_to_sail_coa = 0.2; y_to_sail_coa = 0.3;
+else if fabs(aoa) > 40*pi/180 && fabs(aoa) <= 70*pi/180
+    x_to_sail_coa = 0.3; y_to_sail_coa = 0.35;
+else if fabs(aoa) > 70*pi/180 && fabs(aoa) <= 120*pi/180
+    x_to_sail_coa = 0.4; y_to_sail_coa = 0.4;
+else if fabs(aoa) > 120*pi/180 && fabs(aoa) <= 150*pi/180
+    x_to_sail_coa = 0.2; y_to_sail_coa = 0.3;
+else if fabs(aoa) > 150*pi/180 && fabs(aoa) <= pi
+    x_to_sail_coa = 0; y_to_sail_coa = 0;
+
+
+X_sail = F_lift_V_w*sin(fabs(d_wind_r)) - F_drag_V_w*cos(d_wind_r);
+Y_sail = (F_lift_V_w*cos(d_wind_r) + F_drag_V_w*sin(fabs(d_wind_r)))*sign(-vorzeichen);
+N_sail = X_sail*x_to_sail_coa*sign(aoa) + Y_sail*y_to_sail_coa;
+sail_factor = 0.9
+N_sail = sail_factor*N_sail;
+
+// alpha_rudder = alpha_rudder_r;  // [deg] !!!!!!!
+v_r_tot = sqrt(speed_x^2 + speed_y^2);
+d_water = atan2(speed_y,speed_x);
+
+c_rudder_drag = 1.28*sin(fabs(-d_water + alpha_rudder));
+incid_angle = -d_water + alpha_rudder;
+incid_angle = reminderRad(incid_angle);
+if abs(incid_angle) <= 2*pi/180            % Hysteresis around "dead into the wind"
+    c_rudder_lift = 0;
+else if fabs(incid_angle) <= 25*pi/180       % 25deg = max c_sail_lift
+    c_rudder_lift = (2.24*fabs(incid_angle)-2.24*2*pi/180);   % sign(alpha_rudder)*
+else if fabs(incid_angle) > 25*pi/180 && fabs(incid_angle) < 90*pi/180
+    c_rudder_lift = -0.79*fabs(incid_angle)+1.1; % sign(alpha_rudder)*(-0.79*fabs(alpha_rudder)+0.9)    
+else if fabs(incid_angle) >= 90*pi/180 && fabs(incid_angle) <= pi
+    c_rudder_lift = 0;
+
+
+if incid_angle >= 0
+    vorzeichenR = 1;
+else
+    vorzeichenR = -1;
+    
+F_lift_v_right = 1/2*dens_water*c_rudder_lift*v_r_tot^2*A_rudder*cos(-d_water+alpha_rudder);
+F_drag_v_right = 1/2*dens_water*c_rudder_drag*v_r_tot^2*A_rudder*sin(-d_water+alpha_rudder)*sign(vorzeichenR);
+
+F_lift_v_left = 1/2*dens_water*c_rudder_lift*v_r_tot^2*A_rudder*cos(-d_water+alpha_rudder_l);
+F_drag_v_left = 1/2*dens_water*c_rudder_drag*v_r_tot^2*A_rudder*sin(-d_water+alpha_rudder_l)*sign(vorzeichenR);
+
+if d_water >= 0
+    vorzeichenRR = 1;
+else
+    vorzeichenRR = -1;
+
+//X_rudder_right = F_lift_v_right*sin(abs(d_water)) - F_drag_v_right*cos(d_water);
+Y_rudder_right = F_lift_v_right*cos(d_water)*sign(-vorzeichenR) + F_drag_v_right*sin(abs(d_water))*sign(-vorzeichenRR);
+
+//X_rudder_left = F_lift_v_left*sin(abs(d_water)) - F_drag_v_left*cos(d_water);
+Y_rudder_left = F_lift_v_left*cos(d_water)*sign(-vorzeichenR) + F_drag_v_left*sin(abs(d_water))*sign(-vorzeichenRR);
+
+//X_rudder = X_rudder_left + X_rudder_right;
+Y_rudder = Y_rudder_left + Y_rudder_right;
+N_rudder = 2*Y_rudder*1.7;
+
+N = N_sail + N_wind + N_waves - N_rudder - N_damping;
+
+    vel_new3 = delta_t/I_z*N + vel_3;
+
+   // if vel_new3 > vel_3_max
+   //    alpha_rudder = alpha_rudder - 1;   // -1° 
+
+    return vel_new3
+}
+#endif
 int sign(int i) // gives back the sign of an int
 {
     if (i>=0)
