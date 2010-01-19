@@ -381,7 +381,7 @@ void * translation_thread(void * dummy)
                 //////////////writing the calculated waypoints into the store in an array
                 ////////////////////////////////////////////////////////////
 
-                //last_wyp_data.heading = headingTable16[mapTheta_start_correct]; 
+                last_wyp_data.heading = headingTable16[mapTheta_start_correct]; 
                 arrayPointer = 0;
 
 
