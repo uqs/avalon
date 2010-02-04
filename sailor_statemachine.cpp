@@ -170,10 +170,10 @@ void * translation_thread(void * dummy)
     Rudderstate rudderstateleft, rudderstateright;
     WindCleanData wind_clean;
     imuData imu;
-	imuCleanData imu_clean;
+    imuCleanData imu_clean;
     DesiredHeading desired_heading;
     
-    double u;  // the input that will be written to rudderangle
+   //  double u;  // the input that will be written to rudderangle
     double theta_dot_des; //desired theta_dot by first controller
     double e;  // the current error
     RtxPid* mypid = NULL;
@@ -201,6 +201,11 @@ void * translation_thread(void * dummy)
     double desired_heading_after_tack;
     double desired_heading_while_no_tack_or_jibe;
     int last_no_tack_or_jibe_value;
+    double torque_des;
+    // double kappa_des;
+    // double kappa_mom;
+    // double speed;
+    // int theta_dot_star[] = {0,5,0,-5};
 
     while (1)
     {
@@ -216,10 +221,10 @@ void * translation_thread(void * dummy)
 		{
             dataWindClean.t_readto(wind_clean,0,0);
             dataImuClean.t_readto(imu_clean,0,0);
-			dataSailState.t_readto(sailstate,0,0);
-			dataRudderStateLeft.t_readto(rudderstateleft,0,0);
-			dataRudderStateRight.t_readto(rudderstateright,0,0);
-			dataDesiredHeading.t_readto(desired_heading,0,0);
+            dataSailState.t_readto(sailstate,0,0);
+            dataRudderStateLeft.t_readto(rudderstateleft,0,0);
+            dataRudderStateRight.t_readto(rudderstateright,0,0);
+            dataDesiredHeading.t_readto(desired_heading,0,0);
 
             if(flags.sailor_no_tack_or_jibe == 1)
             {
@@ -277,14 +282,14 @@ void * translation_thread(void * dummy)
 			    /* Rudder: */
 			    if(last_state != flags.state) // initialize only when newly in this state
 			    {
-				    myparamstream = rtx_param_open("sailor_pidparams.txt", 0, NULL); //NULL = errorfunction
-				    mypid = rtx_pid_init(mypid, myparamstream, "rudder", 0.01, 0); //0.01=dt
+				    myparamstream = rtx_param_open("sailor_pid_torque.txt", 0, NULL); //NULL = errorfunction
+				    mypid = rtx_pid_init(mypid, myparamstream, "torque", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(mypid);
 			    }
 			    /* Theta_dot: */
 			    if(last_state != flags.state) // initialize only when newly in this state
 			    {
-				    paramstream_theta_dot = rtx_param_open("sailor_theta_dot_params.txt", 0, NULL); //NULL = errorfunction
+				    paramstream_theta_dot = rtx_param_open("sailor_pid_theta_dot.txt", 0, NULL); //NULL = errorfunction
 				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(thetapid);
 			    }
@@ -301,19 +306,17 @@ void * translation_thread(void * dummy)
 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
 			    }
 			    theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading.heading, 0);
-			    u = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0) * sign(imu.velocity.x);
-#if 0
-			    if(imu.velocity.x > AV_SAILOR_DECREASE_RUDDER_THRESHOLD)
-			    {
-				    // rudder angle is small if speed is high
-				    u = u * AV_SAILOR_DECREASE_RUDDER_THRESHOLD / imu.velocity.x;
-			    }
-#endif
-			    rtx_message("des_heading = %f, heading = %f \n",desired_heading.heading,imu.attitude.yaw);
-			    rtx_message("des_head_dot = %f, head_dot = %f \n",theta_dot_des,imu.gyro.z);
-			    fprintf(thetafile,"%f %f \n",theta_dot_des,imu.gyro.z);
-			    rudder.degrees_left = u;
-			    rudder.degrees_right = u;
+
+                            
+                            // theta_dot_des = imu.theta_star;
+                            torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
+                            rudder.torque_des = torque_des;                            
+
+			    // rtx_message("des_heading_dot = %f, des_torque = %f \n",theta_dot_des,rudder.torque_des);
+			    // rtx_message("des_head = %f, head = %f \n",desired_heading.heading,imu.attitude.yaw);
+			    fprintf(thetafile,"%f %f %f %f\n",theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left);
+			    // rudder.degrees_left = u;
+			    // rudder.degrees_right = u;
 			    last_state = AV_FLAGS_ST_NORMALSAILING;
 			    break;
 
@@ -339,14 +342,14 @@ void * translation_thread(void * dummy)
 			    /* Rudder: */
 			    if(last_state != flags.state) // initialize only when newly in this state
 			    {
-				    myparamstream = rtx_param_open("sailor_pidparams.txt", 0, NULL); //NULL = errorfunction
-				    mypid = rtx_pid_init(mypid, myparamstream, "rudder", 0.01, 0); //0.01=dt
+				    myparamstream = rtx_param_open("sailor_pid_torque.txt", 0, NULL); //NULL = errorfunction
+				    mypid = rtx_pid_init(mypid, myparamstream, "torque", 0.01, 0); //0.01=dt
 			    }
 
 			    /* Theta_dot: */
 			    if(last_state != flags.state) // initialize only when newly in this state
 			    {
-				    paramstream_theta_dot = rtx_param_open("sailor_theta_dot_params.txt", 0, NULL); //NULL = errorfunction
+				    paramstream_theta_dot = rtx_param_open("sailor_pid_theta_dot.txt", 0, NULL); //NULL = errorfunction
 				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(thetapid);
 			    }
@@ -359,8 +362,14 @@ void * translation_thread(void * dummy)
 				    imu.attitude.yaw = 0;
 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
 			    }
-			    theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading.heading, 0) ;
-			    u = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0) * sign(imu.velocity.x);
+                            
+                            theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading.heading, 0) ;
+                            //theta_dot_des = imu.theta_star;
+                            torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
+                            rudder.torque_des = torque_des;                            
+
+			    // u = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0) * sign(imu.velocity.x);
+
 #if 0
 			    if(imu.velocity.x > AV_SAILOR_DECREASE_RUDDER_THRESHOLD)
 			    {
@@ -368,11 +377,11 @@ void * translation_thread(void * dummy)
 				    u = u * AV_SAILOR_DECREASE_RUDDER_THRESHOLD / imu.velocity.x;
 			    }
 #endif
-			    rtx_message("des_heading = %f, heading = %f \n",desired_heading.heading,imu.attitude.yaw);
-			    rtx_message("des_head_dot = %f, head_dot = %f \n",theta_dot_des,imu.gyro.z);
-			    fprintf(thetafile,"%f %f \n",theta_dot_des,imu.gyro.z);
-			    rudder.degrees_left = u;
-			    rudder.degrees_right = u;
+			    // rtx_message("des_heading_dot = %f, des_torque = %f \n",theta_dot_des,rudder.torque_des);
+			    // rtx_message("des_head = %f, head = %f \n",desired_heading.heading,imu.attitude.yaw);
+			    fprintf(thetafile,"%f %f %f %f\n",theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left);
+			    // rudder.degrees_left = u;
+			    // rudder.degrees_right = u;
 			    last_state = AV_FLAGS_ST_UPWINDSAILING;
 			    break;
 
@@ -397,14 +406,14 @@ void * translation_thread(void * dummy)
 			    /* Rudder: */
 			    if(last_state != flags.state) // initialize only when newly in this state
 			    {
-				    myparamstream = rtx_param_open("sailor_pidparams.txt", 0, NULL); //NULL = errorfunction
-				    mypid = rtx_pid_init(mypid, myparamstream, "rudder", 0.01, 0); //0.01=dt
+				    myparamstream = rtx_param_open("sailor_pid_torque.txt", 0, NULL); //NULL = errorfunction
+				    mypid = rtx_pid_init(mypid, myparamstream, "torque", 0.01, 0); //0.01=dt
 			    }
 
 			    /* Theta_dot: */
 			    if(last_state != flags.state) // initialize only when newly in this state
 			    {
-				    paramstream_theta_dot = rtx_param_open("sailor_theta_dot_params.txt", 0, NULL); //NULL = errorfunction
+				    paramstream_theta_dot = rtx_param_open("sailor_pid_theta_dot.txt", 0, NULL); //NULL = errorfunction
 				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(thetapid);
 			    }
@@ -417,20 +426,17 @@ void * translation_thread(void * dummy)
 				    imu.attitude.yaw = 0;
 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
 			    }
+
 			    theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading.heading, 0) ;
-			    u = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0) * sign(imu.velocity.x);
-#if 0
-			    if(imu.velocity.x > AV_SAILOR_DECREASE_RUDDER_THRESHOLD)
-			    {
-				    // rudder angle is small if speed is high
-				    u = u * AV_SAILOR_DECREASE_RUDDER_THRESHOLD / imu.velocity.x;
-			    }
-#endif
-			    rtx_message("des_heading = %f, heading = %f \n",desired_heading.heading,imu.attitude.yaw);
-			    rtx_message("des_head_dot = %f, head_dot = %f \n",theta_dot_des,imu.gyro.z);
-			    fprintf(thetafile,"%f %f \n",theta_dot_des,imu.gyro.z);
-			    rudder.degrees_left = u;
-			    rudder.degrees_right = u;
+                            //theta_dot_des = imu.theta_star;
+                            torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
+                            rudder.torque_des = torque_des;                            
+			 
+			    // rtx_message("des_heading_dot = %f, des_torque = %f \n",theta_dot_des,rudder.torque_des);
+			    // rtx_message("des_head = %f, head = %f \n",desired_heading.heading,imu.attitude.yaw);
+			    fprintf(thetafile,"%f %f %f %f\n",theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left);
+			    // rudder.degrees_left = u;
+			    // rudder.degrees_right = u;
 			    last_state = AV_FLAGS_ST_DOWNWINDSAILING;
 			    break;
 
@@ -439,8 +445,8 @@ void * translation_thread(void * dummy)
 			    {
 				    sign_wanted_rudder_angle = -sign(wind_clean.bearing_app);  // +1 for wind from starboard, -1 for port
 				    wind_global_pre_tack = wind_clean.global_direction_real;
-				    myparamstream = rtx_param_open("sailor_pidparams.txt", 0, NULL); //NULL = errorfunction
-				    mypid = rtx_pid_init(mypid, myparamstream, "rudder", 0.01, 0); //0.01=dt
+				    myparamstream = rtx_param_open("sailor_pid_torque.txt", 0, NULL); //NULL = errorfunction
+				    mypid = rtx_pid_init(mypid, myparamstream, "torque", 0.01, 0); //0.01=dt
 				    desired_heading_after_tack =
 					    remainder(wind_clean.global_direction_real - 45.0 *
 							    sign(remainder(imu.attitude.yaw -
@@ -451,7 +457,7 @@ void * translation_thread(void * dummy)
 			    /* Theta_dot: */
 			    if(last_state != flags.state) // initialize only when newly in this state
 			    {
-				    paramstream_theta_dot = rtx_param_open("sailor_theta_dot_params.txt", 0, NULL); //NULL = errorfunction
+				    paramstream_theta_dot = rtx_param_open("sailor_pid_theta_dot.txt", 0, NULL); //NULL = errorfunction
 				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(thetapid);
 			    }
@@ -477,20 +483,17 @@ void * translation_thread(void * dummy)
 
 			    // Attention: if() mit e is missing(see normal sailing...) probably not needed though !!!!!!!!
 			    // u = rtx_pid_eval(mypid, imu.attitude.yaw, desired_heading_after_tack, 0) * sign(imu.velocity.x);
+
 			    theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading_after_tack, 0) ;
-			    u = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0) * sign(imu.velocity.x);
-#if 0
-			    if(imu.velocity.x > AV_SAILOR_DECREASE_RUDDER_THRESHOLD)
-			    {
-				    // rudder angle is small if speed is high
-				    u = u * AV_SAILOR_DECREASE_RUDDER_THRESHOLD / imu.velocity.x;
-			    }
-#endif
-			    rtx_message("des_heading = %f, heading = %f \n",desired_heading_after_tack,imu.attitude.yaw);
-			    rtx_message("des_head_dot = %f, head_dot = %f \n",theta_dot_des,imu.gyro.z);
-			    fprintf(thetafile,"%f %f \n",theta_dot_des,imu.gyro.z);
-			    rudder.degrees_left = u;
-			    rudder.degrees_right = u;
+                            //theta_dot_des = imu.theta_star;
+                            torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t                            
+                            rudder.torque_des = torque_des;                                                        
+
+			    // rtx_message("des_heading_dot = %f, des_torque = %f \n",theta_dot_des,rudder.torque_des);
+			    rtx_message("des_head = %f, head = %f \n",desired_heading_after_tack,imu.attitude.yaw);
+			    fprintf(thetafile,"%f %f %f %f\n",theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left);
+			    // rudder.degrees_left = u;
+			    // rudder.degrees_right = u;
 			    last_state = AV_FLAGS_ST_TACK;
 			    break;
 
@@ -520,15 +523,15 @@ void * translation_thread(void * dummy)
 			    /* Rudder: */
 			    if(last_state != flags.state) // initialize only when newly in this state
 			    {
-				    myparamstream = rtx_param_open("sailor_pidparams.txt", 0, NULL); //NULL = errorfunction
-				    mypid = rtx_pid_init(mypid, myparamstream, "rudder", 0.01, 0); //0.01=dt
+				    myparamstream = rtx_param_open("sailor_pid_torque.txt", 0, NULL); //NULL = errorfunction
+				    mypid = rtx_pid_init(mypid, myparamstream, "torque", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(mypid);
 			    }
 
 			    /* Theta_dot: */
 			    if(last_state != flags.state) // initialize only when newly in this state
 			    {
-				    paramstream_theta_dot = rtx_param_open("sailor_theta_dot_params.txt", 0, NULL); //NULL = errorfunction
+				    paramstream_theta_dot = rtx_param_open("sailor_pid_theta_dot.txt", 0, NULL); //NULL = errorfunction
 				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(thetapid);
 			    }
@@ -552,30 +555,20 @@ void * translation_thread(void * dummy)
 			    {
 				    imu.attitude.yaw = 0;
 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
+
 			    }
-			    theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading.heading, 0) ;
-			    u = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0) * sign(imu.velocity.x);
-#if 0
-			    if(imu.velocity.x > AV_SAILOR_DECREASE_RUDDER_THRESHOLD)
-			    {
-				    // rudder angle is small if speed is high
-				    u = u * AV_SAILOR_DECREASE_RUDDER_THRESHOLD / imu.velocity.x;
-			    }                    rtx_message("des_head_dot = %f, head_dot = %f \n",theta_dot_des,imu.gyro.z);
-#endif  
 
-#if 0
-			    check_rudder_angle(double heading_speed, imu.velocity.x, imu.velocity.y, sail.degrees, wind_clean.global_direction_real, imu.attitude.yaw, wind_clean.speed, u);
+                            theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading.heading, 0) ;
+                            //theta_dot_des = imu.theta_star;
+                            torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
+                            rudder.torque_des = torque_des;                            
 
-			    while vel_new3 > vel_3_max
-				    u = u - rudder_winkel_reduce;
-			    check_rudder_angle(double heading_speed, imu.velocity.x, imu.velocity.y, sail.degrees, wind_clean.global_direction_real, imu.attitude.yaw, wind_clean.speed, u);
-			    break;                
-#endif  
-			    rtx_message("des_heading = %f, heading = %f \n",desired_heading.heading,imu.attitude.yaw);
-			    rtx_message("des_head_dot = %f, head_dot = %f \n",theta_dot_des,imu.gyro.z);
-			    fprintf(thetafile,"%f %f \n",theta_dot_des,imu.gyro.z);
-			    rudder.degrees_left = u;
-			    rudder.degrees_right = u;
+
+			    // rtx_message("des_heading_dot = %f, des_torque = %f \n",theta_dot_des,rudder.torque_des);
+			    // rtx_message("des_head = %f, head = %f \n",desired_heading.heading,imu.attitude.yaw);
+			    fprintf(thetafile,"%f %f %f %f\n",theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left);
+			    // rudder.degrees_left = u;
+			    // rudder.degrees_right = u;
 			    last_state = AV_FLAGS_ST_JIBE;
 			    break;
 
@@ -627,15 +620,15 @@ void * translation_thread(void * dummy)
 			    if(last_state != flags.state) // initialize only when newly in this state
 			    {
 				    // TODO maybe use different parameters here (I=0)
-				    myparamstream = rtx_param_open("sailor_pidparams.txt", 0, NULL); //NULL = errorfunction
-				    mypid = rtx_pid_init(mypid, myparamstream, "rudder", 0.01, 0); //0.01=dt
+				    myparamstream = rtx_param_open("sailor_pid_torque.txt", 0, NULL); //NULL = errorfunction
+				    mypid = rtx_pid_init(mypid, myparamstream, "torque", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(mypid);
 			    }
 
 			    /* Theta_dot: */
 			    if(last_state != flags.state) // initialize only when newly in this state
 			    {
-				    paramstream_theta_dot = rtx_param_open("sailor_theta_dot_params.txt", 0, NULL); //NULL = errorfunction
+				    paramstream_theta_dot = rtx_param_open("sailor_pid_theta_dot.txt", 0, NULL); //NULL = errorfunction
 				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(thetapid);
 			    }
@@ -650,19 +643,17 @@ void * translation_thread(void * dummy)
 				    imu.attitude.yaw = 0;
 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
 			    }
-			    theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading.heading, 0) ;
-			    u = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0) * sign(imu.velocity.x);
-#if 0
-			    if(imu.velocity.x > AV_SAILOR_DECREASE_RUDDER_THRESHOLD)
-			    {
-				    // rudder angle is small if speed is high
-				    u = u * AV_SAILOR_DECREASE_RUDDER_THRESHOLD / imu.velocity.x;
-			    }
-#endif
-			    rtx_message("des_heading = %f, heading = %f \n",desired_heading.heading,imu.attitude.yaw);
-			    rtx_message("des_head_dot = %f, head_dot = %f \n",theta_dot_des,imu.gyro.z);
-			    rudder.degrees_left = u;
-			    rudder.degrees_right = u;
+
+                            theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading.heading, 0) ;
+                            //theta_dot_des = imu.theta_star;
+                            torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t                          
+                            rudder.torque_des = torque_des;                            
+                            
+
+			    // rtx_message("des_heading_dot = %f, des_torque = %f \n",theta_dot_des,rudder.torque_des);
+			    // rtx_message("des_head = %f, head = %f \n",desired_heading.heading,imu.attitude.yaw);
+			   //  rudder.degrees_left = u;
+			   //  rudder.degrees_right = u;
 			    last_state = AV_FLAGS_ST_HEADINGCHANGE;
 			    break;
 
@@ -675,6 +666,7 @@ void * translation_thread(void * dummy)
 
 	    fclose(thetafile);
             // Bring to store
+
             dataRudder.t_writefrom(rudder);
             dataSail.t_writefrom(sail);
             // Do not write to sailorflags in here! Sailor_transitions does that.
