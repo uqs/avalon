@@ -1,0 +1,16 @@
+Dear Prof. Marani,
+
+thank you for the helpful reviews.
+
+We have modified the paper considering all the comments. We especially
+reorganised the section order, to make understanding of the interaction between
+the software parts easier and to make the text more consistent. Also, we
+extended the review of existing literature, comparing our boat to the existing
+ones. Furthermore, the experimental results were updated and extended with the
+later developments and some unclear parts are further explained.
+
+We think that these modifications make understanding of the material easier and
+add more value to the paper.
+
+With kind regards
+Hendrik Erckens

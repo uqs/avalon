@@ -1,0 +1,21 @@
+The project is very interesting and with good matching to the scope of
+the Magazine.
+However, some modification needs before publication.
+1)	The title is not adequate to the content because the paper
+describe a project, not only the guidance and control aspects; please
+change the title;
+2)	In part IV C the identification of the parameters of the model,
+based on true data, is missed. As the model is used for tuning the
+regulators, an accurate identification stage of the model necessary;
+3)	In part IV E please indicate clearly which results are in
+simulation and which are from experiments. Moreover, tables with PID
+parameters tuned from simulation and from real experiments can both
+reported in order to verify the goodness of the identified model;
+4)	Reading parts IV and V is, some times, confusing. Part IV and V
+could be reorganized in tree main parts: Navigation (sensor data fusion
+and localization), Guidance (path planning) and Control (trajectory
+tracking);
+5)	It is very important that you report in the paper more
+experiments than that actually reported;
+6)	There are some incomplete references. Please check it
+carefully.

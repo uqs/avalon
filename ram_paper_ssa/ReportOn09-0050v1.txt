@@ -1,0 +1,34 @@
+Dear Mr. Erckens,
+
+Your paper 
+
+09-0050 (ID 09-0050)
+"Navigation Strategy and Trajectory Following Controller for an
+Autonomous Sailing Vessel"
+by Erckens, Hendrik* (130615); Büsser, Gion-Andri (130647); Pradalier,
+Cedric (101706); Siegwart, Roland (100088)
+
+submitted for the Special Issue on Marine Robotic Systems to the
+Robotics and Automation Magazine (RAM) has been reviewed by the
+Associate Editor and selected Reviewers. The reviews of the paper are
+attached.
+
+On the basis of the Reviewers' ratings and comments, we are glad to
+inform you that your paper has been accepted for publication at RAM in
+the special issue on Marine Robotics.
+
+The topic is interesting and appropriate to the scope of the RAM
+magazine. However, further effort is needed in order to improve it,
+especially by improving the quality and quantity of experimental
+results.
+Also the review of the existing literature needs further improvement.
+
+Please take thoroughly into account all the reviewers' comments.
+
+Finally, we would appreciate if you could submit your revision no later
+than October 30, 2009.
+
+Sincerely,
+
+Giacomo Marani
+Gianluca Antonelli

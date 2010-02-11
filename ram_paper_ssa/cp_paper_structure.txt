@@ -1,0 +1,55 @@
+--------- 5 colons: ----------
+Intro
+- Objectives ...
+- our objectives and our ...
+- Review of existing aoutonomous sailing boats
+  FIG 14 (Avalon)
+
+A boat designed for survival
+- Rig
+  III B + CAD
+- Hull
+  III A + CAD
+- Keel & Rudders 
+  III C + Fig. 6, Fig. 7
+- Power Supply III D
+
+Embedded System Design
+- Electronics, Sensors Com
+  Summary of III C + IV A + IV B
+- Software
+  1st § of V A + Fig. 10
+------------------------------
+
+--------- 5 colons: ----------
+Autonomous Sailor
+- Objectives
+- Existing works (1 col - 0.5)
+- System Modeling (1 col, no simulation)
+- Controller Principle (1.5 col)
+  - state machine
+  - normal sailing
+  - upwind sailing
+  - (if space: maneuvers)
+- Test results and analysis (1.5 - 2 col)
+------------------------------
+
+--------- 5 colons: ----------
+Navigation Strategy
+  ---- 1 col: ----
+- Principle of motion planning for a sailing boat
+- Existing navigators
+  ----------------
+  ---- 2 col: ----
+- Principle of own solution
+  - Multiscale Planning
+  - Choice of [...] cost
+- Trajectory Executer
+  ----------------
+- Test results and analysis (2 col)
+------------------------------
+
+--------- 1 col: -------------
+Conclusion, Outlook
+References
+------------------------------

@@ -1,0 +1,42 @@
+File Edit Options Buffers Tools Help				       
+								       
+			     
+I like the paper and could agree with seeing it published.  It is the
+right sort of paper for RAM (vs. transactions), describing an
+interesting and innovative system -- an autonomous sailing boat.  The
+writing is generally clear.
+
+However, I think the paper could be substantially improved by simply
+adding	some real experimental results.  The	paper needs to be more
+concrete about the performance of the system -- how well does it work?
+in what wave conditions?  Do the claims made in the paper really stand
+up?  How novel/superior is this system	in comparison to	others?
+
+
+For example, in the abstract, the paper says "will be able to
+autonomously cross the atlantic" -- that's a very strong statement --
+can you guarantee that it will be able to cross?  has the system been
+operated in environments that match the atlantic in terms of wave
+height, wind speed etc?  Even	with strong winds on a Swiss Lake, I
+fear that the Atlantic	Ocean could be a	whole other league of
+difficulty?
+
+The abstract also says "have been successfully tested more than a week
+with winds ranging from 0 up to 25 knots" .... Was this for a single
+week-long deployment, or was this for a number of different
+deployments?  how many hours Has the system been operated for, what's
+the longest mission, etc?  You don't necessarily need to provide all
+this detail, but you should provide some justifcation about what the
+"one week" of operation means?
+
+I understand the system was being prepared for	a competition in       
+July
+-- can	results from that competition be	added to the paper? 
+Also how
+does the design and performance compare to other comparable entries to
+the competition?
+
+I am also curious how you will deal with boat traffic during the
+mission (e.g. obeying the coast guard's collision regulations) for
+vessels that are not large enough to have the position broadcast
+system.
