@@ -25,4 +25,21 @@ $ ln -s python2.5-config python-config
 $ ln -s /usr/local/lib/* /usr/lib
 
 
+#####
+ 
+if error 'include/rtx/log.h:84: error: ‘L_cuserid’ undeclared here (not in a function)' appears,
+incluce the following lines into rtx/include/rtx/log.h after the defines:
+
+#ifndef L_cuserid
+#define L_cuserid 9
+#endif
+
+##### gbu: had to include <stdio.h> in the following files to make it compile:
+/ddx++/src/DDXVariable.cpp
+/ddx++/main/ddxtrace.cpp
+
+and install the following
+
+libgsl0-dev
+#####
 

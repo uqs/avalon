@@ -1,4 +1,4 @@
-# Install script for directory: /tmp/vanilla/example
+# Install script for directory: /home/gbuesser/avalon/eposlib/example
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)

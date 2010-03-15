@@ -35,22 +35,19 @@ CMAKE_COMMAND = /usr/bin/cmake
 # The command to remove a file.
 RM = /usr/bin/cmake -E remove -f
 
-# The program to use to edit the cache.
-CMAKE_EDIT_COMMAND = /usr/bin/ccmake
-
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /tmp/vanilla
+CMAKE_SOURCE_DIR = /home/gbuesser/avalon/eposlib
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /tmp/vanilla
+CMAKE_BINARY_DIR = /home/gbuesser/avalon/eposlib
 
 #=============================================================================
 # Targets provided globally by CMake.
 
 # Special rule for the target edit_cache
 edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
-	/usr/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running interactive CMake command-line interface..."
+	/usr/bin/cmake -i .
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -110,14 +107,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /tmp/vanilla && $(CMAKE_COMMAND) -E cmake_progress_start /tmp/vanilla/CMakeFiles /tmp/vanilla/example/CMakeFiles/progress.make
-	cd /tmp/vanilla && $(MAKE) -f CMakeFiles/Makefile2 example/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /tmp/vanilla/CMakeFiles 0
+	cd /home/gbuesser/avalon/eposlib && $(CMAKE_COMMAND) -E cmake_progress_start /home/gbuesser/avalon/eposlib/CMakeFiles /home/gbuesser/avalon/eposlib/example/CMakeFiles/progress.make
+	cd /home/gbuesser/avalon/eposlib && $(MAKE) -f CMakeFiles/Makefile2 example/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/gbuesser/avalon/eposlib/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /tmp/vanilla && $(MAKE) -f CMakeFiles/Makefile2 example/clean
+	cd /home/gbuesser/avalon/eposlib && $(MAKE) -f CMakeFiles/Makefile2 example/clean
 .PHONY : clean
 
 # The main clean target
@@ -126,22 +123,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /tmp/vanilla && $(MAKE) -f CMakeFiles/Makefile2 example/preinstall
+	cd /home/gbuesser/avalon/eposlib && $(MAKE) -f CMakeFiles/Makefile2 example/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /tmp/vanilla && $(MAKE) -f CMakeFiles/Makefile2 example/preinstall
+	cd /home/gbuesser/avalon/eposlib && $(MAKE) -f CMakeFiles/Makefile2 example/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /tmp/vanilla && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/gbuesser/avalon/eposlib && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 example/CMakeFiles/main.dir/rule:
-	cd /tmp/vanilla && $(MAKE) -f CMakeFiles/Makefile2 example/CMakeFiles/main.dir/rule
+	cd /home/gbuesser/avalon/eposlib && $(MAKE) -f CMakeFiles/Makefile2 example/CMakeFiles/main.dir/rule
 .PHONY : example/CMakeFiles/main.dir/rule
 
 # Convenience name for target.
@@ -150,37 +147,37 @@ main: example/CMakeFiles/main.dir/rule
 
 # fast build rule for target.
 main/fast:
-	cd /tmp/vanilla && $(MAKE) -f example/CMakeFiles/main.dir/build.make example/CMakeFiles/main.dir/build
+	cd /home/gbuesser/avalon/eposlib && $(MAKE) -f example/CMakeFiles/main.dir/build.make example/CMakeFiles/main.dir/build
 .PHONY : main/fast
 
 # target to build an object file
 Motor.o:
-	cd /tmp/vanilla && $(MAKE) -f example/CMakeFiles/main.dir/build.make example/CMakeFiles/main.dir/Motor.o
+	cd /home/gbuesser/avalon/eposlib && $(MAKE) -f example/CMakeFiles/main.dir/build.make example/CMakeFiles/main.dir/Motor.o
 .PHONY : Motor.o
 
 # target to preprocess a source file
 Motor.i:
-	cd /tmp/vanilla && $(MAKE) -f example/CMakeFiles/main.dir/build.make example/CMakeFiles/main.dir/Motor.i
+	cd /home/gbuesser/avalon/eposlib && $(MAKE) -f example/CMakeFiles/main.dir/build.make example/CMakeFiles/main.dir/Motor.i
 .PHONY : Motor.i
 
 # target to generate assembly for a file
 Motor.s:
-	cd /tmp/vanilla && $(MAKE) -f example/CMakeFiles/main.dir/build.make example/CMakeFiles/main.dir/Motor.s
+	cd /home/gbuesser/avalon/eposlib && $(MAKE) -f example/CMakeFiles/main.dir/build.make example/CMakeFiles/main.dir/Motor.s
 .PHONY : Motor.s
 
 # target to build an object file
 main.o:
-	cd /tmp/vanilla && $(MAKE) -f example/CMakeFiles/main.dir/build.make example/CMakeFiles/main.dir/main.o
+	cd /home/gbuesser/avalon/eposlib && $(MAKE) -f example/CMakeFiles/main.dir/build.make example/CMakeFiles/main.dir/main.o
 .PHONY : main.o
 
 # target to preprocess a source file
 main.i:
-	cd /tmp/vanilla && $(MAKE) -f example/CMakeFiles/main.dir/build.make example/CMakeFiles/main.dir/main.i
+	cd /home/gbuesser/avalon/eposlib && $(MAKE) -f example/CMakeFiles/main.dir/build.make example/CMakeFiles/main.dir/main.i
 .PHONY : main.i
 
 # target to generate assembly for a file
 main.s:
-	cd /tmp/vanilla && $(MAKE) -f example/CMakeFiles/main.dir/build.make example/CMakeFiles/main.dir/main.s
+	cd /home/gbuesser/avalon/eposlib && $(MAKE) -f example/CMakeFiles/main.dir/build.make example/CMakeFiles/main.dir/main.s
 .PHONY : main.s
 
 # Help Target
@@ -213,6 +210,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /tmp/vanilla && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/gbuesser/avalon/eposlib && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 
