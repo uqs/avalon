@@ -9,7 +9,7 @@
 #include <math.h>
 
 // Specific Things
-#include <can/epos.h>
+#include <epos/epos.h>
 #include <can/can.h>
 
 #include "Motor.h"

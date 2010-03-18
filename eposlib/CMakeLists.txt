@@ -5,7 +5,7 @@ ADD_DEFINITIONS( -ggdb -Wall )
 
 
 INCLUDE_DIRECTORIES(
-	${CMAKE_HOME_DIRECTORIES}
+	${CMAKE_HOME_DIRECTORY}
 	./
     /usr/local/include
 )
