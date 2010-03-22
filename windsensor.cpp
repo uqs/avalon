@@ -107,13 +107,13 @@ void * wind_thread(void * dummy)
 	  // Decide what kind of message we have
 	  if (strcasecmp(headerBuffer,"WIXDR")==0) {
 		  // If not: Update Voltage and Temperature
-		  rtx_nmea_extract_float(&mesg, 2, &wind.temperature);
-		  rtx_nmea_extract_float(&mesg, 10, &wind.voltage);
+		  rtx_nmea_extract_double(&mesg, 2, &wind.temperature);
+		  rtx_nmea_extract_double(&mesg, 10, &wind.voltage);
 		  wind.uptodate =true;
 	  } else if (strcasecmp(headerBuffer,"WIMWV")==0) {
 
 		// Wind direction
-		ret = rtx_nmea_extract_float(&mesg, 1, &(wind.direction));
+		ret = rtx_nmea_extract_double(&mesg, 1, &(wind.direction));
 		if(ret == -1) {
 			  rtx_message("Error in rtx_nmea_extract_int when extracting wind direction.");
 		}
@@ -121,7 +121,7 @@ void * wind_thread(void * dummy)
 		wind.direction = remainder(wind.direction, 360.0);
 
 		// Wind speed
-		ret = rtx_nmea_extract_float(&mesg, 3, &(wind.speed));
+		ret = rtx_nmea_extract_double(&mesg, 3, &(wind.speed));
 		if(ret == -1) {
 		 rtx_message("Error in rtx_nmea_extract_double when extracting wind speed.");
 		}
