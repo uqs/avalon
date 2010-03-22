@@ -18,8 +18,8 @@
 #include <rtx/timer.h>
 
 // For the Motors
-#include "include/can.h"
-#include "eposlib-test/epos.h"
+#include "can/can.h"
+#include "can/epos.h"
 
 #include "avalon.h"
 #include "SailMotor.h"

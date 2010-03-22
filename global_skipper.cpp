@@ -285,6 +285,24 @@ void * translation_thread(void * dummy)
                     }
 
                     break;
+                    /////////////////////////////////////////////////////////////////////////7    
+                case AV_FLAGS_GLOBALSK_COLLISION:
+
+                    distance = (sqrt((current_pos_longitude - destination.longitude)
+                                *(current_pos_longitude - destination.longitude)
+                                + (current_pos_latitude - destination.latitude)
+                                *(current_pos_latitude - destination.latitude)));
+#ifdef DEBUG_GLOBSKIPPER
+            rtx_message("Collision: collision distance = %f \n", distance);
+#endif
+
+                    if(distance < 200)
+                    {
+                        skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
+                        skipperFlagData.t_writefrom(skipperflags);
+                    }
+
+                    break;
                     ////////////////////////////////////////////////////////////////////////////
 
             }

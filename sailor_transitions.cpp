@@ -167,7 +167,7 @@ void * translation_thread(void * dummy)
         dataSailState.t_readto(sailstate,0,0);
         dataImuClean.t_readto(imu_clean,0,0);
         dataWindClean.t_readto(wind_clean,0,0);
-		dataDesiredHeading.t_readto(desired_heading,0,0);
+        dataDesiredHeading.t_readto(desired_heading,0,0);
 
         // calculate desired heading with drift compensation
         if(imu_clean.velocity.x > 0.5) // below 0.5kn it probably doesn't make sense to compensate drift

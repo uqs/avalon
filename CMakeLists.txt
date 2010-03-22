@@ -41,8 +41,8 @@ TARGET_LINK_LIBRARIES(aisEval ddxx ddx rtx can epos pthread rt )
 ADD_EXECUTABLE(sailor_transitions sailor_transitions.cpp Ship.cpp)
 TARGET_LINK_LIBRARIES(sailor_transitions ddxx ddx rtx pthread rt )
 
-ADD_EXECUTABLE(sailor_statemachine sailor_statemachine.cpp Ship.cpp)
-TARGET_LINK_LIBRARIES(sailor_statemachine ddxx ddx rtx pthread rt )
+ADD_EXECUTABLE(sailor_statemachine sailor_statemachine.cpp Ship.cpp sailor_main_iter_fn.cpp sailor_rudder_iter_fn.cpp)
+TARGET_LINK_LIBRARIES(sailor_statemachine gsl gslcblas ddxx ddx rtx pthread rt )
 
 #ADD_EXECUTABLE(sailor_statemachine_testGB sailor_statemachine_testGB.cpp Ship.cpp)
 #TARGET_LINK_LIBRARIES(sailor_statemachine_testGB ddxx ddx rtx pthread rt )
@@ -68,6 +68,9 @@ TARGET_LINK_LIBRARIES(flag-checker ddxx ddx rtx pthread rt )
 
 ADD_EXECUTABLE(testaufruf testaufruf.cpp)
 TARGET_LINK_LIBRARIES(testaufruf ddxx ddx rtx pthread rt )
+
+ADD_EXECUTABLE(failure failure.cpp)
+TARGET_LINK_LIBRARIES(failure ddxx ddx rtx pthread rt )
 
 # ADD_EXECUTABLE(skippertest skippertest.cpp)
 # TARGET_LINK_LIBRARIES(skippertest ddxx ddx rtx pthread rt )
@@ -101,3 +104,7 @@ TARGET_LINK_LIBRARIES(dtom)
 
 ADD_EXECUTABLE(mtod mtod.cpp)
 TARGET_LINK_LIBRARIES(mtod)
+
+ADD_EXECUTABLE(rootsolver_test rootsolver_test.cpp sailor_main_iter_fn.cpp sailor_rudder_iter_fn.cpp)
+TARGET_LINK_LIBRARIES(rootsolver_test gsl gslcblas rtx)
+

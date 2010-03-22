@@ -19,6 +19,7 @@
 DDX_STORE_TYPE(rudderTarget,
     struct
     {
+        double torque_des;
         double degrees_left;	    // Where to put the port rudder
         double degrees_right;	    // Where to put the starboard rudder
 

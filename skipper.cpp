@@ -380,9 +380,7 @@ void * translation_thread(void * dummy)
 #endif
                     // DO A NEWCALCULATION -> GO INTO NEWCALC MODE
                     if(((fabs(cleanedwind.global_direction_real_long - waypoints.Data[current_wyp].winddirection) > 40.0)
-                       || ((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3)  && (dist_next_trajectory > 100.0))
-                       || (dist_solltrajectory > 100.0)) //|| ((entry_timestamp - waypointData.timeStamp()) > 1e-1)) 
-                        && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END )
+                       || ((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3)  && (dist_next_trajectory > 100.0)) || (dist_solltrajectory > 100.0) || (generalflags.global_locator == AV_FLAGS_GLOBALSK_COLLISION)) && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END )
                         {
 #ifdef DEBUG_SKIPPER
                             rtx_message("normalnavi: switching to newcalculation state; reason:");
@@ -412,7 +410,7 @@ void * translation_thread(void * dummy)
                 case AV_FLAGS_NAVI_GOAL_APPROACH:
                     //if AVALON approaches the final destination, give it
                     //always the direct heading:!!!!!!
-                    if (dist_curr_wyp < 5.0)
+                    if (dist_curr_wyp < 50.0)
                     {
 #ifdef DEBUG_SKIPPER
                         rtx_message("You are there, congratulations");
