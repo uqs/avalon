@@ -296,7 +296,7 @@ void * translation_thread(void * dummy)
             rtx_message("Collision: collision distance = %f \n", distance);
 #endif
 
-                    if(distance < 200)
+                    if(distance < 1000)
                     {
                         skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
                         skipperFlagData.t_writefrom(skipperflags);

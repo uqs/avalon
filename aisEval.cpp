@@ -34,7 +34,6 @@
 #include "aisEval.h"
 #include "ais.h"
 #include "destination.h"
-#include "waypoints.h"
 #include "flags.h"
 #include "imucleaner.h"
 
@@ -53,7 +52,6 @@ DDXVariable aisData; //actual ais data
 DDXVariable aisStruct;
 DDXVariable destinationData;
 DDXVariable destinationStruct;
-DDXVariable waypointData; //to store the calculated path
 DDXVariable dataFlags;
 DDXVariable skipperFlagData;
 /**
@@ -127,7 +125,6 @@ void * translation_thread(void * dummy)
     imuCleanData imu_clean;
     ShipData ship; //transformed information about ship (ais)
     AisData ais;				//gps-struct
-    WaypointData waypoints;
     DestinationData destination; 
     Flags generalflags;
     SkipperFlags skipperflags;	
@@ -169,7 +166,9 @@ void * translation_thread(void * dummy)
     double dist_min;
     double dist_max;
     double dist_limit;
+    double dist_dest;
     double dist_test;
+    double add_dist_safe=1000;
 
     std::vector<obstacle_point> obst_p;
     std::vector<obstacle_point> obst_p_start;
@@ -196,7 +195,6 @@ void * translation_thread(void * dummy)
             shipData.t_readto(ship,0,0);
             destinationData.t_readto(destination,0,0);
             dataImuClean.t_readto(imu_clean,0,0);
-	    waypointData.t_readto(waypoints,0,0);
             
 
             current_pos_longitude = (AV_EARTHRADIUS 
@@ -269,7 +267,6 @@ void * translation_thread(void * dummy)
 
 		    speed_ship		= 0.5144444 * ais.Ship[i].speed_over_ground;
                     heading_avalon     	= atan2((destination.latitude - current_pos_latitude) , (destination.longitude - current_pos_longitude));
-// 		    heading_avalon     	= atan2((waypoints.Data.latitude - current_pos_latitude) , (waypoints.longitude - current_pos_longitude));
 		    speed_avalon	= sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
 //                     speed_avalon_all.insert(speed_avalon_all.begin(),speed_avalon);
 // 		    if(speed_avalon_all.size()>num_speed_history)
@@ -352,7 +349,6 @@ void * translation_thread(void * dummy)
 
 		    speed_ship		= 0.5144444 * ais.Ship[i].speed_over_ground;
 		    heading_avalon     	= atan2((destination.latitude - current_pos_latitude) , (destination.longitude - current_pos_longitude));
-// 		    heading_avalon     	= atan2((waypoints.latitude - current_pos_latitude) , (waypoints.longitude - current_pos_longitude));
 		    speed_avalon       	= sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
 
     // 		speed_avalon_all.insert(speed_avalon_all.begin(),speed_avalon);
@@ -399,7 +395,7 @@ void * translation_thread(void * dummy)
 							  +(current_pos_latitude-ship_pos_latitude)*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)))
 							  /((vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))
 							  +(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle))*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)));
-			    obst_p[num_obstP].dist	= speed_avalon * obst_p[num_obstP].t_crit;
+			    obst_p[num_obstP].dist	= speed_avalon * obst_p[num_obstP].t_crit + add_dist_safe;
 			    obst_p[num_obstP].longitude	= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_longitude;
 			    obst_p[num_obstP].latitude	= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_latitude;
 			    num_obstP ++;
@@ -411,7 +407,7 @@ void * translation_thread(void * dummy)
 							  +(current_pos_latitude-ship_pos_latitude)*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)))
 							  /((vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))
 							  +(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle))*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)));
-			    obst_p[num_obstP].dist	= speed_avalon * obst_p[num_obstP].t_crit;
+			    obst_p[num_obstP].dist	= speed_avalon * obst_p[num_obstP].t_crit + add_dist_safe;
 			    obst_p[num_obstP].longitude	= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_longitude;
 			    obst_p[num_obstP].latitude	= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_latitude;
 			    num_obstP ++;
@@ -427,7 +423,7 @@ void * translation_thread(void * dummy)
 							  +(current_pos_latitude-ship_pos_latitude)*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)))
 							  /((vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))
 							  +(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle))*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)));
-			    obst_p[num_obstP].dist	= speed_avalon * obst_p[num_obstP].t_crit;
+			    obst_p[num_obstP].dist	= speed_avalon * obst_p[num_obstP].t_crit + add_dist_safe;
 			    obst_p[num_obstP].longitude	= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_longitude;
 			    obst_p[num_obstP].latitude	= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_latitude;
 			    num_obstP ++;
@@ -439,7 +435,7 @@ void * translation_thread(void * dummy)
 							  +(current_pos_latitude-ship_pos_latitude)*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)))
 							  /((vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))
 							  +(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle))*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)));
-			    obst_p[num_obstP].dist	= speed_avalon * obst_p[num_obstP].t_crit;
+			    obst_p[num_obstP].dist	= speed_avalon * obst_p[num_obstP].t_crit + add_dist_safe;
 			    obst_p[num_obstP].longitude	= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_longitude;
 			    obst_p[num_obstP].latitude	= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_latitude;
 			    num_obstP ++;
@@ -455,7 +451,7 @@ void * translation_thread(void * dummy)
 							  +(current_pos_latitude-ship_pos_latitude)*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle))) 
 							  /((vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle)) 
 							  +(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle))*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)));
-			obst_p[num_obstP].dist		= speed_avalon * obst_p[num_obstP].t_crit;
+			obst_p[num_obstP].dist		= speed_avalon * obst_p[num_obstP].t_crit + add_dist_safe;
 			obst_p[num_obstP].longitude	= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_longitude;
 			obst_p[num_obstP].latitude	= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_latitude;
 			num_obstP ++;
@@ -467,7 +463,7 @@ void * translation_thread(void * dummy)
 							  +(current_pos_latitude-ship_pos_latitude)*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle))) 
 							  /((vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))
 							  +(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle))*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)));
-			obst_p[num_obstP].dist		= speed_avalon * obst_p[num_obstP].t_crit;
+			obst_p[num_obstP].dist		= speed_avalon * obst_p[num_obstP].t_crit + add_dist_safe;
 			obst_p[num_obstP].longitude	= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_longitude;
 			obst_p[num_obstP].latitude	= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_latitude;
 			num_obstP ++;
@@ -509,7 +505,11 @@ void * translation_thread(void * dummy)
 			}
 		      
 			// if an obstacle is too far away, we don't care about it
-			dist_limit = 10000;
+			dist_dest =(sqrt((current_pos_longitude - destination.longitude)
+					*(current_pos_longitude - destination.longitude)
+					+(current_pos_latitude - destination.latitude)
+					*(current_pos_latitude - destination.latitude)));
+			dist_limit = 2*dist_dest;
 			for ( p = 0; p < num_obstP-1; p=p+2)
 			{
 			    if ((obst_p[p].dist<dist_max) || (obst_p[p+1].dist<dist_max))
@@ -554,10 +554,10 @@ void * translation_thread(void * dummy)
 							*(obst_p_start[0].latitude-destination.latitude));
 	    for (l=1;l<obst_p_start.size();l++)
 	    {
-		dist_test = obst_p_start[l].dist + sqrt((obst_p_start[l].longitude-destination.longitude)
-						  *(obst_p_start[l].longitude-destination.longitude)
-						  +(obst_p_start[l].latitude-destination.latitude)
-						  *(obst_p_start[l].latitude-destination.latitude));
+		dist_test 	= obst_p_start[l].dist + sqrt((obst_p_start[l].longitude-destination.longitude)
+							*(obst_p_start[l].longitude-destination.longitude)
+							+(obst_p_start[l].latitude-destination.latitude)
+							*(obst_p_start[l].latitude-destination.latitude));
 		if(dist_min>dist_test)
 		{
 		    dist_min=dist_test;
@@ -567,10 +567,10 @@ void * translation_thread(void * dummy)
 	    }
 	    for (l=0;l<obst_p_end.size();l++)
 	    {
-		dist_test = obst_p_end[l].dist + sqrt((obst_p_end[l].longitude-destination.longitude)
-						*(obst_p_end[l].longitude-destination.longitude)
-						+(obst_p_end[l].latitude-destination.latitude)
-						*(obst_p_end[l].latitude-destination.latitude));
+		dist_test  	= obst_p_end[l].dist + sqrt((obst_p_end[l].longitude-destination.longitude)
+						      *(obst_p_end[l].longitude-destination.longitude)
+						      +(obst_p_end[l].latitude-destination.latitude)
+						      *(obst_p_end[l].latitude-destination.latitude));
 		if(dist_min>dist_test)
 		{
 		    dist_min=dist_test;
@@ -578,9 +578,7 @@ void * translation_thread(void * dummy)
 		    safe_waypoint_lat	= obst_p_end[l].latitude;
 		}
 	    }
-// 	    waypoints.Data[1].longitude = safe_waypoint_long;
-// 	    waypoints.Data[1].latitude  = safe_waypoint_lat;
-// 	    waypointData.t_writefrom(waypoints);
+
 	    destination.longitude = safe_waypoint_long;
 	    destination.latitude  = safe_waypoint_lat;
 	    destinationData.t_writefrom(destination);
@@ -740,8 +738,6 @@ int main (int argc, const char * argv[])
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), AisData));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), DestinationStruct));
         DOC(DDX_STORE_REGISTER_TYPE (store.getId(), DestinationData));
-	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), WaypointStruct));
-	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), WaypointData));
         DOC(DDX_STORE_REGISTER_TYPE (store.getId(), SkipperFlags));
     //
 	
@@ -751,8 +747,6 @@ int main (int argc, const char * argv[])
         DOB(store.registerVariable(dataBoat, varname4, "imuData"));
         DOB(store.registerVariable(shipStruct, varname_shipStruct, "ShipStruct"));
         DOB(store.registerVariable(shipData, varname_shipData, "ShipData"));
-// 	DOB(store.registerVariable(waypointStruct, varname_wypStruct, "WaypointStruct"));
-// 	DOB(store.registerVariable(waypointData, varname_wypData, "WaypointData"));
        DOB(store.registerVariable(destinationStruct, varname_destStruct, "DestinationStruct"));
         DOB(store.registerVariable(skipperFlagData, varname_skipperflags, "SkipperFlags"));
 	
