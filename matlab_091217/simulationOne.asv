@@ -1,0 +1,290 @@
+%
+% Mathematical model of the movement of the ship in the water
+% with influence of wind, current and waves
+%
+% - Simulation
+%
+% (c) by Fabian Jenne
+% see documentation in "Identification and adaptive control applied to
+% ship steering" by Claes G K�llstr�m
+% and "Endbericht Final Avalon Team"
+% 
+% addpath '/usr/local/lib/matlab/ddxmatlab'
+% addpath '.'
+% 
+% clear all; close all; clc;
+
+
+%% load the wind profile wind.mat
+
+% load wind
+
+%% generate 2D map with arrows (wind magnitude, wind angle)
+% 
+% uneu=u(:,:,10);
+% vneu=v(:,:,10);
+% xneu=x(:,:,10);
+% yneu=y(:,:,10);
+% %
+% % plot wind profil
+%
+% for i=1:41
+%     for j=1:35
+%         quiver(xneu(j,i), yneu(j,i), uneu(j,i), vneu(j,i), 0.05)    % generates arrows scalled by 0.05
+%         hold on
+%     end
+% end
+
+%% init variables
+
+% avalon = ddx_init();
+parameter;
+
+% double joy_axes1; double joy_axes2; double joy_axes3; double joy_axes4
+
+%% Define Simulation Variables
+
+T_sim = 20;                 % [s] time of simulation
+delta_t = 1/15;             % [s] iteration time step (smallest time step of sensor reading)
+world_size = 200;           % [m] size of the part we are looking at
+disp_forces = 1;            % display forces; 0 or 1
+disp_measurements = 0;      % display measurements; 0 or 1
+
+%% Run Simulation with the Position Update Function PoseStep.m
+
+t=0;
+X_p = [];
+Y_p = [];
+N_p = [];
+vel_p = [];
+% figure(1);
+
+% t_gps = 100;
+% t_compass = 100;
+% gi=1;
+% goal = pathpoints(gi,:);
+
+% initialize particles
+% rand('state',sum(100*clock));       % set seed for pseudo-random number generator
+% x = [-filter_size+filter_size*rand(n_particles,1), -filter_size+filter_size*rand(n_particles,1), 2*pi*rand(n_particles,1) - pi];
+% initialise weights
+% w=ones(n_particles,1)/n_particles;                  % we start with uniform weigths
+joystick_control = 0;
+n=1;
+
+while t < T_sim
+    % %
+    %     r_pose = ceil(pose/10); % round position for the windprofile, increase steps: 10m for each value
+    %     v_wind = 1/4*(sqrt(uneu(r_pose(1),r_pose(2))*uneu(r_pose(1),r_pose(2)) + vneu(r_pose(1),r_pose(2))*vneu(r_pose(1),r_pose(2)))); %1/4 downscaling term by myself
+    %     d_wind = atan2(vneu(r_pose(1),r_pose(2)),uneu(r_pose(1),r_pose(2)));
+    
+    %% read DDX Store variables
+    
+%     [localization, control, wind, gps, rudderstate, sailstate, joystick] = ddx_read( avalon );
+%     
+%     vel(1) = control.xVelocity;
+%     vel(2) = control.yVelocity;
+%     vel(3) = control.rotVelocity;
+%     pose(1) = localization.x;
+%     pose(2) = localization.y;
+%     pose(3) = localization.roll;
+%     joy_but1 = joystick.buttons(1);         % shooting button
+%     joy_but2 = joystick.buttons(2);         % thumb button
+%     joy_axes1 = double(joystick.axes(1));   % left - right
+%     joy_axes2 = double(joystick.axes(2));   % front - back
+%     joy_axes3 = double(joystick.axes(3));   % turn around z-axis
+%     joy_axes4 = double(joystick.axes(4));   % small additional turning stick
+    
+    %% control parameters with joystick
+    
+    if joystick_control == 1
+        
+        if joy_but1 == 1;       % control the rudder angle with the joystick
+            alpha_rudder = (joy_axes3/32767)*deg2rad(20);
+        end
+        
+        if joy_but2 == 1;       % control the wind speed and direction
+            v_wind = v_wind - (joy_axes2/32767);
+            d_wind = d_wind - (joy_axes1/32767)*deg2rad(10);
+            
+            d_waves = d_wind - deg2rad(1);
+            d_current = d_wind - deg2rad(1);
+            
+            if d_waves == deg2rad(180);
+                d_waves = d_waves - deg2rad(1);
+            end
+        end
+        
+        aoa_sail = -joy_axes4/32767*pi;
+    end
+    
+%     disppar = [rad2deg(aoa_sail) rad2deg(alpha_rudder)];
+%     disppar2 = [v_wind rad2deg(d_wind)];
+    % alpha_rudder = rad2deg(alpha_rudder);
+    % aoa_sail = rad2deg(aoa_sail);
+  
+%     fprintf('wind: %6.1f[m/s] at: %2.1f°       sail: %2.1f°   rudder: %2.1f°\n',disppar2, disppar);
+
+%     u_w_wind = cos(d_wind-pi/2)*v_wind;
+%     v_w_wind = sin(d_wind-pi/2)*v_wind;
+%     subplot(1,3,3);
+%     quiver(0,0,u_w_wind,v_w_wind);
+%     axis([-20/2 20/2 -20/2 20/2]);
+
+
+    %% control steps for position update
+    
+    [pose, vel_p, vel, X, Y, N, X_p, Y_p, N_p, X_waves, Y_waves, N_waves, X_sail, Y_sail, N_sail] = PoseStep(t, delta_t, pose, vel, X_p, Y_p, N_p, vel_p, m, aoa_sail, A_sail, A_hull, A_rudder, alpha_rudder, C_d, C_hat, I, v_current, d_current, v_wind, d_wind, d_waves, T, h, depth, length, width);
+    
+%     [gps_pose, t_gps, gps_length, gps_orient] = GpsSignal(pose, t_gps, sigma_gps, gps_length, gps_orient);
+
+    
+    %% write variables to DDX Store
+%     
+%     control.xVelocity   = vel(1);
+%     control.yVelocity   = vel(2);
+%     control.rotVelocity = vel(3);
+%     localization.x = gps_pose(1);
+%     localization.y = gps_pose(2);
+%     localization.roll = gps_pose(3);
+%     wind.speed     = v_wind;
+%     wind.rotation  = d_wind;
+%     joystick.buttons(1) = joy_but1;
+%     joystick.buttons(2) = joy_but2;
+%     joystick.axes(1) = joy_axes1;
+%     joystick.axes(2) = joy_axes2;
+%     joystick.axes(3) = joy_axes3;
+%     joystick.axes(4) = joy_axes4;
+%     
+%     ddx_write( avalon, control, localization, wind, gps, rudderstate, sailstate, joystick );
+    
+    %% Plotting
+    
+    traj(n,:) = [pose(1),pose(2)];
+    waveforces(n,:) = [X_waves, Y_waves, N_waves];
+    sailforces(n,:) = [X_sail, Y_sail, N_sail];
+    n=n+1;
+    
+%     % plotting
+%     % ---------------------------------
+%     subplot(1,3,1);
+%     figure(1);
+%     
+%     if abs(pose(1)) > world_size/2
+%         world_size = abs(pose(1))*2;
+%     end
+%     if abs(pose(2)) > world_size/2
+%         world_size = abs(pose(2))*2;
+%     end
+%     
+%     psi = pose(3);
+%     boat = [ones(1,5)*pose(1); ones(1,5)*pose(2)] + ([0,-length/2, +length/2, -length/2, 0; 0, width/2, 0, -width/2, 0]'*[cos(psi) sin(psi); -sin(psi) cos(psi)])';
+%     wind = [ones(1,5)*(world_size/20-world_size/2); ones(1,5)*(world_size/20-world_size/2)] + ([0,-world_size/20, +world_size/20, -world_size/20, 0; 0, world_size/40, 0, -world_size/40, 0]'*[cos(d_wind+pi) sin(d_wind+pi); -sin(d_wind+pi) cos(d_wind+pi)])';
+%     waves = [ones(1,5)*(world_size/20-world_size/2); ones(1,5)*(world_size/20-world_size/2)] + ([0,-world_size/20, +world_size/20, -world_size/20, 0; 0, world_size/40, 0, -world_size/40, 0]'*[cos(d_waves+pi) sin(d_waves+pi); -sin(d_waves+pi) cos(d_waves+pi)])';
+%     
+%     
+%     if disp_forces == 1
+%         f = sqrt(X^2+Y^2);
+%         d_f = atan2(Y,X)+psi;
+%         forces = [ones(1,5)*pose(1); ones(1,5)*pose(2)] + ([0,+f, +f/2, f, f/2; 0, 0, -f/2, 0, f/2]'*[cos(d_f) sin(d_f); -sin(d_f) cos(d_f)])';
+%         moment = [];
+%         if N < 0
+%             for i=0:-pi/16:-pi
+%                 mom = [pose(1)+N*cos(i); pose(2)+N*sin(i)];
+%                 moment = [moment mom];
+%             end
+%             mom = [pose(1)+N/2*cos(-pi*2/3) pose(1)+N*cos(-pi) pose(1)+3/2*N*cos(-pi*2/3); pose(2)+N/2*sin(-pi*2/3) pose(2)+N*sin(-pi) pose(2)+3/2*N*sin(-pi*2/3)];
+%             moment = [moment mom];
+%         else
+%             for i=0:pi/16:pi
+%                 mom = [pose(1)+N*cos(i); pose(2)+N*sin(i)];
+%                 moment = [moment mom];
+%             end
+%             mom = [pose(1)+N/2*cos(pi*2/3) pose(1)+N*cos(pi) pose(1)+3/2*N*cos(pi*2/3); pose(2)+N/2*sin(pi*2/3) pose(2)+N*sin(pi) pose(2)+3/2*N*sin(pi*2/3)];
+%             moment = [moment mom];
+%         end
+%     end
+%     
+% 
+%     if disp_measurements == 1
+%         measurement = [ones(1,5)*gps_pose(1); ones(1,5)*gps_pose(2)] + ([0,-length/2, +length/2, -length/2, 0; 0, width/2, 0, -width/2, 0]'*[cos(gps_pose(3)) sin(gps_pose(3)); -sin(gps_pose(3)) cos(gps_pose(3))])';
+%         % filtered = [ones(1,5)*x_hat(1); ones(1,5)*x_hat(2)] + ([0,-length/2, +length/2, -length/2, 0; 0, width/2, 0, -width/2, 0]'*[cos(x_hat(3)) sin(x_hat(3)); -sin(x_hat(3)) cos(x_hat(3))])';
+% 
+%        % mu = [x_hat(1),x_hat(2)];
+%        % ellipse=0:pi/30:2*pi; % angles around a circle
+%        % [eigvec,eigval] = eig([P(1,1:2);P(2,1:2)]); % Compute eigen-stuff
+%        % xyellipse = [cos(ellipse'),sin(ellipse')] * sqrt(eigval) * eigvec'; % Transformation
+%        % xellipse = xyellipse(:,1);           
+%        % yellipse = xyellipse(:,2);        
+%     end
+%     
+%     
+%     if disp_forces == 1
+%         if disp_measurements == 1
+%             plot(boat(2,:),boat(1,:),'b',wind(2,:),wind(1,:),'r',waves(2,:),waves(1,:),'g',forces(2,:),forces(1,:),'r',moment(2,:),moment(1,:),'g',measurement(2,:),measurement(1,:),'r');      %coordinate system is other way round
+%         else
+%             plot(boat(2,:),boat(1,:),'b',wind(2,:),wind(1,:),'r',waves(2,:),waves(1,:),'g',forces(2,:),forces(1,:),'r',moment(2,:),moment(1,:),'g');      %coordinate system is other way round
+%         end
+%     else
+%         if disp_measurements == 1
+%             plot(boat(2,:),boat(1,:),'b',wind(2,:),wind(1,:),'r',waves(2,:),waves(1,:),'g',measurement(2,:),measurement(1,:),'r');      %coordinate system is other way round
+%         else
+%             plot(boat(2,:),boat(1,:),'b',wind(2,:),wind(1,:),'r',waves(2,:),waves(1,:),'g');      %coordinate system is other way round
+%         end
+%     end
+%     axis([-world_size/2 world_size/2 -world_size/2 world_size/2]);
+% 
+%     %     title([num2str(pose(1)),', ', num2str(pose(2)), ', ', num2str(pose(3)*180/pi),', Windwinkel zum Boot = ',num2str(g_r*180/pi),'�',', chi = ',num2str(chi/pi*180)]);
+%     title(['Simulation time = ',num2str(t),' s']);
+%     
+% 
+% 	subplot(1,3,2);
+    plot(handles.AxesTrajectory, traj(:,2),traj(:,1)); 
+%     axis([-world_size/2 world_size/2 -world_size/2 world_size/2]);
+%     
+%     drawnow;
+%     pause(delta_t);
+%     
+%     
+    
+    t=t+delta_t;
+%     t_gps = t_gps + delta_t;
+end
+
+% ddx_close( avalon );
+
+%% additional plots
+
+ %t=t-delta_t;
+
+ % Forces;
+hold(handles.AxesForce,'on');
+plot(handles.AxesForce, 0:delta_t:t, X_p, 'r');
+plot(handles.AxesForce, 0:delta_t:t, Y_p, 'g');
+plot(handles.AxesForce, 0:delta_t:t, N_p, 'b');
+legend(handles.AxesForce, 'F_x', 'F_y', 'M_z', 'Location', 'Best');
+
+ % Velocity 
+hold(handles.AxesVelocity,'on');
+plot(handles.AxesVelocity, 0:delta_t:t,vel_p(1,:),'r', 0:delta_t:t,vel_p(2,:),'g', 0:delta_t:t,vel_p(3,:),'b');
+legend(handles.AxesVelocity, 'v_x', 'v_y', 'v_{rot}', 'Location', 'Best');
+% %figure(3);
+% plot(0:delta_t:t,vel_p(1,:),'r',0:delta_t:t,vel_p(2,:),'g',0:delta_t:t,vel_p(3,:),'b');
+% title('velocities');
+
+% Odometry
+% hold(handles.AxesOdoAngle,'on');
+% stairs(handles.AxesOdoAngle,data(:,9), data(:,4), 'b');
+% stairs(handles.AxesOdoAngle,data(:,9), data(:,5), 'r');
+% legend(handles.AxesOdoAngle,'Encoder (Right)', 'Encoder (Left)', 'Location', 'Best');
+%hold(handles.AxesOdoAngle,'off');
+% figure(4);
+% plot(traj(:,2),traj(:,1));
+% title('trajectory');
+% 
+% figure(5);
+% plot(1:(n-1),sailforces(:,1),'r',1:(n-1),sailforces(:,2),'g',1:(n-1),sailforces(:,3),'b')
+% 
+% figure(6);
+% plot(1:(n-1),waveforces(:,1),'r',1:(n-1),waveforces(:,2),'g',1:(n-1),waveforces(:,3),'b');
+% title('sailforces');

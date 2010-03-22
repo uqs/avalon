@@ -86,7 +86,7 @@ RtxGetopt producerOpts[] = {
   RTX_GETOPT_END
 };
 
-int main(int argc, const char * argv[])
+int main(int argc, char * argv[])
 {
     int ret;
     SailMotor sailmotor;

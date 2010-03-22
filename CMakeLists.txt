@@ -69,8 +69,8 @@ TARGET_LINK_LIBRARIES(flag-checker ddxx ddx rtx pthread rt )
 ADD_EXECUTABLE(testaufruf testaufruf.cpp)
 TARGET_LINK_LIBRARIES(testaufruf ddxx ddx rtx pthread rt )
 
-ADD_EXECUTABLE(failure failure.cpp)
-TARGET_LINK_LIBRARIES(failure ddxx ddx rtx pthread rt )
+# ADD_EXECUTABLE(failure failure.cpp)
+# TARGET_LINK_LIBRARIES(failure ddxx ddx rtx pthread rt )
 
 # ADD_EXECUTABLE(skippertest skippertest.cpp)
 # TARGET_LINK_LIBRARIES(skippertest ddxx ddx rtx pthread rt )
