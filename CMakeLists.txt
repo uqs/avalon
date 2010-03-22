@@ -11,8 +11,8 @@ LINK_DIRECTORIES(
 	 ${CMAKE_HOME_DIRECTORY}/eposlib-test /usr/local/lib
 )
 
-ADD_EXECUTABLE(windsensor windsensor.cpp)
-TARGET_LINK_LIBRARIES(windsensor ddxx ddx rtx pthread rt )
+# ADD_EXECUTABLE(windsensor windsensor.cpp)
+# TARGET_LINK_LIBRARIES(windsensor ddxx ddx rtx pthread rt )
 
 ADD_EXECUTABLE(gps gps.cpp)
 TARGET_LINK_LIBRARIES(gps ddxx ddx rtx pthread rt )
@@ -63,8 +63,8 @@ TARGET_LINK_LIBRARIES(windcleaner ddxx ddx rtx can epos pthread rt )
 ADD_EXECUTABLE(imucleaner imucleaner.cpp)
 TARGET_LINK_LIBRARIES(imucleaner ddxx ddx rtx pthread rt )
 
-ADD_EXECUTABLE(flag-checker flag-checker.cpp)
-TARGET_LINK_LIBRARIES(flag-checker ddxx ddx rtx pthread rt )
+# ADD_EXECUTABLE(flag-checker flag-checker.cpp)
+# TARGET_LINK_LIBRARIES(flag-checker ddxx ddx rtx pthread rt )
 
 ADD_EXECUTABLE(testaufruf testaufruf.cpp)
 TARGET_LINK_LIBRARIES(testaufruf ddxx ddx rtx pthread rt )

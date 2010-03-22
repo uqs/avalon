@@ -688,7 +688,7 @@ void initializeHeadingTable16(std::vector<double> & headingTable)
 }
 /////////////////////////////////////////////////////////////
 
-int main (int argc, const char * argv[])
+int main (int argc, char * argv[])
 {
 	RtxThread * th;
     int ret;

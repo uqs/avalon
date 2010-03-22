@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/failure.dir/failure.o  -o failure -rdynamic -L/home/stefan/RoboYacht/svn/avalon/eposlib-test -L/usr/local/lib -lddxx -lddx -lrtx -lpthread -lrt -Wl,-rpath,/home/stefan/RoboYacht/svn/avalon/eposlib-test:/usr/local/lib 

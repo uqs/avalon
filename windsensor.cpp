@@ -154,7 +154,7 @@ void * wind_thread(void * dummy)
 
 
 int
-main (int argc, const char * argv[])
+main (int argc, char * argv[])
 {
 
 	RtxThread * th;

@@ -361,7 +361,7 @@ int sign(double i) // gives back the sign of a float
 }
 
 
-int main (int argc, const char * argv[])
+int main (int argc, char * argv[])
 {
 	RtxThread * th;
     int ret;

@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/home/stefan/RoboYacht/svn/avalon/avalon.h
+
+/home/stefan/RoboYacht/svn/avalon/dtom.cpp
+avalon.h
+/home/stefan/RoboYacht/svn/avalon/avalon.h
+ctype.h
+-
+memory.h
+-
+math.h
+-
+time.h
+-
+sys/time.h
+-
+string
+-
+fstream
+-
+iostream
+-
+stdio.h
+-
+stdlib.h
+-
+vector
+-
+iostream
+-
+

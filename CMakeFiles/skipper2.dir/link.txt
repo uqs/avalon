@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/skipper2.dir/skipper2.o  -o skipper2 -rdynamic -L/home/stefan/RoboYacht/svn/avalon/eposlib-test -L/usr/local/lib -lddxx -lddx -lrtx -lpthread -lrt -Wl,-rpath,/home/stefan/RoboYacht/svn/avalon/eposlib-test:/usr/local/lib 

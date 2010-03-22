@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/obstacle_converter.dir/obstacle_converter.o  -o obstacle_converter -rdynamic -L/home/stefan/RoboYacht/svn/avalon/eposlib-test -L/usr/local/lib 

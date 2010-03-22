@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/ruddermain.dir/ruddermain.o CMakeFiles/ruddermain.dir/RudderMotor.o  -o ruddermain -rdynamic -L/home/stefan/RoboYacht/svn/avalon/eposlib-test -L/usr/local/lib -lddxx -lddx -lrtx -lcan -lepos -lpthread -lrt -Wl,-rpath,/home/stefan/RoboYacht/svn/avalon/eposlib-test:/usr/local/lib 

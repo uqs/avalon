@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/eposdebug.dir/eposdebug.o CMakeFiles/eposdebug.dir/RudderMotor.o CMakeFiles/eposdebug.dir/SailMotor.o  -o eposdebug -rdynamic -L/home/stefan/RoboYacht/svn/avalon/eposlib-test -L/usr/local/lib -lddxx -lddx -lrtx -lcan -lepos -lpthread -lrt -Wl,-rpath,/home/stefan/RoboYacht/svn/avalon/eposlib-test:/usr/local/lib 

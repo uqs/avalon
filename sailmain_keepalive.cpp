@@ -181,7 +181,7 @@ int RunCommand(const char *strCommand)
 }
 
 
-int main (int argc, const char * argv[])
+int main (int argc, char * argv[])
 {
 	RtxThread * th;
     int ret;

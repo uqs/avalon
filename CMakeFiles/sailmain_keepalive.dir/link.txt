@@ -1,0 +1,1 @@
+/usr/bin/c++      CMakeFiles/sailmain_keepalive.dir/sailmain_keepalive.o  -o sailmain_keepalive -rdynamic -L/home/stefan/RoboYacht/svn/avalon/eposlib-test -L/usr/local/lib -lddxx -lddx -lrtx -lcan -lepos -lpthread -lrt -Wl,-rpath,/home/stefan/RoboYacht/svn/avalon/eposlib-test:/usr/local/lib 
