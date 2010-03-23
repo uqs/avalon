@@ -492,7 +492,7 @@ void * translation_thread(void * dummy)
 #define DOP(c) if ((c)==NULL) {rtx_error("Command "#c" failed");return -1;} 
 
 int
-main (int argc, char * argv[])
+main (int argc, const char * argv[])
 {
 	RtxThread * th;
     int ret;

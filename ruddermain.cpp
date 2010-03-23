@@ -224,7 +224,7 @@ void * rudderdrive_thread(void * dummy)
 // Error handling for pointer-returning function (return NULL on failure)
 #define DOP(c) if ((c)==NULL) {rtx_error("Command "#c" failed");return -1;} 
 
-int main (int argc, char * argv[])
+int main (int argc, const char * argv[])
 {
 	RtxThread * th;
 	int ret;

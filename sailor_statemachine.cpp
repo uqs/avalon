@@ -839,7 +839,7 @@ double get_sail_AOA_coeff(double roll)
     // = 0.5 * cos((imu_clean.attitude.roll + 17) / 30) + 0.5 - 0.12 * cos((imu_clean.attitude.roll + 17) / 14) + 0.12;
 }
 
-int main (int argc, char * argv[])
+int main (int argc, const char * argv[])
 {
     RtxThread * th;
     int ret;

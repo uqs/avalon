@@ -13,7 +13,6 @@
 #include <gsl/gsl_roots.h>
 
 
-
 //sailor_main_iter_class::sailor_main_iter_class()
 //{
 //}
