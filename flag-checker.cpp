@@ -42,7 +42,7 @@ DDXVariable dataRcFlags;
 DDXVariable dataSailorFlags;
 DDXVariable dataNaviFlags;
 DDXVariable skipperFlagData;
-DDXVariable errorFlagData;
+// DDXVariable errorFlagData;
 
 /**
  * Storage for the command line arguments
@@ -52,7 +52,7 @@ const char * varname_rcflags = "rcflags";
 const char * varname_sailorflags = "sailorflags";
 const char * varname_naviflags = "naviflags";
 const char * varname_skipperflags = "skipperflags";
-const char * varname_errorflags = "errorflags";
+// const char * varname_errorflags = "errorflags";
 const char * producerHelpStr = "Flags-Checker who sets all the general Flags";
 
 /**
@@ -84,12 +84,14 @@ RtxGetopt producerOpts[] = {
      RTX_GETOPT_END_ARG
    }
   },
+#if 0
   {"errorflags", "Store Variable where the flags are",
    {
      {RTX_GETOPT_STR, &varname_errorflags, ""},
      RTX_GETOPT_END_ARG
    }
   },
+#endif
   RTX_GETOPT_END
 };
 
@@ -104,7 +106,7 @@ void * translation_thread(void * dummy)
     sailorFlags sailorflags;
     NaviFlags naviflags;
     SkipperFlags skipperflags;
-    ErrorFlags errorflags;
+    // ErrorFlags errorflags;
 
     /* Initialization */
     dataFlags.t_readto(flags,0,0);
@@ -112,7 +114,7 @@ void * translation_thread(void * dummy)
     dataSailorFlags.t_readto(sailorflags,0,0);
     dataNaviFlags.t_readto(naviflags,0,0);
     skipperFlagData.t_readto(skipperflags,0,0);
-    errorFlagData.t_readto(errorflags,0,0);
+//     errorFlagData.t_readto(errorflags,0,0);
 
     // General Flags:
     flags.man_in_charge = AV_FLAGS_MIC_REMOTECONTROL;
@@ -152,10 +154,10 @@ void * translation_thread(void * dummy)
     skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
 
     //Error Flags_
-    errorflags.state = 0;
+//     errorflags.state = 0;
 
     //writing to store the initialized flags:
-    errorFlagData.t_writefrom(errorflags);
+//     errorFlagData.t_writefrom(errorflags);
     skipperFlagData.t_writefrom(skipperflags);
     dataFlags.t_writefrom(flags);
     dataRcFlags.t_writefrom(rcflags);
@@ -228,7 +230,7 @@ void * translation_thread(void * dummy)
                 default:
                     flags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
             }
-            
+#if 0
             switch(errorflags.state)
             {
                 case 0:
@@ -238,6 +240,7 @@ void * translation_thread(void * dummy)
                 case AV_FLAGS_ERROR_SYSTEM_ID:
                     flags.error_state = AV_FLAGS_ERROR_SYSTEM_ID;
             } 
+#endif
 
             switch(rcflags.autonom_navigation)
             {
@@ -426,7 +429,7 @@ void * translation_thread(void * dummy)
 
 
 int
-main (int argc, char * argv[])
+main (int argc, const char * argv[])
 {
 	RtxThread * th;
     int ret;
@@ -447,7 +450,7 @@ main (int argc, char * argv[])
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), sailorFlags));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), NaviFlags));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), SkipperFlags));
-        DOC(DDX_STORE_REGISTER_TYPE (store.getId(), ErrorFlags));
+//         DOC(DDX_STORE_REGISTER_TYPE (store.getId(), ErrorFlags));
 
 
 
@@ -457,7 +460,7 @@ main (int argc, char * argv[])
 	DOB(store.registerVariable(dataSailorFlags, varname_sailorflags, "sailorFlags"));
 	DOB(store.registerVariable(dataNaviFlags, varname_naviflags, "NaviFlags"));
 	DOB(store.registerVariable(skipperFlagData, varname_skipperflags, "SkipperFlags"));
-        DOB(store.registerVariable(errorFlagData, varname_errorflags, "ErrorFlags"));
+//         DOB(store.registerVariable(errorFlagData, varname_errorflags, "ErrorFlags"));
 
 	// Start the working thread
     DOP(th = rtx_thread_create ("Flag Checker Thread", 0,

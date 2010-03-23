@@ -36,19 +36,7 @@ DDX_STORE_TYPE(ShipData,
 
 );
 
-DDX_STORE_TYPE(obstacle_point,
-        struct {
 
-        double angle;
-        double dist;		// distance from current position to obstacle
-	double t_crit;
-	
-	double longitude;	// Position of the obstacle
-	double latitude;
-
-        }
-
-);
 
 
 #endif //aisEval.h

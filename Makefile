@@ -35,19 +35,22 @@ CMAKE_COMMAND = /usr/bin/cmake
 # The command to remove a file.
 RM = /usr/bin/cmake -E remove -f
 
+# The program to use to edit the cache.
+CMAKE_EDIT_COMMAND = /usr/bin/ccmake
+
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_SOURCE_DIR = /home/krucker/Master_thesis/avalon
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_BINARY_DIR = /home/krucker/Master_thesis/avalon
 
 #=============================================================================
 # Targets provided globally by CMake.
 
 # Special rule for the target edit_cache
 edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running interactive CMake command-line interface..."
-	/usr/bin/cmake -i .
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
+	/usr/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -66,9 +69,9 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/stefan/RoboYacht/svn/avalon/CMakeFiles /home/stefan/RoboYacht/svn/avalon/CMakeFiles/progress.make
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/krucker/Master_thesis/avalon/CMakeFiles /home/krucker/Master_thesis/avalon/CMakeFiles/progress.make
 	$(MAKE) -f CMakeFiles/Makefile2 all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/stefan/RoboYacht/svn/avalon/CMakeFiles 0
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/krucker/Master_thesis/avalon/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
@@ -146,6 +149,19 @@ eposdebug: cmake_check_build_system
 eposdebug/fast:
 	$(MAKE) -f CMakeFiles/eposdebug.dir/build.make CMakeFiles/eposdebug.dir/build
 .PHONY : eposdebug/fast
+
+#=============================================================================
+# Target rules for targets named flag-checker
+
+# Build rule for target.
+flag-checker: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 flag-checker
+.PHONY : flag-checker
+
+# fast build rule for target.
+flag-checker/fast:
+	$(MAKE) -f CMakeFiles/flag-checker.dir/build.make CMakeFiles/flag-checker.dir/build
+.PHONY : flag-checker/fast
 
 #=============================================================================
 # Target rules for targets named global_skipper
@@ -525,6 +541,21 @@ eposdebug.s:
 .PHONY : eposdebug.s
 
 # target to build an object file
+flag-checker.o:
+	$(MAKE) -f CMakeFiles/flag-checker.dir/build.make CMakeFiles/flag-checker.dir/flag-checker.o
+.PHONY : flag-checker.o
+
+# target to preprocess a source file
+flag-checker.i:
+	$(MAKE) -f CMakeFiles/flag-checker.dir/build.make CMakeFiles/flag-checker.dir/flag-checker.i
+.PHONY : flag-checker.i
+
+# target to generate assembly for a file
+flag-checker.s:
+	$(MAKE) -f CMakeFiles/flag-checker.dir/build.make CMakeFiles/flag-checker.dir/flag-checker.s
+.PHONY : flag-checker.s
+
+# target to build an object file
 global_skipper.o:
 	$(MAKE) -f CMakeFiles/global_skipper.dir/build.make CMakeFiles/global_skipper.dir/global_skipper.o
 .PHONY : global_skipper.o
@@ -871,6 +902,7 @@ help:
 	@echo "... dtom"
 	@echo "... edit_cache"
 	@echo "... eposdebug"
+	@echo "... flag-checker"
 	@echo "... global_skipper"
 	@echo "... gps"
 	@echo "... imucleaner"
@@ -913,6 +945,9 @@ help:
 	@echo "... eposdebug.o"
 	@echo "... eposdebug.i"
 	@echo "... eposdebug.s"
+	@echo "... flag-checker.o"
+	@echo "... flag-checker.i"
+	@echo "... flag-checker.s"
 	@echo "... global_skipper.o"
 	@echo "... global_skipper.i"
 	@echo "... global_skipper.s"

@@ -44,6 +44,18 @@ DDX_STORE_TYPE(AisData,
         }
 );
 
+DDX_STORE_TYPE(Obstacle,
+        struct {
 
+        double angle;
+        double dist;		// distance from current position to obstacle
+	double t_crit;
+	
+	double longitude;	// Position of the obstacle
+	double latitude;
+
+        }
+
+);
 
 #endif //AIS_H

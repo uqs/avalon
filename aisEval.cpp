@@ -50,6 +50,7 @@ DDXVariable shipData; //already prcessed information, showing the dangerous poin
 DDXVariable shipStruct;
 DDXVariable aisData; //actual ais data
 DDXVariable aisStruct;
+DDXVariable obstacle;
 DDXVariable destinationData;
 DDXVariable destinationStruct;
 DDXVariable dataFlags;
@@ -59,6 +60,7 @@ DDXVariable skipperFlagData;
  * */
 int sign(int i);
 int sign(double i);
+
 
 
 /**
@@ -71,6 +73,7 @@ const char * varname_shipData = "shipData";
 const char * varname_shipStruct = "shipStruct";
 const char * varname_aisData = "aisData";
 const char * varname_aisStruct = "aisStruct";
+const char * varname_Obstacle = "Obstacle";
 const char * varname_destData = "destData";
 const char * varname_destStruct = "destStruct";
 const char * varname_flags = "flags";
@@ -125,6 +128,7 @@ void * translation_thread(void * dummy)
     imuCleanData imu_clean;
     ShipData ship; //transformed information about ship (ais)
     AisData ais;				//gps-struct
+    Obstacle obst;
     DestinationData destination; 
     Flags generalflags;
     SkipperFlags skipperflags;	
@@ -170,11 +174,11 @@ void * translation_thread(void * dummy)
     double dist_test;
     double add_dist_safe=1000;
 
-    std::vector<obstacle_point> obst_p;
-    std::vector<obstacle_point> obst_p_start;
-    std::vector<obstacle_point> obst_p_end;
+    std::vector<Obstacle> obst_p;
+    std::vector<Obstacle> obst_p_start;
+    std::vector<Obstacle> obst_p_end;
     std::vector<double> speed_avalon_all;
-    obstacle_point temp_obst;
+    Obstacle temp_obst;
     unsigned int num_speed_history = 20;
     int num_obstP;
     
@@ -192,6 +196,7 @@ void * translation_thread(void * dummy)
         if (dataBoat.t_readto(boatData,10,1) && (generalflags.state == AV_FLAGS_ST_NORMALSAILING || generalflags.state == AV_FLAGS_ST_UPWINDSAILING || generalflags.state == AV_FLAGS_ST_DOWNWINDSAILING ))
         {
             aisData.t_readto(ais,0,0);
+	    obstacle.t_readto(obst,0,0);
             shipData.t_readto(ship,0,0);
             destinationData.t_readto(destination,0,0);
             dataImuClean.t_readto(imu_clean,0,0);
@@ -715,7 +720,7 @@ int sign(double i) // gives back the sign of a float
 }
 
 
-int main (int argc, char * argv[])
+int main (int argc, const char * argv[])
 {
 	RtxThread * th;
     int ret;
@@ -736,6 +741,7 @@ int main (int argc, char * argv[])
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), ShipData));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), AisStruct));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), AisData));
+	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), Obstacle));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), DestinationStruct));
         DOC(DDX_STORE_REGISTER_TYPE (store.getId(), DestinationData));
         DOC(DDX_STORE_REGISTER_TYPE (store.getId(), SkipperFlags));
@@ -744,6 +750,7 @@ int main (int argc, char * argv[])
     // Create output variable
         DOB(store.registerVariable(aisStruct, varname_aisStruct, "AisStruct"));
         DOB(store.registerVariable(aisData, varname_aisData, "AisData"));
+	DOB(store.registerVariable(aisData, varname_Obstacle, "Obstacle"));
         DOB(store.registerVariable(dataBoat, varname4, "imuData"));
         DOB(store.registerVariable(shipStruct, varname_shipStruct, "ShipStruct"));
         DOB(store.registerVariable(shipData, varname_shipData, "ShipData"));
