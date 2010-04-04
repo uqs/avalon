@@ -4,7 +4,7 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_CXX
-  "/home/stefan/RoboYacht/svn/avalon/obstacle_converter.cpp" "/home/stefan/RoboYacht/svn/avalon/CMakeFiles/obstacle_converter.dir/obstacle_converter.o"
+  "/home/gbuesser/avalon/obstacle_converter.cpp" "/home/gbuesser/avalon/CMakeFiles/obstacle_converter.dir/obstacle_converter.o"
   )
 SET(CMAKE_CXX_COMPILER_ID "GNU")
 

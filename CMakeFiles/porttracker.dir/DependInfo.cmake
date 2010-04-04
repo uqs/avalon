@@ -4,8 +4,8 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_CXX
-  "/home/stefan/RoboYacht/svn/avalon/RudderMotor.cpp" "/home/stefan/RoboYacht/svn/avalon/CMakeFiles/porttracker.dir/RudderMotor.o"
-  "/home/stefan/RoboYacht/svn/avalon/porttracker.cpp" "/home/stefan/RoboYacht/svn/avalon/CMakeFiles/porttracker.dir/porttracker.o"
+  "/home/gbuesser/avalon/RudderMotor.cpp" "/home/gbuesser/avalon/CMakeFiles/porttracker.dir/RudderMotor.o"
+  "/home/gbuesser/avalon/porttracker.cpp" "/home/gbuesser/avalon/CMakeFiles/porttracker.dir/porttracker.o"
   )
 SET(CMAKE_CXX_COMPILER_ID "GNU")
 

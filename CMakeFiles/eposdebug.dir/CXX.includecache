@@ -6,13 +6,13 @@
 
 #IncludeRegexTransform: 
 
-/home/stefan/RoboYacht/svn/avalon/RudderMotor.cpp
+/home/gbuesser/avalon/RudderMotor.cpp
 math.h
 -
 include/can.h
-/home/stefan/RoboYacht/svn/avalon/include/can.h
+/home/gbuesser/avalon/include/can.h
 eposlib-test/epos.h
-/home/stefan/RoboYacht/svn/avalon/eposlib-test/epos.h
+/home/gbuesser/avalon/eposlib-test/epos.h
 rtx/getopt.h
 -
 rtx/main.h
@@ -26,19 +26,19 @@ rtx/thread.h
 rtx/message.h
 -
 avalon.h
-/home/stefan/RoboYacht/svn/avalon/avalon.h
+/home/gbuesser/avalon/avalon.h
 RudderMotor.h
-/home/stefan/RoboYacht/svn/avalon/RudderMotor.h
+/home/gbuesser/avalon/RudderMotor.h
 
-/home/stefan/RoboYacht/svn/avalon/RudderMotor.h
+/home/gbuesser/avalon/RudderMotor.h
 
-/home/stefan/RoboYacht/svn/avalon/SailMotor.cpp
+/home/gbuesser/avalon/SailMotor.cpp
 math.h
 -
 include/can.h
-/home/stefan/RoboYacht/svn/avalon/include/can.h
+/home/gbuesser/avalon/include/can.h
 eposlib-test/epos.h
-/home/stefan/RoboYacht/svn/avalon/eposlib-test/epos.h
+/home/gbuesser/avalon/eposlib-test/epos.h
 rtx/getopt.h
 -
 rtx/main.h
@@ -52,15 +52,15 @@ rtx/thread.h
 rtx/message.h
 -
 avalon.h
-/home/stefan/RoboYacht/svn/avalon/avalon.h
+/home/gbuesser/avalon/avalon.h
 SailMotor.h
-/home/stefan/RoboYacht/svn/avalon/SailMotor.h
+/home/gbuesser/avalon/SailMotor.h
 
-/home/stefan/RoboYacht/svn/avalon/SailMotor.h
+/home/gbuesser/avalon/SailMotor.h
 
-/home/stefan/RoboYacht/svn/avalon/avalon.h
+/home/gbuesser/avalon/avalon.h
 
-/home/stefan/RoboYacht/svn/avalon/eposdebug.cpp
+/home/gbuesser/avalon/eposdebug.cpp
 stdlib.h
 -
 stdio.h
@@ -70,19 +70,19 @@ rtx/getopt.h
 rtx/timer.h
 -
 can/can.h
-/home/stefan/RoboYacht/svn/avalon/can/can.h
+/home/gbuesser/avalon/can/can.h
 can/epos.h
-/home/stefan/RoboYacht/svn/avalon/can/epos.h
+/home/gbuesser/avalon/can/epos.h
 avalon.h
-/home/stefan/RoboYacht/svn/avalon/avalon.h
+/home/gbuesser/avalon/avalon.h
 SailMotor.h
-/home/stefan/RoboYacht/svn/avalon/SailMotor.h
+/home/gbuesser/avalon/SailMotor.h
 RudderMotor.h
-/home/stefan/RoboYacht/svn/avalon/RudderMotor.h
+/home/gbuesser/avalon/RudderMotor.h
 
-/home/stefan/RoboYacht/svn/avalon/eposlib-test/epos.h
+/home/gbuesser/avalon/eposlib-test/epos.h
 
-/home/stefan/RoboYacht/svn/avalon/include/can.h
+/home/gbuesser/avalon/include/can.h
 
 /usr/local/include/can/can.h
 

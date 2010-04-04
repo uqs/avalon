@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_SOURCE_DIR = /home/gbuesser/avalon
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_BINARY_DIR = /home/gbuesser/avalon
 
 # Include any dependencies generated for this target.
 include CMakeFiles/porttracker.dir/depend.make
@@ -48,17 +48,17 @@ include CMakeFiles/porttracker.dir/flags.make
 
 CMakeFiles/porttracker.dir/porttracker.o: CMakeFiles/porttracker.dir/flags.make
 CMakeFiles/porttracker.dir/porttracker.o: porttracker.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/porttracker.dir/porttracker.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/porttracker.dir/porttracker.o -c /home/stefan/RoboYacht/svn/avalon/porttracker.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/porttracker.dir/porttracker.o -c /home/gbuesser/avalon/porttracker.cpp
 
 CMakeFiles/porttracker.dir/porttracker.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/porttracker.dir/porttracker.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/porttracker.cpp > CMakeFiles/porttracker.dir/porttracker.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/porttracker.cpp > CMakeFiles/porttracker.dir/porttracker.i
 
 CMakeFiles/porttracker.dir/porttracker.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/porttracker.dir/porttracker.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/porttracker.cpp -o CMakeFiles/porttracker.dir/porttracker.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/porttracker.cpp -o CMakeFiles/porttracker.dir/porttracker.s
 
 CMakeFiles/porttracker.dir/porttracker.o.requires:
 .PHONY : CMakeFiles/porttracker.dir/porttracker.o.requires
@@ -72,17 +72,17 @@ CMakeFiles/porttracker.dir/porttracker.o.provides.build: CMakeFiles/porttracker.
 
 CMakeFiles/porttracker.dir/RudderMotor.o: CMakeFiles/porttracker.dir/flags.make
 CMakeFiles/porttracker.dir/RudderMotor.o: RudderMotor.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_2)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/porttracker.dir/RudderMotor.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/porttracker.dir/RudderMotor.o -c /home/stefan/RoboYacht/svn/avalon/RudderMotor.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/porttracker.dir/RudderMotor.o -c /home/gbuesser/avalon/RudderMotor.cpp
 
 CMakeFiles/porttracker.dir/RudderMotor.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/porttracker.dir/RudderMotor.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/RudderMotor.cpp > CMakeFiles/porttracker.dir/RudderMotor.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/RudderMotor.cpp > CMakeFiles/porttracker.dir/RudderMotor.i
 
 CMakeFiles/porttracker.dir/RudderMotor.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/porttracker.dir/RudderMotor.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/RudderMotor.cpp -o CMakeFiles/porttracker.dir/RudderMotor.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/RudderMotor.cpp -o CMakeFiles/porttracker.dir/RudderMotor.s
 
 CMakeFiles/porttracker.dir/RudderMotor.o.requires:
 .PHONY : CMakeFiles/porttracker.dir/RudderMotor.o.requires
@@ -122,6 +122,6 @@ CMakeFiles/porttracker.dir/clean:
 .PHONY : CMakeFiles/porttracker.dir/clean
 
 CMakeFiles/porttracker.dir/depend:
-	cd /home/stefan/RoboYacht/svn/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon/CMakeFiles/porttracker.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/gbuesser/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon/CMakeFiles/porttracker.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/porttracker.dir/depend
 

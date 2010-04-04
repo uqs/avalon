@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_SOURCE_DIR = /home/gbuesser/avalon
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_BINARY_DIR = /home/gbuesser/avalon
 
 # Include any dependencies generated for this target.
 include CMakeFiles/testaufruf.dir/depend.make
@@ -48,17 +48,17 @@ include CMakeFiles/testaufruf.dir/flags.make
 
 CMakeFiles/testaufruf.dir/testaufruf.o: CMakeFiles/testaufruf.dir/flags.make
 CMakeFiles/testaufruf.dir/testaufruf.o: testaufruf.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/testaufruf.dir/testaufruf.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/testaufruf.dir/testaufruf.o -c /home/stefan/RoboYacht/svn/avalon/testaufruf.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/testaufruf.dir/testaufruf.o -c /home/gbuesser/avalon/testaufruf.cpp
 
 CMakeFiles/testaufruf.dir/testaufruf.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/testaufruf.dir/testaufruf.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/testaufruf.cpp > CMakeFiles/testaufruf.dir/testaufruf.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/testaufruf.cpp > CMakeFiles/testaufruf.dir/testaufruf.i
 
 CMakeFiles/testaufruf.dir/testaufruf.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/testaufruf.dir/testaufruf.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/testaufruf.cpp -o CMakeFiles/testaufruf.dir/testaufruf.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/testaufruf.cpp -o CMakeFiles/testaufruf.dir/testaufruf.s
 
 CMakeFiles/testaufruf.dir/testaufruf.o.requires:
 .PHONY : CMakeFiles/testaufruf.dir/testaufruf.o.requires
@@ -95,6 +95,6 @@ CMakeFiles/testaufruf.dir/clean:
 .PHONY : CMakeFiles/testaufruf.dir/clean
 
 CMakeFiles/testaufruf.dir/depend:
-	cd /home/stefan/RoboYacht/svn/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon/CMakeFiles/testaufruf.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/gbuesser/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon/CMakeFiles/testaufruf.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/testaufruf.dir/depend
 

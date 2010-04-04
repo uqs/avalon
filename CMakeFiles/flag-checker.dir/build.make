@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_SOURCE_DIR = /home/gbuesser/avalon
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_BINARY_DIR = /home/gbuesser/avalon
 
 # Include any dependencies generated for this target.
 include CMakeFiles/flag-checker.dir/depend.make
@@ -48,17 +48,17 @@ include CMakeFiles/flag-checker.dir/flags.make
 
 CMakeFiles/flag-checker.dir/flag-checker.o: CMakeFiles/flag-checker.dir/flags.make
 CMakeFiles/flag-checker.dir/flag-checker.o: flag-checker.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/flag-checker.dir/flag-checker.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/flag-checker.dir/flag-checker.o -c /home/stefan/RoboYacht/svn/avalon/flag-checker.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/flag-checker.dir/flag-checker.o -c /home/gbuesser/avalon/flag-checker.cpp
 
 CMakeFiles/flag-checker.dir/flag-checker.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/flag-checker.dir/flag-checker.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/flag-checker.cpp > CMakeFiles/flag-checker.dir/flag-checker.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/flag-checker.cpp > CMakeFiles/flag-checker.dir/flag-checker.i
 
 CMakeFiles/flag-checker.dir/flag-checker.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/flag-checker.dir/flag-checker.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/flag-checker.cpp -o CMakeFiles/flag-checker.dir/flag-checker.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/flag-checker.cpp -o CMakeFiles/flag-checker.dir/flag-checker.s
 
 CMakeFiles/flag-checker.dir/flag-checker.o.requires:
 .PHONY : CMakeFiles/flag-checker.dir/flag-checker.o.requires
@@ -95,6 +95,6 @@ CMakeFiles/flag-checker.dir/clean:
 .PHONY : CMakeFiles/flag-checker.dir/clean
 
 CMakeFiles/flag-checker.dir/depend:
-	cd /home/stefan/RoboYacht/svn/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon/CMakeFiles/flag-checker.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/gbuesser/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon/CMakeFiles/flag-checker.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/flag-checker.dir/depend
 

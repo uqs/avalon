@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_SOURCE_DIR = /home/gbuesser/avalon
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_BINARY_DIR = /home/gbuesser/avalon
 
 # Include any dependencies generated for this target.
 include CMakeFiles/windcleaner.dir/depend.make
@@ -48,17 +48,17 @@ include CMakeFiles/windcleaner.dir/flags.make
 
 CMakeFiles/windcleaner.dir/windcleaner.o: CMakeFiles/windcleaner.dir/flags.make
 CMakeFiles/windcleaner.dir/windcleaner.o: windcleaner.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/windcleaner.dir/windcleaner.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/windcleaner.dir/windcleaner.o -c /home/stefan/RoboYacht/svn/avalon/windcleaner.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/windcleaner.dir/windcleaner.o -c /home/gbuesser/avalon/windcleaner.cpp
 
 CMakeFiles/windcleaner.dir/windcleaner.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/windcleaner.dir/windcleaner.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/windcleaner.cpp > CMakeFiles/windcleaner.dir/windcleaner.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/windcleaner.cpp > CMakeFiles/windcleaner.dir/windcleaner.i
 
 CMakeFiles/windcleaner.dir/windcleaner.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/windcleaner.dir/windcleaner.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/windcleaner.cpp -o CMakeFiles/windcleaner.dir/windcleaner.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/windcleaner.cpp -o CMakeFiles/windcleaner.dir/windcleaner.s
 
 CMakeFiles/windcleaner.dir/windcleaner.o.requires:
 .PHONY : CMakeFiles/windcleaner.dir/windcleaner.o.requires
@@ -95,6 +95,6 @@ CMakeFiles/windcleaner.dir/clean:
 .PHONY : CMakeFiles/windcleaner.dir/clean
 
 CMakeFiles/windcleaner.dir/depend:
-	cd /home/stefan/RoboYacht/svn/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon/CMakeFiles/windcleaner.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/gbuesser/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon/CMakeFiles/windcleaner.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/windcleaner.dir/depend
 

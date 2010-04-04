@@ -4,7 +4,7 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_CXX
-  "/home/stefan/RoboYacht/svn/avalon/simulator.cpp" "/home/stefan/RoboYacht/svn/avalon/CMakeFiles/simulator.dir/simulator.o"
+  "/home/gbuesser/avalon/simulator.cpp" "/home/gbuesser/avalon/CMakeFiles/simulator.dir/simulator.o"
   )
 SET(CMAKE_CXX_COMPILER_ID "GNU")
 

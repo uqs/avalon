@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_SOURCE_DIR = /home/gbuesser/avalon
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_BINARY_DIR = /home/gbuesser/avalon
 
 # Include any dependencies generated for this target.
 include CMakeFiles/ruddermain.dir/depend.make
@@ -48,17 +48,17 @@ include CMakeFiles/ruddermain.dir/flags.make
 
 CMakeFiles/ruddermain.dir/ruddermain.o: CMakeFiles/ruddermain.dir/flags.make
 CMakeFiles/ruddermain.dir/ruddermain.o: ruddermain.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/ruddermain.dir/ruddermain.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/ruddermain.dir/ruddermain.o -c /home/stefan/RoboYacht/svn/avalon/ruddermain.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/ruddermain.dir/ruddermain.o -c /home/gbuesser/avalon/ruddermain.cpp
 
 CMakeFiles/ruddermain.dir/ruddermain.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/ruddermain.dir/ruddermain.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/ruddermain.cpp > CMakeFiles/ruddermain.dir/ruddermain.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/ruddermain.cpp > CMakeFiles/ruddermain.dir/ruddermain.i
 
 CMakeFiles/ruddermain.dir/ruddermain.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ruddermain.dir/ruddermain.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/ruddermain.cpp -o CMakeFiles/ruddermain.dir/ruddermain.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/ruddermain.cpp -o CMakeFiles/ruddermain.dir/ruddermain.s
 
 CMakeFiles/ruddermain.dir/ruddermain.o.requires:
 .PHONY : CMakeFiles/ruddermain.dir/ruddermain.o.requires
@@ -72,17 +72,17 @@ CMakeFiles/ruddermain.dir/ruddermain.o.provides.build: CMakeFiles/ruddermain.dir
 
 CMakeFiles/ruddermain.dir/RudderMotor.o: CMakeFiles/ruddermain.dir/flags.make
 CMakeFiles/ruddermain.dir/RudderMotor.o: RudderMotor.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_2)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/ruddermain.dir/RudderMotor.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/ruddermain.dir/RudderMotor.o -c /home/stefan/RoboYacht/svn/avalon/RudderMotor.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/ruddermain.dir/RudderMotor.o -c /home/gbuesser/avalon/RudderMotor.cpp
 
 CMakeFiles/ruddermain.dir/RudderMotor.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/ruddermain.dir/RudderMotor.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/RudderMotor.cpp > CMakeFiles/ruddermain.dir/RudderMotor.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/RudderMotor.cpp > CMakeFiles/ruddermain.dir/RudderMotor.i
 
 CMakeFiles/ruddermain.dir/RudderMotor.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/ruddermain.dir/RudderMotor.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/RudderMotor.cpp -o CMakeFiles/ruddermain.dir/RudderMotor.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/RudderMotor.cpp -o CMakeFiles/ruddermain.dir/RudderMotor.s
 
 CMakeFiles/ruddermain.dir/RudderMotor.o.requires:
 .PHONY : CMakeFiles/ruddermain.dir/RudderMotor.o.requires
@@ -122,6 +122,6 @@ CMakeFiles/ruddermain.dir/clean:
 .PHONY : CMakeFiles/ruddermain.dir/clean
 
 CMakeFiles/ruddermain.dir/depend:
-	cd /home/stefan/RoboYacht/svn/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon/CMakeFiles/ruddermain.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/gbuesser/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon/CMakeFiles/ruddermain.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/ruddermain.dir/depend
 

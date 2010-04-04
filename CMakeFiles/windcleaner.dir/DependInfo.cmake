@@ -4,7 +4,7 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_CXX
-  "/home/stefan/RoboYacht/svn/avalon/windcleaner.cpp" "/home/stefan/RoboYacht/svn/avalon/CMakeFiles/windcleaner.dir/windcleaner.o"
+  "/home/gbuesser/avalon/windcleaner.cpp" "/home/gbuesser/avalon/CMakeFiles/windcleaner.dir/windcleaner.o"
   )
 SET(CMAKE_CXX_COMPILER_ID "GNU")
 

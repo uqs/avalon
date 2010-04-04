@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_SOURCE_DIR = /home/gbuesser/avalon
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_BINARY_DIR = /home/gbuesser/avalon
 
 # Include any dependencies generated for this target.
 include CMakeFiles/sailor_statemachine.dir/depend.make
@@ -48,17 +48,17 @@ include CMakeFiles/sailor_statemachine.dir/flags.make
 
 CMakeFiles/sailor_statemachine.dir/sailor_statemachine.o: CMakeFiles/sailor_statemachine.dir/flags.make
 CMakeFiles/sailor_statemachine.dir/sailor_statemachine.o: sailor_statemachine.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/sailor_statemachine.dir/sailor_statemachine.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/sailor_statemachine.dir/sailor_statemachine.o -c /home/stefan/RoboYacht/svn/avalon/sailor_statemachine.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/sailor_statemachine.dir/sailor_statemachine.o -c /home/gbuesser/avalon/sailor_statemachine.cpp
 
 CMakeFiles/sailor_statemachine.dir/sailor_statemachine.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/sailor_statemachine.dir/sailor_statemachine.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/sailor_statemachine.cpp > CMakeFiles/sailor_statemachine.dir/sailor_statemachine.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/sailor_statemachine.cpp > CMakeFiles/sailor_statemachine.dir/sailor_statemachine.i
 
 CMakeFiles/sailor_statemachine.dir/sailor_statemachine.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/sailor_statemachine.dir/sailor_statemachine.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/sailor_statemachine.cpp -o CMakeFiles/sailor_statemachine.dir/sailor_statemachine.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/sailor_statemachine.cpp -o CMakeFiles/sailor_statemachine.dir/sailor_statemachine.s
 
 CMakeFiles/sailor_statemachine.dir/sailor_statemachine.o.requires:
 .PHONY : CMakeFiles/sailor_statemachine.dir/sailor_statemachine.o.requires
@@ -72,17 +72,17 @@ CMakeFiles/sailor_statemachine.dir/sailor_statemachine.o.provides.build: CMakeFi
 
 CMakeFiles/sailor_statemachine.dir/Ship.o: CMakeFiles/sailor_statemachine.dir/flags.make
 CMakeFiles/sailor_statemachine.dir/Ship.o: Ship.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_2)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/sailor_statemachine.dir/Ship.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/sailor_statemachine.dir/Ship.o -c /home/stefan/RoboYacht/svn/avalon/Ship.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/sailor_statemachine.dir/Ship.o -c /home/gbuesser/avalon/Ship.cpp
 
 CMakeFiles/sailor_statemachine.dir/Ship.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/sailor_statemachine.dir/Ship.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/Ship.cpp > CMakeFiles/sailor_statemachine.dir/Ship.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/Ship.cpp > CMakeFiles/sailor_statemachine.dir/Ship.i
 
 CMakeFiles/sailor_statemachine.dir/Ship.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/sailor_statemachine.dir/Ship.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/Ship.cpp -o CMakeFiles/sailor_statemachine.dir/Ship.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/Ship.cpp -o CMakeFiles/sailor_statemachine.dir/Ship.s
 
 CMakeFiles/sailor_statemachine.dir/Ship.o.requires:
 .PHONY : CMakeFiles/sailor_statemachine.dir/Ship.o.requires
@@ -96,17 +96,17 @@ CMakeFiles/sailor_statemachine.dir/Ship.o.provides.build: CMakeFiles/sailor_stat
 
 CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.o: CMakeFiles/sailor_statemachine.dir/flags.make
 CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.o: sailor_main_iter_fn.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_3)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_3)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.o -c /home/stefan/RoboYacht/svn/avalon/sailor_main_iter_fn.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.o -c /home/gbuesser/avalon/sailor_main_iter_fn.cpp
 
 CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/sailor_main_iter_fn.cpp > CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/sailor_main_iter_fn.cpp > CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.i
 
 CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/sailor_main_iter_fn.cpp -o CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/sailor_main_iter_fn.cpp -o CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.s
 
 CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.o.requires:
 .PHONY : CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.o.requires
@@ -120,17 +120,17 @@ CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.o.provides.build: CMakeFi
 
 CMakeFiles/sailor_statemachine.dir/sailor_rudder_iter_fn.o: CMakeFiles/sailor_statemachine.dir/flags.make
 CMakeFiles/sailor_statemachine.dir/sailor_rudder_iter_fn.o: sailor_rudder_iter_fn.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_4)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_4)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/sailor_statemachine.dir/sailor_rudder_iter_fn.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/sailor_statemachine.dir/sailor_rudder_iter_fn.o -c /home/stefan/RoboYacht/svn/avalon/sailor_rudder_iter_fn.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/sailor_statemachine.dir/sailor_rudder_iter_fn.o -c /home/gbuesser/avalon/sailor_rudder_iter_fn.cpp
 
 CMakeFiles/sailor_statemachine.dir/sailor_rudder_iter_fn.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/sailor_statemachine.dir/sailor_rudder_iter_fn.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/sailor_rudder_iter_fn.cpp > CMakeFiles/sailor_statemachine.dir/sailor_rudder_iter_fn.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/sailor_rudder_iter_fn.cpp > CMakeFiles/sailor_statemachine.dir/sailor_rudder_iter_fn.i
 
 CMakeFiles/sailor_statemachine.dir/sailor_rudder_iter_fn.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/sailor_statemachine.dir/sailor_rudder_iter_fn.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/sailor_rudder_iter_fn.cpp -o CMakeFiles/sailor_statemachine.dir/sailor_rudder_iter_fn.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/sailor_rudder_iter_fn.cpp -o CMakeFiles/sailor_statemachine.dir/sailor_rudder_iter_fn.s
 
 CMakeFiles/sailor_statemachine.dir/sailor_rudder_iter_fn.o.requires:
 .PHONY : CMakeFiles/sailor_statemachine.dir/sailor_rudder_iter_fn.o.requires
@@ -176,6 +176,6 @@ CMakeFiles/sailor_statemachine.dir/clean:
 .PHONY : CMakeFiles/sailor_statemachine.dir/clean
 
 CMakeFiles/sailor_statemachine.dir/depend:
-	cd /home/stefan/RoboYacht/svn/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon/CMakeFiles/sailor_statemachine.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/gbuesser/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon/CMakeFiles/sailor_statemachine.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/sailor_statemachine.dir/depend
 

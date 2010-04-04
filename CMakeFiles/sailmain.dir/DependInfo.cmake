@@ -4,8 +4,8 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_CXX
-  "/home/stefan/RoboYacht/svn/avalon/SailMotor.cpp" "/home/stefan/RoboYacht/svn/avalon/CMakeFiles/sailmain.dir/SailMotor.o"
-  "/home/stefan/RoboYacht/svn/avalon/sailmain.cpp" "/home/stefan/RoboYacht/svn/avalon/CMakeFiles/sailmain.dir/sailmain.o"
+  "/home/gbuesser/avalon/SailMotor.cpp" "/home/gbuesser/avalon/CMakeFiles/sailmain.dir/SailMotor.o"
+  "/home/gbuesser/avalon/sailmain.cpp" "/home/gbuesser/avalon/CMakeFiles/sailmain.dir/sailmain.o"
   )
 SET(CMAKE_CXX_COMPILER_ID "GNU")
 

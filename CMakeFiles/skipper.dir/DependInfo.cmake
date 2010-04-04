@@ -4,7 +4,7 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_CXX
-  "/home/stefan/RoboYacht/svn/avalon/skipper.cpp" "/home/stefan/RoboYacht/svn/avalon/CMakeFiles/skipper.dir/skipper.o"
+  "/home/gbuesser/avalon/skipper.cpp" "/home/gbuesser/avalon/CMakeFiles/skipper.dir/skipper.o"
   )
 SET(CMAKE_CXX_COMPILER_ID "GNU")
 

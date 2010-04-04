@@ -10,6 +10,8 @@
 #############################################################################
 
 # Importing generic things
+#import sys
+#sys.path.append('/usr/local/lib/python2.6/site-packages/')
 import ddxInterface
 import serial
 import sys

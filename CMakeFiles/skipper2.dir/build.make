@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_SOURCE_DIR = /home/gbuesser/avalon
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_BINARY_DIR = /home/gbuesser/avalon
 
 # Include any dependencies generated for this target.
 include CMakeFiles/skipper2.dir/depend.make
@@ -48,17 +48,17 @@ include CMakeFiles/skipper2.dir/flags.make
 
 CMakeFiles/skipper2.dir/skipper2.o: CMakeFiles/skipper2.dir/flags.make
 CMakeFiles/skipper2.dir/skipper2.o: skipper2.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/skipper2.dir/skipper2.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/skipper2.dir/skipper2.o -c /home/stefan/RoboYacht/svn/avalon/skipper2.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/skipper2.dir/skipper2.o -c /home/gbuesser/avalon/skipper2.cpp
 
 CMakeFiles/skipper2.dir/skipper2.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/skipper2.dir/skipper2.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/skipper2.cpp > CMakeFiles/skipper2.dir/skipper2.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/skipper2.cpp > CMakeFiles/skipper2.dir/skipper2.i
 
 CMakeFiles/skipper2.dir/skipper2.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/skipper2.dir/skipper2.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/skipper2.cpp -o CMakeFiles/skipper2.dir/skipper2.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/skipper2.cpp -o CMakeFiles/skipper2.dir/skipper2.s
 
 CMakeFiles/skipper2.dir/skipper2.o.requires:
 .PHONY : CMakeFiles/skipper2.dir/skipper2.o.requires
@@ -95,6 +95,6 @@ CMakeFiles/skipper2.dir/clean:
 .PHONY : CMakeFiles/skipper2.dir/clean
 
 CMakeFiles/skipper2.dir/depend:
-	cd /home/stefan/RoboYacht/svn/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon/CMakeFiles/skipper2.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/gbuesser/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon/CMakeFiles/skipper2.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/skipper2.dir/depend
 

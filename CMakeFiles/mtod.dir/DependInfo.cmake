@@ -4,7 +4,7 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_CXX
-  "/home/stefan/RoboYacht/svn/avalon/mtod.cpp" "/home/stefan/RoboYacht/svn/avalon/CMakeFiles/mtod.dir/mtod.o"
+  "/home/gbuesser/avalon/mtod.cpp" "/home/gbuesser/avalon/CMakeFiles/mtod.dir/mtod.o"
   )
 SET(CMAKE_CXX_COMPILER_ID "GNU")
 

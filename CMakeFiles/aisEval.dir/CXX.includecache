@@ -6,15 +6,15 @@
 
 #IncludeRegexTransform: 
 
-/home/stefan/RoboYacht/svn/avalon/ais.h
+/home/gbuesser/avalon/ais.h
 DDXStore.h
 -
 DDXVariable.h
 -
 
-/home/stefan/RoboYacht/svn/avalon/aisEval.cpp
+/home/gbuesser/avalon/aisEval.cpp
 avalon.h
-/home/stefan/RoboYacht/svn/avalon/avalon.h
+/home/gbuesser/avalon/avalon.h
 stdlib.h
 -
 stdio.h
@@ -40,59 +40,59 @@ rtx/thread.h
 rtx/message.h
 -
 include/ddxjoystick.h
-/home/stefan/RoboYacht/svn/avalon/include/ddxjoystick.h
+/home/gbuesser/avalon/include/ddxjoystick.h
 DDXStore.h
 -
 DDXVariable.h
 -
 imu.h
-/home/stefan/RoboYacht/svn/avalon/imu.h
+/home/gbuesser/avalon/imu.h
 aisEval.h
-/home/stefan/RoboYacht/svn/avalon/aisEval.h
+/home/gbuesser/avalon/aisEval.h
 ais.h
-/home/stefan/RoboYacht/svn/avalon/ais.h
+/home/gbuesser/avalon/ais.h
 destination.h
-/home/stefan/RoboYacht/svn/avalon/destination.h
+/home/gbuesser/avalon/destination.h
 flags.h
-/home/stefan/RoboYacht/svn/avalon/flags.h
+/home/gbuesser/avalon/flags.h
 imucleaner.h
-/home/stefan/RoboYacht/svn/avalon/imucleaner.h
+/home/gbuesser/avalon/imucleaner.h
 vector
 -
 
-/home/stefan/RoboYacht/svn/avalon/aisEval.h
+/home/gbuesser/avalon/aisEval.h
 DDXStore.h
 -
 DDXVariable.h
 -
 
-/home/stefan/RoboYacht/svn/avalon/avalon.h
+/home/gbuesser/avalon/avalon.h
 
-/home/stefan/RoboYacht/svn/avalon/destination.h
+/home/gbuesser/avalon/destination.h
 DDXStore.h
 -
 DDXVariable.h
 -
 
-/home/stefan/RoboYacht/svn/avalon/flags.h
+/home/gbuesser/avalon/flags.h
 DDXStore.h
 -
 DDXVariable.h
 -
 
-/home/stefan/RoboYacht/svn/avalon/imu.h
+/home/gbuesser/avalon/imu.h
 DDXStore.h
 -
 DDXVariable.h
 -
 
-/home/stefan/RoboYacht/svn/avalon/imucleaner.h
+/home/gbuesser/avalon/imucleaner.h
 DDXStore.h
 -
 DDXVariable.h
 -
 
-/home/stefan/RoboYacht/svn/avalon/include/ddxjoystick.h
+/home/gbuesser/avalon/include/ddxjoystick.h
 ddx.h
 -
 

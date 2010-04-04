@@ -38,6 +38,7 @@ SET(CMAKE_DEPEND_INFO_FILES
   "CMakeFiles/destination_converter.dir/DependInfo.cmake"
   "CMakeFiles/dtom.dir/DependInfo.cmake"
   "CMakeFiles/eposdebug.dir/DependInfo.cmake"
+  "CMakeFiles/flag-checker.dir/DependInfo.cmake"
   "CMakeFiles/global_skipper.dir/DependInfo.cmake"
   "CMakeFiles/gps.dir/DependInfo.cmake"
   "CMakeFiles/imucleaner.dir/DependInfo.cmake"

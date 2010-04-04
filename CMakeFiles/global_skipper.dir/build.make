@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_SOURCE_DIR = /home/gbuesser/avalon
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_BINARY_DIR = /home/gbuesser/avalon
 
 # Include any dependencies generated for this target.
 include CMakeFiles/global_skipper.dir/depend.make
@@ -48,17 +48,17 @@ include CMakeFiles/global_skipper.dir/flags.make
 
 CMakeFiles/global_skipper.dir/global_skipper.o: CMakeFiles/global_skipper.dir/flags.make
 CMakeFiles/global_skipper.dir/global_skipper.o: global_skipper.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/global_skipper.dir/global_skipper.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/global_skipper.dir/global_skipper.o -c /home/stefan/RoboYacht/svn/avalon/global_skipper.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/global_skipper.dir/global_skipper.o -c /home/gbuesser/avalon/global_skipper.cpp
 
 CMakeFiles/global_skipper.dir/global_skipper.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/global_skipper.dir/global_skipper.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/global_skipper.cpp > CMakeFiles/global_skipper.dir/global_skipper.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/global_skipper.cpp > CMakeFiles/global_skipper.dir/global_skipper.i
 
 CMakeFiles/global_skipper.dir/global_skipper.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/global_skipper.dir/global_skipper.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/global_skipper.cpp -o CMakeFiles/global_skipper.dir/global_skipper.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/global_skipper.cpp -o CMakeFiles/global_skipper.dir/global_skipper.s
 
 CMakeFiles/global_skipper.dir/global_skipper.o.requires:
 .PHONY : CMakeFiles/global_skipper.dir/global_skipper.o.requires
@@ -95,6 +95,6 @@ CMakeFiles/global_skipper.dir/clean:
 .PHONY : CMakeFiles/global_skipper.dir/clean
 
 CMakeFiles/global_skipper.dir/depend:
-	cd /home/stefan/RoboYacht/svn/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon/CMakeFiles/global_skipper.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/gbuesser/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon/CMakeFiles/global_skipper.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/global_skipper.dir/depend
 

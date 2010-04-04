@@ -4,7 +4,7 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_CXX
-  "/home/stefan/RoboYacht/svn/avalon/sailmain_keepalive.cpp" "/home/stefan/RoboYacht/svn/avalon/CMakeFiles/sailmain_keepalive.dir/sailmain_keepalive.o"
+  "/home/gbuesser/avalon/sailmain_keepalive.cpp" "/home/gbuesser/avalon/CMakeFiles/sailmain_keepalive.dir/sailmain_keepalive.o"
   )
 SET(CMAKE_CXX_COMPILER_ID "GNU")
 

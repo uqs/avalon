@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_SOURCE_DIR = /home/gbuesser/avalon
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_BINARY_DIR = /home/gbuesser/avalon
 
 # Include any dependencies generated for this target.
 include CMakeFiles/sailmain_keepalive.dir/depend.make
@@ -48,17 +48,17 @@ include CMakeFiles/sailmain_keepalive.dir/flags.make
 
 CMakeFiles/sailmain_keepalive.dir/sailmain_keepalive.o: CMakeFiles/sailmain_keepalive.dir/flags.make
 CMakeFiles/sailmain_keepalive.dir/sailmain_keepalive.o: sailmain_keepalive.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/sailmain_keepalive.dir/sailmain_keepalive.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/sailmain_keepalive.dir/sailmain_keepalive.o -c /home/stefan/RoboYacht/svn/avalon/sailmain_keepalive.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/sailmain_keepalive.dir/sailmain_keepalive.o -c /home/gbuesser/avalon/sailmain_keepalive.cpp
 
 CMakeFiles/sailmain_keepalive.dir/sailmain_keepalive.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/sailmain_keepalive.dir/sailmain_keepalive.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/sailmain_keepalive.cpp > CMakeFiles/sailmain_keepalive.dir/sailmain_keepalive.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/sailmain_keepalive.cpp > CMakeFiles/sailmain_keepalive.dir/sailmain_keepalive.i
 
 CMakeFiles/sailmain_keepalive.dir/sailmain_keepalive.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/sailmain_keepalive.dir/sailmain_keepalive.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/sailmain_keepalive.cpp -o CMakeFiles/sailmain_keepalive.dir/sailmain_keepalive.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/sailmain_keepalive.cpp -o CMakeFiles/sailmain_keepalive.dir/sailmain_keepalive.s
 
 CMakeFiles/sailmain_keepalive.dir/sailmain_keepalive.o.requires:
 .PHONY : CMakeFiles/sailmain_keepalive.dir/sailmain_keepalive.o.requires
@@ -95,6 +95,6 @@ CMakeFiles/sailmain_keepalive.dir/clean:
 .PHONY : CMakeFiles/sailmain_keepalive.dir/clean
 
 CMakeFiles/sailmain_keepalive.dir/depend:
-	cd /home/stefan/RoboYacht/svn/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon/CMakeFiles/sailmain_keepalive.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/gbuesser/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon/CMakeFiles/sailmain_keepalive.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/sailmain_keepalive.dir/depend
 

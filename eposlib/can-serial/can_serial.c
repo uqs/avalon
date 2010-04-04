@@ -47,7 +47,8 @@
 #undef DEBUG
 
 #include <can/pdebug.h>
-#include <epos/epos.h>
+#include <can/epos.h>
+//#include <epos/epos.h>
 
 #include "can_serial.h"
 

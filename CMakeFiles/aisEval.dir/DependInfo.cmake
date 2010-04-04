@@ -4,7 +4,7 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_CXX
-  "/home/stefan/RoboYacht/svn/avalon/aisEval.cpp" "/home/stefan/RoboYacht/svn/avalon/CMakeFiles/aisEval.dir/aisEval.o"
+  "/home/gbuesser/avalon/aisEval.cpp" "/home/gbuesser/avalon/CMakeFiles/aisEval.dir/aisEval.o"
   )
 SET(CMAKE_CXX_COMPILER_ID "GNU")
 

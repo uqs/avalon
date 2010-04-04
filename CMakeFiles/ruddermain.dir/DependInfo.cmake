@@ -4,8 +4,8 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_CXX
-  "/home/stefan/RoboYacht/svn/avalon/RudderMotor.cpp" "/home/stefan/RoboYacht/svn/avalon/CMakeFiles/ruddermain.dir/RudderMotor.o"
-  "/home/stefan/RoboYacht/svn/avalon/ruddermain.cpp" "/home/stefan/RoboYacht/svn/avalon/CMakeFiles/ruddermain.dir/ruddermain.o"
+  "/home/gbuesser/avalon/RudderMotor.cpp" "/home/gbuesser/avalon/CMakeFiles/ruddermain.dir/RudderMotor.o"
+  "/home/gbuesser/avalon/ruddermain.cpp" "/home/gbuesser/avalon/CMakeFiles/ruddermain.dir/ruddermain.o"
   )
 SET(CMAKE_CXX_COMPILER_ID "GNU")
 

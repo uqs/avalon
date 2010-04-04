@@ -6,11 +6,11 @@
 
 #IncludeRegexTransform: 
 
-/home/stefan/RoboYacht/svn/avalon/avalon.h
+/home/gbuesser/avalon/avalon.h
 
-/home/stefan/RoboYacht/svn/avalon/dtom.cpp
+/home/gbuesser/avalon/dtom.cpp
 avalon.h
-/home/stefan/RoboYacht/svn/avalon/avalon.h
+/home/gbuesser/avalon/avalon.h
 ctype.h
 -
 memory.h

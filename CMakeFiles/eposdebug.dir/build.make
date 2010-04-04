@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_SOURCE_DIR = /home/gbuesser/avalon
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_BINARY_DIR = /home/gbuesser/avalon
 
 # Include any dependencies generated for this target.
 include CMakeFiles/eposdebug.dir/depend.make
@@ -48,17 +48,17 @@ include CMakeFiles/eposdebug.dir/flags.make
 
 CMakeFiles/eposdebug.dir/eposdebug.o: CMakeFiles/eposdebug.dir/flags.make
 CMakeFiles/eposdebug.dir/eposdebug.o: eposdebug.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/eposdebug.dir/eposdebug.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/eposdebug.dir/eposdebug.o -c /home/stefan/RoboYacht/svn/avalon/eposdebug.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/eposdebug.dir/eposdebug.o -c /home/gbuesser/avalon/eposdebug.cpp
 
 CMakeFiles/eposdebug.dir/eposdebug.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/eposdebug.dir/eposdebug.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/eposdebug.cpp > CMakeFiles/eposdebug.dir/eposdebug.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/eposdebug.cpp > CMakeFiles/eposdebug.dir/eposdebug.i
 
 CMakeFiles/eposdebug.dir/eposdebug.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/eposdebug.dir/eposdebug.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/eposdebug.cpp -o CMakeFiles/eposdebug.dir/eposdebug.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/eposdebug.cpp -o CMakeFiles/eposdebug.dir/eposdebug.s
 
 CMakeFiles/eposdebug.dir/eposdebug.o.requires:
 .PHONY : CMakeFiles/eposdebug.dir/eposdebug.o.requires
@@ -72,17 +72,17 @@ CMakeFiles/eposdebug.dir/eposdebug.o.provides.build: CMakeFiles/eposdebug.dir/ep
 
 CMakeFiles/eposdebug.dir/RudderMotor.o: CMakeFiles/eposdebug.dir/flags.make
 CMakeFiles/eposdebug.dir/RudderMotor.o: RudderMotor.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_2)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_2)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/eposdebug.dir/RudderMotor.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/eposdebug.dir/RudderMotor.o -c /home/stefan/RoboYacht/svn/avalon/RudderMotor.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/eposdebug.dir/RudderMotor.o -c /home/gbuesser/avalon/RudderMotor.cpp
 
 CMakeFiles/eposdebug.dir/RudderMotor.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/eposdebug.dir/RudderMotor.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/RudderMotor.cpp > CMakeFiles/eposdebug.dir/RudderMotor.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/RudderMotor.cpp > CMakeFiles/eposdebug.dir/RudderMotor.i
 
 CMakeFiles/eposdebug.dir/RudderMotor.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/eposdebug.dir/RudderMotor.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/RudderMotor.cpp -o CMakeFiles/eposdebug.dir/RudderMotor.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/RudderMotor.cpp -o CMakeFiles/eposdebug.dir/RudderMotor.s
 
 CMakeFiles/eposdebug.dir/RudderMotor.o.requires:
 .PHONY : CMakeFiles/eposdebug.dir/RudderMotor.o.requires
@@ -96,17 +96,17 @@ CMakeFiles/eposdebug.dir/RudderMotor.o.provides.build: CMakeFiles/eposdebug.dir/
 
 CMakeFiles/eposdebug.dir/SailMotor.o: CMakeFiles/eposdebug.dir/flags.make
 CMakeFiles/eposdebug.dir/SailMotor.o: SailMotor.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_3)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_3)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/eposdebug.dir/SailMotor.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/eposdebug.dir/SailMotor.o -c /home/stefan/RoboYacht/svn/avalon/SailMotor.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/eposdebug.dir/SailMotor.o -c /home/gbuesser/avalon/SailMotor.cpp
 
 CMakeFiles/eposdebug.dir/SailMotor.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/eposdebug.dir/SailMotor.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/SailMotor.cpp > CMakeFiles/eposdebug.dir/SailMotor.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/SailMotor.cpp > CMakeFiles/eposdebug.dir/SailMotor.i
 
 CMakeFiles/eposdebug.dir/SailMotor.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/eposdebug.dir/SailMotor.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/SailMotor.cpp -o CMakeFiles/eposdebug.dir/SailMotor.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/SailMotor.cpp -o CMakeFiles/eposdebug.dir/SailMotor.s
 
 CMakeFiles/eposdebug.dir/SailMotor.o.requires:
 .PHONY : CMakeFiles/eposdebug.dir/SailMotor.o.requires
@@ -149,6 +149,6 @@ CMakeFiles/eposdebug.dir/clean:
 .PHONY : CMakeFiles/eposdebug.dir/clean
 
 CMakeFiles/eposdebug.dir/depend:
-	cd /home/stefan/RoboYacht/svn/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon/CMakeFiles/eposdebug.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/gbuesser/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon/CMakeFiles/eposdebug.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/eposdebug.dir/depend
 

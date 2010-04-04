@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_SOURCE_DIR = /home/gbuesser/avalon
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_BINARY_DIR = /home/gbuesser/avalon
 
 # Include any dependencies generated for this target.
 include CMakeFiles/imucleaner.dir/depend.make
@@ -48,17 +48,17 @@ include CMakeFiles/imucleaner.dir/flags.make
 
 CMakeFiles/imucleaner.dir/imucleaner.o: CMakeFiles/imucleaner.dir/flags.make
 CMakeFiles/imucleaner.dir/imucleaner.o: imucleaner.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/imucleaner.dir/imucleaner.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/imucleaner.dir/imucleaner.o -c /home/stefan/RoboYacht/svn/avalon/imucleaner.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/imucleaner.dir/imucleaner.o -c /home/gbuesser/avalon/imucleaner.cpp
 
 CMakeFiles/imucleaner.dir/imucleaner.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/imucleaner.dir/imucleaner.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/imucleaner.cpp > CMakeFiles/imucleaner.dir/imucleaner.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/imucleaner.cpp > CMakeFiles/imucleaner.dir/imucleaner.i
 
 CMakeFiles/imucleaner.dir/imucleaner.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/imucleaner.dir/imucleaner.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/imucleaner.cpp -o CMakeFiles/imucleaner.dir/imucleaner.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/imucleaner.cpp -o CMakeFiles/imucleaner.dir/imucleaner.s
 
 CMakeFiles/imucleaner.dir/imucleaner.o.requires:
 .PHONY : CMakeFiles/imucleaner.dir/imucleaner.o.requires
@@ -95,6 +95,6 @@ CMakeFiles/imucleaner.dir/clean:
 .PHONY : CMakeFiles/imucleaner.dir/clean
 
 CMakeFiles/imucleaner.dir/depend:
-	cd /home/stefan/RoboYacht/svn/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon/CMakeFiles/imucleaner.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/gbuesser/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon/CMakeFiles/imucleaner.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/imucleaner.dir/depend
 

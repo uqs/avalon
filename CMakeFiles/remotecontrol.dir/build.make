@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_SOURCE_DIR = /home/gbuesser/avalon
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_BINARY_DIR = /home/gbuesser/avalon
 
 # Include any dependencies generated for this target.
 include CMakeFiles/remotecontrol.dir/depend.make
@@ -48,17 +48,17 @@ include CMakeFiles/remotecontrol.dir/flags.make
 
 CMakeFiles/remotecontrol.dir/remotecontrol.o: CMakeFiles/remotecontrol.dir/flags.make
 CMakeFiles/remotecontrol.dir/remotecontrol.o: remotecontrol.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/remotecontrol.dir/remotecontrol.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/remotecontrol.dir/remotecontrol.o -c /home/stefan/RoboYacht/svn/avalon/remotecontrol.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/remotecontrol.dir/remotecontrol.o -c /home/gbuesser/avalon/remotecontrol.cpp
 
 CMakeFiles/remotecontrol.dir/remotecontrol.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/remotecontrol.dir/remotecontrol.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/remotecontrol.cpp > CMakeFiles/remotecontrol.dir/remotecontrol.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/remotecontrol.cpp > CMakeFiles/remotecontrol.dir/remotecontrol.i
 
 CMakeFiles/remotecontrol.dir/remotecontrol.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/remotecontrol.dir/remotecontrol.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/remotecontrol.cpp -o CMakeFiles/remotecontrol.dir/remotecontrol.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/remotecontrol.cpp -o CMakeFiles/remotecontrol.dir/remotecontrol.s
 
 CMakeFiles/remotecontrol.dir/remotecontrol.o.requires:
 .PHONY : CMakeFiles/remotecontrol.dir/remotecontrol.o.requires
@@ -95,6 +95,6 @@ CMakeFiles/remotecontrol.dir/clean:
 .PHONY : CMakeFiles/remotecontrol.dir/clean
 
 CMakeFiles/remotecontrol.dir/depend:
-	cd /home/stefan/RoboYacht/svn/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon/CMakeFiles/remotecontrol.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/gbuesser/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon/CMakeFiles/remotecontrol.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/remotecontrol.dir/depend
 

@@ -4,7 +4,7 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_CXX
-  "/home/stefan/RoboYacht/svn/avalon/flag-checker.cpp" "/home/stefan/RoboYacht/svn/avalon/CMakeFiles/flag-checker.dir/flag-checker.o"
+  "/home/gbuesser/avalon/flag-checker.cpp" "/home/gbuesser/avalon/CMakeFiles/flag-checker.dir/flag-checker.o"
   )
 SET(CMAKE_CXX_COMPILER_ID "GNU")
 

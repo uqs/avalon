@@ -32,10 +32,10 @@ CMAKE_COMMAND = /usr/bin/cmake
 RM = /usr/bin/cmake -E remove -f
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_SOURCE_DIR = /home/gbuesser/avalon
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/stefan/RoboYacht/svn/avalon
+CMAKE_BINARY_DIR = /home/gbuesser/avalon
 
 # Include any dependencies generated for this target.
 include CMakeFiles/system-state.dir/depend.make
@@ -48,17 +48,17 @@ include CMakeFiles/system-state.dir/flags.make
 
 CMakeFiles/system-state.dir/system-state.o: CMakeFiles/system-state.dir/flags.make
 CMakeFiles/system-state.dir/system-state.o: system-state.cpp
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/stefan/RoboYacht/svn/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Building CXX object CMakeFiles/system-state.dir/system-state.o"
-	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/system-state.dir/system-state.o -c /home/stefan/RoboYacht/svn/avalon/system-state.cpp
+	/usr/bin/c++   $(CXX_DEFINES) $(CXX_FLAGS) -o CMakeFiles/system-state.dir/system-state.o -c /home/gbuesser/avalon/system-state.cpp
 
 CMakeFiles/system-state.dir/system-state.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/system-state.dir/system-state.i"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/stefan/RoboYacht/svn/avalon/system-state.cpp > CMakeFiles/system-state.dir/system-state.i
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -E /home/gbuesser/avalon/system-state.cpp > CMakeFiles/system-state.dir/system-state.i
 
 CMakeFiles/system-state.dir/system-state.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/system-state.dir/system-state.s"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/stefan/RoboYacht/svn/avalon/system-state.cpp -o CMakeFiles/system-state.dir/system-state.s
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_FLAGS) -S /home/gbuesser/avalon/system-state.cpp -o CMakeFiles/system-state.dir/system-state.s
 
 CMakeFiles/system-state.dir/system-state.o.requires:
 .PHONY : CMakeFiles/system-state.dir/system-state.o.requires
@@ -95,6 +95,6 @@ CMakeFiles/system-state.dir/clean:
 .PHONY : CMakeFiles/system-state.dir/clean
 
 CMakeFiles/system-state.dir/depend:
-	cd /home/stefan/RoboYacht/svn/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon /home/stefan/RoboYacht/svn/avalon/CMakeFiles/system-state.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/gbuesser/avalon && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon /home/gbuesser/avalon/CMakeFiles/system-state.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/system-state.dir/depend
 

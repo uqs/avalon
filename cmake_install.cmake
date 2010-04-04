@@ -1,4 +1,4 @@
-# Install script for directory: /home/stefan/RoboYacht/svn/avalon
+# Install script for directory: /home/gbuesser/avalon
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -38,7 +38,7 @@ ELSE(CMAKE_INSTALL_COMPONENT)
   SET(CMAKE_INSTALL_MANIFEST "install_manifest.txt")
 ENDIF(CMAKE_INSTALL_COMPONENT)
 
-FILE(WRITE "/home/stefan/RoboYacht/svn/avalon/${CMAKE_INSTALL_MANIFEST}" "")
+FILE(WRITE "/home/gbuesser/avalon/${CMAKE_INSTALL_MANIFEST}" "")
 FOREACH(file ${CMAKE_INSTALL_MANIFEST_FILES})
-  FILE(APPEND "/home/stefan/RoboYacht/svn/avalon/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
+  FILE(APPEND "/home/gbuesser/avalon/${CMAKE_INSTALL_MANIFEST}" "${file}\n")
 ENDFOREACH(file)

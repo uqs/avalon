@@ -18,10 +18,10 @@
 
 DDX_STORE_TYPE(WindData,
   struct {
-    float direction;		// In Degree (from -180 to +180 degrees)
-    float speed;		// Windspeed in Knots
-    float temperature;		// Temperature at the Surface
-    float voltage;		// Voltage of the heating
+    double direction;		// In Degree (from -180 to +180 degrees)
+    double speed;		// Windspeed in Knots
+    double temperature;		// Temperature at the Surface
+    double voltage;		// Voltage of the heating
     int uptodate;		// Are Voltage and Temp up to date? (0 = no, not 0 = yes)
   }
 );

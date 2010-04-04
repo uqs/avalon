@@ -4,7 +4,7 @@ SET(CMAKE_DEPENDS_LANGUAGES
   )
 # The set of files for implicit dependencies of each language:
 SET(CMAKE_DEPENDS_CHECK_CXX
-  "/home/stefan/RoboYacht/svn/avalon/system-state.cpp" "/home/stefan/RoboYacht/svn/avalon/CMakeFiles/system-state.dir/system-state.o"
+  "/home/gbuesser/avalon/system-state.cpp" "/home/gbuesser/avalon/CMakeFiles/system-state.dir/system-state.o"
   )
 SET(CMAKE_CXX_COMPILER_ID "GNU")
 
