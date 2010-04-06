@@ -43,7 +43,7 @@
 #include "aisEval.h"
 
 //#define DEBUG_ISLAND
-#define DEBUG_NAVIGATOR
+// #define DEBUG_NAVIGATOR
 
 /**
  * Global variable for all DDX object
@@ -162,7 +162,6 @@ void * translation_thread(void * dummy)
     dataNaviFlags.t_writefrom(naviflags);
 
 
-
     while (1) {
         // Read the next data available, or wait at most 5 seconds
         if (dataBoat.t_readto(boatData,10,1))
@@ -208,7 +207,6 @@ void * translation_thread(void * dummy)
                 //calculating the offsets:
                 transformation.x_offset = 5; //to be modified!
                 transformation.y_offset = 5;
-
 #ifdef DEBUG_NAVIGATOR
                 rtx_message("start: %f %f m; end: %f %f m \n",transformation.longitude_start_transf, transformation.latitude_start_transf,
                         destination.longitude, destination.latitude);
@@ -384,7 +382,6 @@ void * translation_thread(void * dummy)
                 last_wyp_data.heading = headingTable16[mapTheta_start_correct]; 
                 arrayPointer = 0;
 
-
                 for (it=path.begin();it!=path.end();it++) {
 #ifdef DEBUG_NAVIGATOR
                     printf("x and y (%d,%d) at curr(%d) position, heading = %f \n",it->x,it->y,arrayPointer,
@@ -434,6 +431,7 @@ void * translation_thread(void * dummy)
                     }
 
                 }
+
 
                 waypoints.Data[arrayPointer].longitude = last_wyp_data.longitude;
                 waypoints.Data[arrayPointer].latitude = last_wyp_data.latitude;

@@ -28,7 +28,7 @@
 #include "flags.h"
 #include "destination.h"
 
-//#define DEBUG_GLOBSKIPPER
+// #define DEBUG_GLOBSKIPPER
 
 /**
  * Global variable for all DDX object
@@ -102,12 +102,12 @@ RtxGetopt producerOpts[] = {
  * */
 void * translation_thread(void * dummy)
 {
-
     imuData boatData;
     Flags generalflags;
     DestinationData destination; //actual array!!
     SkipperFlags skipperflags;
 
+    double dest_dist = 800;
     double closest_distance;
     int i,p;
     double distance;
@@ -139,9 +139,8 @@ void * translation_thread(void * dummy)
 #ifdef DEBUG_GLOBSKIPPER
             rtx_message("the current global destpoint is number %d flags.global_locator = %d \n", destination.destNr, generalflags.global_locator);
 #endif
-
+// rtx_message("the current global destpoint is number %d flags.global_locator = %d \n", destination.destNr, generalflags.global_locator);
             //begin statemachine: /////////////////////////////////////////////////
-
             switch(generalflags.global_locator)
             {
                 case AV_FLAGS_GLOBALSK_LOCATOR:
@@ -157,7 +156,7 @@ void * translation_thread(void * dummy)
 #ifdef DEBUG_GLOBSKIPPER
                     rtx_message("locator: closest distance = %f \n", closest_distance);
 #endif
-                    while((i<1000) && (destination.Data[i].type != AV_DEST_TYPE_NOMORE ))
+                    while((i<10) && (destination.Data[i].type != AV_DEST_TYPE_NOMORE ))
                     {
 
 #ifdef DEBUG_GLOBSKIPPER
@@ -188,17 +187,16 @@ void * translation_thread(void * dummy)
                     }
 
                     assert((destination.destNr < 1000) && (destination.destNr>=0));
-                    assert((i < 1000) && (i>=0));
+                    //assert((i < 1000) && (i>=0));
 
                     for (p = 0; p < 3; p++)
                     {
                         rtx_message ("locator: counter p = %d \n",p);
-
                         if (((sqrt((current_pos_longitude - destination.Data[destination.destNr+2-p].longitude)
                                             *(current_pos_longitude - destination.Data[destination.destNr+2-p].longitude)
                                             + (current_pos_latitude - destination.Data[destination.destNr+2-p].latitude)
                                             *(current_pos_latitude - destination.Data[destination.destNr+2-p].latitude))) 
-                                    < 44000)
+                                    < 2.1*dest_dist)
                                 && ((destination.Data[destination.destNr +2 -p].type == AV_DEST_TYPE_OCEANWYP)
                                     || (destination.Data[destination.destNr +2 -p].type == AV_DEST_TYPE_END)))
                         {
@@ -235,14 +233,14 @@ void * translation_thread(void * dummy)
 #ifdef DEBUG_GLOBSKIPPER
             rtx_message("closing: closest distance = %f \n", distance);
 #endif
-                    if(distance > 44000.0)
+                    if(distance > 2.1*dest_dist)
                     {
                         destination.longitude = current_pos_longitude + 0.5 * (destination.longitude - current_pos_longitude);
                         destination.latitude = current_pos_latitude + 0.5 * (destination.latitude - current_pos_latitude);
                         destinationData.t_writefrom(destination);
                     }
 
-                    if(distance < 20000)
+                    if(distance < dest_dist)
                     {
                         skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
                         skipperFlagData.t_writefrom(skipperflags);
@@ -253,7 +251,7 @@ void * translation_thread(void * dummy)
                 case AV_FLAGS_GLOBALSK_TRACKER:
 
 #ifdef DEBUG_GLOBSKIPPER
-                    rtx_message("distanz zum bood = %f \n",  (sqrt((current_pos_longitude - destination.Data[destination.destNr].longitude)
+                    rtx_message("distance to next destination = %f \n",  (sqrt((current_pos_longitude - destination.Data[destination.destNr].longitude)
                                     *(current_pos_longitude - destination.Data[destination.destNr].longitude)
                                     + (current_pos_latitude - destination.Data[destination.destNr].latitude)
                                     *(current_pos_latitude - destination.Data[destination.destNr].latitude))));
@@ -265,7 +263,7 @@ void * translation_thread(void * dummy)
                                         *(current_pos_longitude - destination.Data[destination.destNr].longitude)
                                         + (current_pos_latitude - destination.Data[destination.destNr].latitude)
                                         *(current_pos_latitude - destination.Data[destination.destNr].latitude)))
-                                < 4000)
+                                < 0.4*dest_dist)
                             && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
                     {
                         destination.destNr += 1;
@@ -278,7 +276,7 @@ void * translation_thread(void * dummy)
                     if((sqrt((current_pos_longitude - destination.Data[destination.destNr].longitude)
                                     *(current_pos_longitude - destination.Data[destination.destNr].longitude)
                                     + (current_pos_latitude - destination.Data[destination.destNr].latitude)
-                                    *(current_pos_latitude - destination.Data[destination.destNr].latitude))) > 44000)
+                                    *(current_pos_latitude - destination.Data[destination.destNr].latitude))) > 2.1*dest_dist)
                     {
                         skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
                         skipperFlagData.t_writefrom(skipperflags);
@@ -296,7 +294,7 @@ void * translation_thread(void * dummy)
             rtx_message("Collision: collision distance = %f \n", distance);
 #endif
 
-                    if(distance < 1000)
+                    if((distance < .2*dest_dist) || (distance > 2*dest_dist))
                     {
                         skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
                         skipperFlagData.t_writefrom(skipperflags);
@@ -365,13 +363,13 @@ int main (int argc, const char * argv[])
 {
 	RtxThread * th;
     int ret;
-
 	// Process the command line
     if ((ret = RTX_GETOPT_CMD (producerOpts, argc, argv, NULL, producerHelpStr)) == -1) {
 		RTX_GETOPT_PRINT (producerOpts, argv[0], NULL, producerHelpStr);
 		exit (1);
 	}
 	rtx_main_init ("Global Skipper Interface", RTX_ERROR_STDERR);
+
 
 	// Open the store
 	DOB(store.open());

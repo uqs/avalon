@@ -35,7 +35,7 @@
 #include "desired_course.h"
 //#include "weatherdata.h"
 
-#define DEBUG_SKIPPER
+// #define DEBUG_SKIPPER
 
 /**
  * Global variable for all DDX object
