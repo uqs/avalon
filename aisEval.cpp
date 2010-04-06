@@ -3,6 +3,7 @@
  * store, so sailor can take over!!
  *
  **/
+// TODO check "remainder", speed history, which obstacles do we care about, 
 
 // General Project Constants
 #include "avalon.h"
@@ -38,13 +39,14 @@
 #include "imucleaner.h"
 
 #include <vector>
-#define DEBUG_AISEVAL
+// #define DEBUG_AISEVAL
 
 /**
  * Global variable for all DDX object
  * */
 DDXStore store;
 DDXVariable dataBoat; //to get imu-Data
+DDXVariable dataFlags;
 DDXVariable dataImuClean;
 DDXVariable shipData; //already prcessed information, showing the dangerous points of impact
 DDXVariable shipStruct;
@@ -53,7 +55,6 @@ DDXVariable aisStruct;
 DDXVariable obstacle;
 DDXVariable destinationData;
 DDXVariable destinationStruct;
-DDXVariable dataFlags;
 DDXVariable skipperFlagData;
 /**
  * Prototypes for utility functions
@@ -73,7 +74,7 @@ const char * varname_shipData = "shipData";
 const char * varname_shipStruct = "shipStruct";
 const char * varname_aisData = "aisData";
 const char * varname_aisStruct = "aisStruct";
-const char * varname_Obstacle = "Obstacle";
+const char * varname_obstacle = "obstacle";
 const char * varname_destData = "destData";
 const char * varname_destStruct = "destStruct";
 const char * varname_flags = "flags";
@@ -99,14 +100,14 @@ RtxGetopt producerOpts[] = {
      RTX_GETOPT_END_ARG
    }
   },
-
+#if 0
   {"destination","Variable where the calculated navi-waypoints are stored",
    {
      {RTX_GETOPT_STR, &varname_destData, "Waypoints"},
      RTX_GETOPT_END_ARG
    }
   },
-#if 0
+
   {"weatherData", "Store Variable where the weather data is written",
    {
      {RTX_GETOPT_STR, &varname_weather, ""},
@@ -137,11 +138,9 @@ void * translation_thread(void * dummy)
     int p, k, i, n, interchange;
     unsigned int l;
     double ship_pos_longitude, ship_pos_latitude;
-//     double ship_pos_longitude_dynamic, ship_pos_latitude_dynamic;
     RtxTime time_now;
     double time_now_d;
-    double distance_static;// distance_dynamic;
-    // int simtime;
+    double distance_static;
     double heading_ship;
     bool inserted;
     
@@ -168,11 +167,10 @@ void * translation_thread(void * dummy)
     double ship_length;
     double check_angle;
     double dist_min;
-    double dist_max;
     double dist_limit;
     double dist_dest;
     double dist_test;
-    double add_dist_safe=1000;
+    double add_dist_safe=160;
 
     std::vector<Obstacle> obst_p;
     std::vector<Obstacle> obst_p_start;
@@ -189,19 +187,30 @@ void * translation_thread(void * dummy)
 
     while (1)
     {
- 
+//  generalflags.state=124312;
         dataFlags.t_readto(generalflags,0,0);
-
+// generalflags.state=AV_FLAGS_ST_NORMALSAILING;
         // Read the next data available, or wai
+// rtx_message("flag: %d",generalflags.state);
         if (dataBoat.t_readto(boatData,10,1) && (generalflags.state == AV_FLAGS_ST_NORMALSAILING || generalflags.state == AV_FLAGS_ST_UPWINDSAILING || generalflags.state == AV_FLAGS_ST_DOWNWINDSAILING ))
         {
+
             aisData.t_readto(ais,0,0);
-	    obstacle.t_readto(obst,0,0);
+// ais.number_of_ships=0;
+// 
+// ship.Data[0].mmsi=11111;
+// ship.Data[0].timestamp=0.1;
+// ship.Data[0].longitude=1;
+// ship.Data[0].latitude=1;
+// ship.shipCount=1;
+// 	    obstacle.t_readto(obst,0,0);
             shipData.t_readto(ship,0,0);
             destinationData.t_readto(destination,0,0);
+// destination.longitude=500;
+// destination.latitude=400;
             dataImuClean.t_readto(imu_clean,0,0);
-            
-
+// imu_clean.velocity.x=5;
+// imu_clean.velocity.y=5;
             current_pos_longitude = (AV_EARTHRADIUS 
                     *cos((boatData.position.latitude * AV_PI/180))*(AV_PI/180)
                     *boatData.position.longitude);
@@ -218,7 +227,7 @@ void * translation_thread(void * dummy)
             for( p = 0; p < ship.shipCount; p++)
             {
 #ifdef DEBUG_AISEVAL
-                rtx_message("checking if the ship is already in shipData( %d times)\n",p);
+//                 rtx_message("checking if the ship is already in shipData( %d times)\n",p);
 #endif
                 rtx_time_get(&time_now); 
                 time_now_d = rtx_time_to_double(&time_now);
@@ -238,7 +247,7 @@ void * translation_thread(void * dummy)
 	    for (i = 0; i < ais.number_of_ships; i++)
             {
 #ifdef DEBUG_AISEVAL
-                rtx_message("checking for ships %d. times\n",p);
+//                 rtx_message("checking for ships %d. times\n",p);
 #endif
                 ship_pos_longitude = (AV_EARTHRADIUS 
                         *cos((ais.Ship[i].latitude * AV_PI/180))*(AV_PI/180)
@@ -251,14 +260,20 @@ void * translation_thread(void * dummy)
                         + (current_pos_latitude - ship_pos_latitude)
                         *(current_pos_latitude - ship_pos_latitude));
 
-// ASSUMPTION:  ONLY TAKE THE CLOSEST SHIP! -> bubble_sort for example....
+// rtx_message("shipx = %f \n",ship_pos_longitude);
+// rtx_message("shipy = %f \n",ship_pos_latitude);
+// rtx_message("avalonx = %f \n",current_pos_longitude);
+// rtx_message("avalony = %f \n",current_pos_latitude);
+// rtx_message("deltax = %f \n",current_pos_longitude - ship_pos_longitude);
+// rtx_message("deltay = %f \n",current_pos_latitude - ship_pos_latitude);
 
 #ifdef DEBUG_AISEVAL
-                rtx_message("static distance avalon to ship is %f meters\n",distance_static);
-                rtx_message("ship's longitude = %f \n",ship_pos_longitude);
-                rtx_message("ship's latitude = %f \n",ship_pos_latitude);
+//                 rtx_message("static distance avalon to ship is %f meters\n",distance_static);
+//                 rtx_message("ship's longitude = %f \n",ship_pos_longitude);
+//                 rtx_message("ship's latitude = %f \n",ship_pos_latitude);
 #endif
-                if ((distance_static < 20000.0) && (ais.Ship[i].speed_over_ground != 0.0)
+// rtx_message("distance = %f \n",distance_static);
+                if ((distance_static < 500.0) && (ais.Ship[i].speed_over_ground != 0.0)
                         && ((ais.Ship[i].course_over_ground != 0.0) || (ais.Ship[i].heading != 0.0)))
                 {
 		    heading_ship = ais.Ship[i].heading*AV_PI/180.0; // TODO degree or rad??
@@ -267,12 +282,12 @@ void * translation_thread(void * dummy)
                         heading_ship = ais.Ship[i].course_over_ground*AV_PI/180.0;
                     }
 #ifdef DEBUG_AISEVAL
-                    rtx_message("ship in reachable distance (20 km) \n");
+//                     rtx_message("ship in reachable distance (20 km) \n");
 #endif
 
 		    speed_ship		= 0.5144444 * ais.Ship[i].speed_over_ground;
                     heading_avalon     	= atan2((destination.latitude - current_pos_latitude) , (destination.longitude - current_pos_longitude));
-		    speed_avalon	= sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
+		    speed_avalon	= 0.5144444 * sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
 //                     speed_avalon_all.insert(speed_avalon_all.begin(),speed_avalon);
 // 		    if(speed_avalon_all.size()>num_speed_history)
 // 		      {speed_avalon_all.resize(num_speed_history);}
@@ -286,19 +301,21 @@ void * translation_thread(void * dummy)
                     vel_ship_lat	= cos(heading_ship) * speed_ship;
                     vel_relativ_long	= vel_avalon_long - vel_ship_long;
                     vel_relativ_lat	= vel_avalon_lat - vel_ship_lat;
-
-		    angle_relativ	= atan2(vel_relativ_lat, vel_relativ_long);
+// rtx_message("avalon vel: long= %lf lat= %lf      ship vel: long= %lf lat= %lf", vel_avalon_long,vel_avalon_lat,vel_ship_long, vel_ship_lat);
+// rtx_message("relativ vel: long= %lf lat= %lf", vel_avalon_long-vel_ship_long,vel_avalon_lat-vel_ship_lat);
+// 		    angle_relativ	= atan2(vel_relativ_lat, vel_relativ_long);
+		    angle_relativ	= atan2(vel_relativ_long, vel_relativ_lat);
                     angle_avalon_ship	= atan2((ship_pos_longitude-current_pos_longitude) , (ship_pos_latitude-current_pos_latitude));
 
-                    ship_length		= 100;  // ship length, if not from AIS
-                    threshold_radius	= 500;  // to be modified: additional safety distance
+                    ship_length		= 1;  // ship length, if not from AIS
+                    threshold_radius	= 50;  // to be modified: additional safety distance
                     radius_relativ	= ship_length + 4 + threshold_radius;    // ship length + avalon_length + threshold_radius
                     dist_avalon_ship	= sqrt(((ship_pos_latitude-current_pos_latitude)*(ship_pos_latitude-current_pos_latitude))
 					      +((ship_pos_longitude-current_pos_longitude)*(ship_pos_longitude-current_pos_longitude)));
 
                     angle_tang_rear	= remainder(((angle_avalon_ship - asin(radius_relativ/dist_avalon_ship))*180.0/AV_PI),360.0) * AV_PI/180.0;
                     angle_tang_front	= remainder(((angle_avalon_ship + asin(radius_relativ/dist_avalon_ship))*180.0/AV_PI),360.0) * AV_PI/180.0;
-                    
+//  rtx_message("ang_rear: %lf    ang_rel: %lf    ang_front: %lf",angle_tang_rear,angle_relativ,angle_tang_front);
 		    if ((remainder(((angle_relativ - angle_tang_rear)*180.0/AV_PI),360.0)>0)
 		      && (remainder(((angle_relativ - angle_tang_front)*180.0/AV_PI),360.0)<0))
 		    {
@@ -309,18 +326,20 @@ void * translation_thread(void * dummy)
 		    }
 		}
 	    }
-
-	    if (skipperflags.global_locator != AV_FLAGS_GLOBALSK_COLLISION)
+// rtx_message("skipperflag: %d",generalflags.global_locator);
+	    if (generalflags.global_locator != AV_FLAGS_GLOBALSK_COLLISION )
 		{continue;}
 
+#ifdef DEBUG_AISEVAL
+		rtx_message("Collision course!! check for new destination\n");
+#endif
+rtx_message("Collision course!! check for new destination\n");
 	    obst_p_end.clear();
 	    obst_p_start.clear();
 	    // find the collision points with every ship in the vicinity
 	    for (i = 0; i < ais.number_of_ships; i++)
 	    {
-#ifdef DEBUG_AISEVAL
-		rtx_message("checking for ships %d. times\n",p);
-#endif
+
 		ship_pos_longitude = (AV_EARTHRADIUS 
 			*cos((ais.Ship[i].latitude * AV_PI/180))*(AV_PI/180)
 			*ais.Ship[i].longitude);
@@ -334,11 +353,11 @@ void * translation_thread(void * dummy)
 
 
 #ifdef DEBUG_AISEVAL
-                rtx_message("static distance avalon to ship is %f meters\n",distance_static);
-                rtx_message("ship's longitude = %f \n",ship_pos_longitude);
-                rtx_message("ship's latitude = %f \n",ship_pos_latitude);
+//                 rtx_message("static distance avalon to ship is %f meters\n",distance_static);
+//                 rtx_message("ship's longitude = %f \n",ship_pos_longitude);
+//                 rtx_message("ship's latitude = %f \n",ship_pos_latitude);
 #endif
-		if ((distance_static < 20000.0) && (ais.Ship[i].speed_over_ground != 0.0)
+		if ((distance_static < 500.0) && (ais.Ship[i].speed_over_ground != 0.0)
 			&& ((ais.Ship[i].course_over_ground != 0.0) || (ais.Ship[i].heading != 0.0)))
 		{
 		    obst_p.clear();
@@ -349,12 +368,12 @@ void * translation_thread(void * dummy)
 			heading_ship = ais.Ship[i].course_over_ground*AV_PI/180.0;
 		    }
 #ifdef DEBUG_AISEVAL
-                    rtx_message("ship in reachable distance (20 km) \n");
+//                     rtx_message("ship in reachable distance (20 km) \n");
 #endif
 
 		    speed_ship		= 0.5144444 * ais.Ship[i].speed_over_ground;
 		    heading_avalon     	= atan2((destination.latitude - current_pos_latitude) , (destination.longitude - current_pos_longitude));
-		    speed_avalon       	= sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
+		    speed_avalon       	= 0.5144444 * sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
 
     // 		speed_avalon_all.insert(speed_avalon_all.begin(),speed_avalon);
     // 		if(speed_avalon_all.size()>num_speed_history)
@@ -370,12 +389,13 @@ void * translation_thread(void * dummy)
 		    vel_relativ_long	= vel_avalon_long - vel_ship_long;
 		    vel_relativ_lat	= vel_avalon_lat - vel_ship_lat;
 
-		    angle_relativ	= atan2(vel_relativ_lat, vel_relativ_long);
+		    // 		    angle_relativ	= atan2(vel_relativ_lat, vel_relativ_long);
+		    angle_relativ	= atan2(vel_relativ_long, vel_relativ_lat);
 		    angle_avalon_ship	= atan2((ship_pos_longitude-current_pos_longitude) , (ship_pos_latitude-current_pos_latitude));
 
-		    ship_length		= 100;  // ship length, if not from AIS
-		    threshold_radius	= 500;  // to be modified: additional safety distance
-		    radius_relativ		= ship_length + 4 + 500;    // ship length + avalon_length + threshold_radius
+		    ship_length		= 1;  // ship length, if not from AIS
+		    threshold_radius	= 50;  // to be modified: additional safety distance
+		    radius_relativ		= ship_length + 4 + threshold_radius;    // ship length + avalon_length + threshold_radius
 		    dist_avalon_ship	= sqrt(((ship_pos_latitude-current_pos_latitude)*(ship_pos_latitude-current_pos_latitude))
 						  +((ship_pos_longitude-current_pos_longitude)*(ship_pos_longitude-current_pos_longitude)));
 
@@ -386,6 +406,7 @@ void * translation_thread(void * dummy)
 
 		    if (speed_avalon < speed_ship)
 		    {
+// rtx_message("avalon is slower\n"); 
 			angle_crit_min = remainder(((AV_PI+heading_ship - asin(speed_avalon/speed_ship))*180.0/AV_PI),360.0) * AV_PI/180.0;
 			angle_crit_max = remainder(((AV_PI+heading_ship + asin(speed_avalon/speed_ship))*180.0/AV_PI),360.0) * AV_PI/180.0;
 
@@ -393,7 +414,7 @@ void * translation_thread(void * dummy)
 			  && (remainder(((angle_crit_max-angle_tang_rear)*180.0/AV_PI),360.0) > 0))
 			{	// Calculate the two intersectin with the first tangent
 			    obst_p.resize(num_obstP+2);
-
+rtx_message("two obstacles at rear\n");  
 			    obst_p[num_obstP].angle 	= remainder(((angle_tang_rear
 							  -asin(speed_avalon/speed_ship*sin(AV_PI+heading_ship-angle_tang_rear)))*180.0/AV_PI),360.0) * AV_PI/180.0;
 			    obst_p[num_obstP].t_crit	= ((current_pos_longitude-ship_pos_longitude)*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))
@@ -404,7 +425,7 @@ void * translation_thread(void * dummy)
 			    obst_p[num_obstP].longitude	= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_longitude;
 			    obst_p[num_obstP].latitude	= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_latitude;
 			    num_obstP ++;
-			    
+
 
 			    obst_p[num_obstP].angle 	= remainder(((angle_tang_rear
 							  +asin(speed_avalon/speed_ship*sin(AV_PI+heading_ship-angle_tang_rear))-AV_PI)*180.0/AV_PI),360.0) * AV_PI/180.0;
@@ -416,11 +437,13 @@ void * translation_thread(void * dummy)
 			    obst_p[num_obstP].longitude	= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_longitude;
 			    obst_p[num_obstP].latitude	= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_latitude;
 			    num_obstP ++;
+
 			}
 
 			if ((remainder(((angle_crit_min-angle_tang_front)*180.0/AV_PI),360.0) < 0) && (remainder(((angle_crit_max-angle_tang_front)*180.0/AV_PI),360.0) > 0))
 			{	// Calculate the two intersectin with the second tangent
 			    obst_p.resize(num_obstP+2);
+rtx_message("two obstacles at front\n");  
 
 			    obst_p[num_obstP].angle 	= remainder(((angle_tang_front
 							  -asin(speed_avalon/speed_ship*sin(AV_PI+heading_ship-angle_tang_front)))*180.0/AV_PI),360.0) * AV_PI/180.0;
@@ -448,6 +471,7 @@ void * translation_thread(void * dummy)
 		    }
 		    else	// if speed_avalon > speed_ship, we have an intersection with each tangent
 		    {
+rtx_message("avalon is faster\n"); 
 			obst_p.resize(num_obstP+2);
 
 			obst_p[num_obstP].angle 	= remainder(((angle_tang_rear 
@@ -509,6 +533,8 @@ void * translation_thread(void * dummy)
 			    obst_p[num_obstP-1]=temp_obst;
 			}
 		      
+rtx_message("num_obst: %d    obst_p: %d\n",num_obstP,obst_p.size());
+ 
 			// if an obstacle is too far away, we don't care about it
 			dist_dest =(sqrt((current_pos_longitude - destination.longitude)
 					*(current_pos_longitude - destination.longitude)
@@ -517,16 +543,22 @@ void * translation_thread(void * dummy)
 			dist_limit = 2*dist_dest;
 			for ( p = 0; p < num_obstP-1; p=p+2)
 			{
-			    if ((obst_p[p].dist<dist_max) || (obst_p[p+1].dist<dist_max))
+ rtx_message("dest: %lf  imit: %lf  obst: front= %lf back= %lf",dist_dest, dist_limit, obst_p[p].dist, obst_p[p+1].dist);
+			    if ((obst_p[p].dist<dist_limit) || (obst_p[p+1].dist<dist_limit))
 			    {
 				obst_p_start.push_back(obst_p[p]);
 				obst_p_end.push_back(obst_p[p+1]);
+rtx_message("obst_start: x:%lf y:%lf\n", obst_p_start[0].longitude ,obst_p_start[0].latitude);
 			    }
 			}
 		    }
 		}
 	    }
-		  
+	
+rtx_message("numbers of obstacles: %d\n",obst_p_start.size());  
+	    if (obst_p_start.size()==0){
+		continue;
+	    }
 	    // Fuse obstacles
 	    n=obst_p_start.size()-1;
 	    k=0;
@@ -549,7 +581,8 @@ void * translation_thread(void * dummy)
 		}
 		k++;
 	    }
-		  
+		
+  
 	    // set new Waypoint
 	    safe_waypoint_long	= obst_p_start[0].longitude; 
 	    safe_waypoint_lat	= obst_p_start[0].latitude;
@@ -736,7 +769,9 @@ int main (int argc, const char * argv[])
 	DOB(store.open());
 
 	// Register the new Datatypes
+	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), Flags));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), imuData));
+	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), imuCleanData));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), ShipStruct));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), ShipData));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), AisStruct));
@@ -748,13 +783,16 @@ int main (int argc, const char * argv[])
     //
 	
     // Create output variable
+	DOB(store.registerVariable(dataFlags, varname_flags, "Flags"));
         DOB(store.registerVariable(aisStruct, varname_aisStruct, "AisStruct"));
         DOB(store.registerVariable(aisData, varname_aisData, "AisData"));
-	DOB(store.registerVariable(aisData, varname_Obstacle, "Obstacle"));
+	DOB(store.registerVariable(obstacle, varname_obstacle, "Obstacle"));
         DOB(store.registerVariable(dataBoat, varname4, "imuData"));
+	DOB(store.registerVariable(dataImuClean, varname_imuClean, "imuCleanData"));
         DOB(store.registerVariable(shipStruct, varname_shipStruct, "ShipStruct"));
         DOB(store.registerVariable(shipData, varname_shipData, "ShipData"));
-       DOB(store.registerVariable(destinationStruct, varname_destStruct, "DestinationStruct"));
+	DOB(store.registerVariable(destinationData, varname_destData, "DestinationData"));
+        DOB(store.registerVariable(destinationStruct, varname_destStruct, "DestinationStruct"));
         DOB(store.registerVariable(skipperFlagData, varname_skipperflags, "SkipperFlags"));
 	
 	// Start the working thread
