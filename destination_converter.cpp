@@ -170,7 +170,6 @@ void * translation_thread(void * dummy)
                     
                     destination.Data[current_destpoint-1].type = AV_DEST_TYPE_END;
                     destination.Data[current_destpoint].type = AV_DEST_TYPE_NOMORE;
-		    destination.destNr=current_destpoint-1;
 
                     //bring to store:
 
