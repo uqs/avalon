@@ -1,0 +1,11 @@
+###### setup eposlib:
+
+
+go to folder 'can_library'
+$ cmake .
+$ make install (only works the 2nd time!!!!!!!)
+
+go to folder 'eposlib'
+$ make install
+
+ 

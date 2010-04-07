@@ -105,6 +105,6 @@ TARGET_LINK_LIBRARIES(dtom)
 ADD_EXECUTABLE(mtod mtod.cpp)
 TARGET_LINK_LIBRARIES(mtod)
 
-ADD_EXECUTABLE(rootsolver_test rootsolver_test.cpp sailor_main_iter_fn.cpp sailor_rudder_iter_fn.cpp)
-TARGET_LINK_LIBRARIES(rootsolver_test gsl gslcblas rtx)
+#ADD_EXECUTABLE(rootsolver_test rootsolver_test.cpp sailor_main_iter_fn.cpp sailor_rudder_iter_fn.cpp)
+#TARGET_LINK_LIBRARIES(rootsolver_test gsl gslcblas rtx)
 

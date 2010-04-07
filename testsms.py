@@ -7,7 +7,7 @@
 #                                                          #
 ############################################################
 
-small script to test the functionality of the iridium-module
+# small script to test the functionality of the iridium-module
 
 import iridium
 
