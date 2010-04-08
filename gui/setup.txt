@@ -1,0 +1,29 @@
+####install wypython: ###########
+
+needed libraries: glib & gtk+
+
+1) add the following 3 lines to your /etc/apt/sources.list
+
+# wxPython repository on Starship
+deb http://starship.python.net/crew/robind/wxPython/apt/ binary/
+deb-src http://starship.python.net/crew/robind/wxPython/apt/ source/
+
+2)
+
+$ sudo apt-get update
+$ sudo apt-get install python-wxgtk2.6 python-wxtools wx2.6-i18n
+
+
+thats it!!
+
+######install SPE ########### (not very important and helpful, VIM is much better!!!)
+#
+$ svn checkout svn://svn.berlios.de/python/spe/trunk/_spe
+$ sudo apt-get install python-wxglade
+
+
+#####install Gnuplot.py (important to display gui chart!!
+download gnuplot-py-1.8.tar-gz from http://sourceforge.net/projects/gnuplot-py/files/
+
+extract it and go into the gnuplot-py-1.8 folder:
+$ python setup.py install
