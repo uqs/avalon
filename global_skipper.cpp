@@ -107,7 +107,7 @@ void * translation_thread(void * dummy)
     DestinationData destination; //actual array!!
     SkipperFlags skipperflags;
 
-    double dest_dist = 800;
+    double dest_dist = 2000;
     double closest_distance;
     int i,p;
     double distance;
@@ -156,7 +156,7 @@ void * translation_thread(void * dummy)
 #ifdef DEBUG_GLOBSKIPPER
                     rtx_message("locator: closest distance = %f \n", closest_distance);
 #endif
-                    while((i<10) && (destination.Data[i].type != AV_DEST_TYPE_NOMORE ))
+                    while((i<1000) && (destination.Data[i].type != AV_DEST_TYPE_NOMORE ))
                     {
 
 #ifdef DEBUG_GLOBSKIPPER
@@ -263,7 +263,7 @@ void * translation_thread(void * dummy)
                                         *(current_pos_longitude - destination.Data[destination.destNr].longitude)
                                         + (current_pos_latitude - destination.Data[destination.destNr].latitude)
                                         *(current_pos_latitude - destination.Data[destination.destNr].latitude)))
-                                < 0.4*dest_dist)
+                                < 0.2*dest_dist)
                             && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
                     {
                         destination.destNr += 1;
@@ -276,7 +276,7 @@ void * translation_thread(void * dummy)
                     if((sqrt((current_pos_longitude - destination.Data[destination.destNr].longitude)
                                     *(current_pos_longitude - destination.Data[destination.destNr].longitude)
                                     + (current_pos_latitude - destination.Data[destination.destNr].latitude)
-                                    *(current_pos_latitude - destination.Data[destination.destNr].latitude))) > 2.1*dest_dist)
+                                    *(current_pos_latitude - destination.Data[destination.destNr].latitude))) > 2.2*dest_dist)
                     {
                         skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
                         skipperFlagData.t_writefrom(skipperflags);
@@ -294,7 +294,7 @@ void * translation_thread(void * dummy)
             rtx_message("Collision: collision distance = %f \n", distance);
 #endif
 
-                    if((distance < .2*dest_dist) || (distance > 2*dest_dist))
+                    if((distance < 100/*.2*dest_dist*/) || (distance > 2*dest_dist))
                     {
                         skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
                         skipperFlagData.t_writefrom(skipperflags);
