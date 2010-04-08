@@ -170,7 +170,7 @@ void * translation_thread(void * dummy)
     double dist_limit;
     double dist_dest;
     double dist_test;
-    double add_dist_safe=160;
+    double add_dist_safe=100;
 
     std::vector<Obstacle> obst_p;
     std::vector<Obstacle> obst_p_start;
@@ -272,8 +272,8 @@ void * translation_thread(void * dummy)
 //                 rtx_message("ship's longitude = %f \n",ship_pos_longitude);
 //                 rtx_message("ship's latitude = %f \n",ship_pos_latitude);
 #endif
-// rtx_message("distance = %f \n",distance_static);
-                if ((distance_static < 500.0) && (ais.Ship[i].speed_over_ground != 0.0)
+rtx_message("distance = %f \n",distance_static);
+                if ((distance_static < 2000.0) && (ais.Ship[i].speed_over_ground != 0.0)
                         && ((ais.Ship[i].course_over_ground != 0.0) || (ais.Ship[i].heading != 0.0)))
                 {
 		    heading_ship = ais.Ship[i].heading*AV_PI/180.0; // TODO degree or rad??
@@ -308,14 +308,14 @@ void * translation_thread(void * dummy)
                     angle_avalon_ship	= atan2((ship_pos_longitude-current_pos_longitude) , (ship_pos_latitude-current_pos_latitude));
 
                     ship_length		= 1;  // ship length, if not from AIS
-                    threshold_radius	= 50;  // to be modified: additional safety distance
+                    threshold_radius	= 395;  // to be modified: additional safety distance
                     radius_relativ	= ship_length + 4 + threshold_radius;    // ship length + avalon_length + threshold_radius
                     dist_avalon_ship	= sqrt(((ship_pos_latitude-current_pos_latitude)*(ship_pos_latitude-current_pos_latitude))
 					      +((ship_pos_longitude-current_pos_longitude)*(ship_pos_longitude-current_pos_longitude)));
 
                     angle_tang_rear	= remainder(((angle_avalon_ship - asin(radius_relativ/dist_avalon_ship))*180.0/AV_PI),360.0) * AV_PI/180.0;
                     angle_tang_front	= remainder(((angle_avalon_ship + asin(radius_relativ/dist_avalon_ship))*180.0/AV_PI),360.0) * AV_PI/180.0;
-//  rtx_message("ang_rear: %lf    ang_rel: %lf    ang_front: %lf",angle_tang_rear,angle_relativ,angle_tang_front);
+ rtx_message("ang_rear: %lf    ang_rel: %lf    ang_front: %lf",angle_tang_rear,angle_relativ,angle_tang_front);
 		    if ((remainder(((angle_relativ - angle_tang_rear)*180.0/AV_PI),360.0)>0)
 		      && (remainder(((angle_relativ - angle_tang_front)*180.0/AV_PI),360.0)<0))
 		    {
@@ -357,7 +357,7 @@ rtx_message("Collision course!! check for new destination\n");
 //                 rtx_message("ship's longitude = %f \n",ship_pos_longitude);
 //                 rtx_message("ship's latitude = %f \n",ship_pos_latitude);
 #endif
-		if ((distance_static < 500.0) && (ais.Ship[i].speed_over_ground != 0.0)
+		if ((distance_static < 2000.0) && (ais.Ship[i].speed_over_ground != 0.0)
 			&& ((ais.Ship[i].course_over_ground != 0.0) || (ais.Ship[i].heading != 0.0)))
 		{
 		    obst_p.clear();
@@ -394,7 +394,7 @@ rtx_message("Collision course!! check for new destination\n");
 		    angle_avalon_ship	= atan2((ship_pos_longitude-current_pos_longitude) , (ship_pos_latitude-current_pos_latitude));
 
 		    ship_length		= 1;  // ship length, if not from AIS
-		    threshold_radius	= 50;  // to be modified: additional safety distance
+		    threshold_radius	= 40;  // to be modified: additional safety distance
 		    radius_relativ		= ship_length + 4 + threshold_radius;    // ship length + avalon_length + threshold_radius
 		    dist_avalon_ship	= sqrt(((ship_pos_latitude-current_pos_latitude)*(ship_pos_latitude-current_pos_latitude))
 						  +((ship_pos_longitude-current_pos_longitude)*(ship_pos_longitude-current_pos_longitude)));
@@ -540,7 +540,7 @@ rtx_message("num_obst: %d    obst_p: %d\n",num_obstP,obst_p.size());
 					*(current_pos_longitude - destination.longitude)
 					+(current_pos_latitude - destination.latitude)
 					*(current_pos_latitude - destination.latitude)));
-			dist_limit = 2*dist_dest;
+			dist_limit = 1000;//2*dist_dest;
 			for ( p = 0; p < num_obstP-1; p=p+2)
 			{
  rtx_message("dest: %lf  imit: %lf  obst: front= %lf back= %lf",dist_dest, dist_limit, obst_p[p].dist, obst_p[p+1].dist);
@@ -548,7 +548,8 @@ rtx_message("num_obst: %d    obst_p: %d\n",num_obstP,obst_p.size());
 			    {
 				obst_p_start.push_back(obst_p[p]);
 				obst_p_end.push_back(obst_p[p+1]);
-rtx_message("obst_start: x:%lf y:%lf\n", obst_p_start[0].longitude ,obst_p_start[0].latitude);
+rtx_message("obst_start: x:%lf y:%lf\n", obst_p_start[0].longitude+4.380225573914934e+06 ,obst_p_start[0].latitude-1.111949403453934e+06);
+rtx_message("obst_end: x:%lf y:%lf\n", obst_p_end[0].longitude+4.380225573914934e+06 ,obst_p_end[0].latitude-1.111949403453934e+06);
 			    }
 			}
 		    }
