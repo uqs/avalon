@@ -143,6 +143,7 @@ void * translation_thread(void * dummy)
     double distance_static;
     double heading_ship;
     bool inserted;
+    bool collision;
     
     double heading_avalon;
     double speed_avalon;
@@ -162,6 +163,7 @@ void * translation_thread(void * dummy)
     double angle_tang_front;
     double angle_crit_min;
     double angle_crit_max;
+    double angle_safe;
     double safe_waypoint_long;
     double safe_waypoint_lat;
     double ship_length;
@@ -243,7 +245,7 @@ void * translation_thread(void * dummy)
             }
 
 
-
+	    collision = false;
 	    for (i = 0; i < ais.number_of_ships; i++)
             {
 #ifdef DEBUG_AISEVAL
@@ -313,6 +315,21 @@ rtx_message("distance = %f \n",distance_static);
                     dist_avalon_ship	= sqrt(((ship_pos_latitude-current_pos_latitude)*(ship_pos_latitude-current_pos_latitude))
 					      +((ship_pos_longitude-current_pos_longitude)*(ship_pos_longitude-current_pos_longitude)));
 
+		    if (dist_avalon_ship<0.5*radius_relativ)
+		    {
+			if (remainder(((AV_PI+angle_avalon_ship-heading_ship)*180.0/AV_PI),360.0)<0)
+			    {angle_safe=heading_ship-AV_PI*0.5;}
+			else
+			    {angle_safe=heading_ship+AV_PI*0.5;}
+
+rtx_message("angle_av_sh= %lf    head_sh= %lf     ang_safe= %lf\n", angle_avalon_ship*180/AV_PI,heading_ship*180/AV_PI,angle_safe*180/AV_PI);
+			destination.longitude = ship_pos_longitude+1.5*radius_relativ*sin(angle_safe);
+			destination.latitude  = ship_pos_latitude+1.5*radius_relativ*cos(angle_safe);
+			destinationData.t_writefrom(destination);
+			skipperflags.global_locator  = AV_FLAGS_GLOBALSK_SURVIVE;
+			skipperFlagData.t_writefrom(skipperflags);
+			continue;
+		    }
                     angle_tang_rear	= remainder(((angle_avalon_ship - asin(radius_relativ/dist_avalon_ship))*180.0/AV_PI),360.0) * AV_PI/180.0;
                     angle_tang_front	= remainder(((angle_avalon_ship + asin(radius_relativ/dist_avalon_ship))*180.0/AV_PI),360.0) * AV_PI/180.0;
  rtx_message("ang_rear: %lf    ang_rel: %lf    ang_front: %lf",angle_tang_rear,angle_relativ,angle_tang_front);
@@ -320,14 +337,15 @@ rtx_message("distance = %f \n",distance_static);
 		      && (remainder(((angle_relativ - angle_tang_front)*180.0/AV_PI),360.0)<0))
 		    {
 			// On collision course with a ship, check ALL ships for obstacles
-			skipperflags.global_locator  = AV_FLAGS_GLOBALSK_COLLISION;
+			skipperflags.global_locator  = AV_FLAGS_GLOBALSK_AVOIDANCE;
 			skipperFlagData.t_writefrom(skipperflags);
+			collision = true;
 			break;
 		    }
 		}
 	    }
 // rtx_message("skipperflag: %d",generalflags.global_locator);
-	    if (generalflags.global_locator != AV_FLAGS_GLOBALSK_COLLISION )
+	    if (collision == false)
 		{continue;}
 
 #ifdef DEBUG_AISEVAL
@@ -394,7 +412,7 @@ rtx_message("Collision course!! check for new destination\n");
 		    angle_avalon_ship	= atan2((ship_pos_longitude-current_pos_longitude) , (ship_pos_latitude-current_pos_latitude));
 
 		    ship_length		= 1;  // ship length, if not from AIS
-		    threshold_radius	= 40;  // to be modified: additional safety distance
+		    threshold_radius	= 395;  // to be modified: additional safety distance
 		    radius_relativ		= ship_length + 4 + threshold_radius;    // ship length + avalon_length + threshold_radius
 		    dist_avalon_ship	= sqrt(((ship_pos_latitude-current_pos_latitude)*(ship_pos_latitude-current_pos_latitude))
 						  +((ship_pos_longitude-current_pos_longitude)*(ship_pos_longitude-current_pos_longitude)));

@@ -284,7 +284,7 @@ void * translation_thread(void * dummy)
 
                     break;
                     /////////////////////////////////////////////////////////////////////////7    
-                case AV_FLAGS_GLOBALSK_COLLISION:
+                case AV_FLAGS_GLOBALSK_AVOIDANCE:
 
                     distance = (sqrt((current_pos_longitude - destination.longitude)
                                 *(current_pos_longitude - destination.longitude)
@@ -295,6 +295,24 @@ void * translation_thread(void * dummy)
 #endif
 
                     if((distance < 100/*.2*dest_dist*/) || (distance > 2*dest_dist))
+                    {
+                        skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
+                        skipperFlagData.t_writefrom(skipperflags);
+                    }
+
+                    break;
+                    ////////////////////////////////////////////////////////////////////////////
+		case AV_FLAGS_GLOBALSK_SURVIVE:
+
+                    distance = (sqrt((current_pos_longitude - destination.longitude)
+                                *(current_pos_longitude - destination.longitude)
+                                + (current_pos_latitude - destination.latitude)
+                                *(current_pos_latitude - destination.latitude)));
+#ifdef DEBUG_GLOBSKIPPER
+            rtx_message("Collision: collision distance = %f \n", distance);
+#endif
+
+                    if((distance < 100/*.2*dest_dist*/) || (distance > 600))
                     {
                         skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
                         skipperFlagData.t_writefrom(skipperflags);

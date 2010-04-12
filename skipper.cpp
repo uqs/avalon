@@ -222,7 +222,7 @@ void * translation_thread(void * dummy)
                 }
                 break;
             }
-
+rtx_message("next WP: x= %lf, y= %lf",waypoints.Data[current_wyp].longitude+4.380225573914934e+06,waypoints.Data[current_wyp].latitude-1.111949403453934e+06);
             //write the current desired heading to store:
             desiredHeading.heading = waypoints.Data[current_wyp].heading;
             headingData.t_writefrom(desiredHeading);
@@ -380,7 +380,7 @@ void * translation_thread(void * dummy)
 #endif
                     // DO A NEWCALCULATION -> GO INTO NEWCALC MODE
                     if(((fabs(cleanedwind.global_direction_real_long - waypoints.Data[current_wyp].winddirection) > 40.0)
-                       || ((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3)  && (dist_next_trajectory > 100.0)) || (dist_solltrajectory > 100.0) || (generalflags.global_locator == AV_FLAGS_GLOBALSK_COLLISION)) && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END )
+                       || ((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3)  && (dist_next_trajectory > 100.0)) || (dist_solltrajectory > 100.0) || (generalflags.global_locator == AV_FLAGS_GLOBALSK_AVOIDANCE)) && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END )
                         {
 #ifdef DEBUG_SKIPPER
                             rtx_message("normalnavi: switching to newcalculation state; reason:");

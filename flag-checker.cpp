@@ -224,8 +224,11 @@ void * translation_thread(void * dummy)
                 case AV_FLAGS_GLOBALSK_CLOSING:
                     flags.global_locator = AV_FLAGS_GLOBALSK_CLOSING;
                     break;
-                case AV_FLAGS_GLOBALSK_COLLISION:
-                    flags.global_locator = AV_FLAGS_GLOBALSK_COLLISION;
+                case AV_FLAGS_GLOBALSK_AVOIDANCE:
+                    flags.global_locator = AV_FLAGS_GLOBALSK_AVOIDANCE;
+                    break;
+		case AV_FLAGS_GLOBALSK_SURVIVE:
+                    flags.global_locator = AV_FLAGS_GLOBALSK_SURVIVE;
                     break;
                 default:
                     flags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
