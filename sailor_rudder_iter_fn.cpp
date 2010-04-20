@@ -62,7 +62,7 @@ double sailor_rudder_iter_fn(double x, void *params)
     double sail_factor;
     
     // neccessary coordn. transformation
-    // speed_y              = -speed_y;
+    speed_y              = -speed_y;
 
     torque_des           = 0.7*torque_des;
     N_damping            = signum(heading_speed)*A_hull_3*0.5*dens_water*C_d_3*((width/2.0*heading_speed)*(width/2.0*heading_speed));

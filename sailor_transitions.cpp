@@ -226,7 +226,8 @@ void * translation_thread(void * dummy)
 
             case AV_FLAGS_ST_NORMALSAILING: //current state NORMALSAILING
                 // to UPWINDSAILING
-				if(fabs(remainder((desired_heading.heading - wind_clean.global_direction_real),360.0)) <= 45.0) //AV_SAILOR_MAX_HEIGHT_TO_WIND
+// rtx_message("desired_head= %lf   wind_clean= %lf \n",desired_heading.heading,wind_clean.global_direction_real );
+		if(fabs(remainder((desired_heading.heading - wind_clean.global_direction_real),360.0)) <= 45.0) //AV_SAILOR_MAX_HEIGHT_TO_WIND
                 {
                     sailorflags.state = AV_FLAGS_ST_UPWINDSAILING;
                 }
@@ -429,12 +430,14 @@ void * translation_thread(void * dummy)
                                 - wind_clean.global_direction_real,360.0)),360.0);
                     wind_global_pre_tack = wind_clean.global_direction_real; // for HEADINGCHANGE
                 }
+// rtx_message("des_head = %f, head = %f \n",desired_heading_after_tack,imu.attitude.yaw);
                 time(&tackendtimeout_currenttime);
                 tackendtimeout_diff = difftime(tackendtimeout_currenttime, tackendtimeout_start); // yields time in [s]
                 // to NORMALSAILING
                 if((fabs(remainder((desired_heading_after_tack - imu.attitude.yaw),360.0)) < AV_SAILOR_EPSILON_TACK)
                         || (tackendtimeout_diff > AV_SAILOR_TACK_END_TIMEOUT))
                 {
+rtx_message("change to normalsailing");
                     sailorflags.state = AV_FLAGS_ST_NORMALSAILING;
                     time(&tacktimeout_start); // start the timer
                 }
