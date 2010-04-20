@@ -274,7 +274,7 @@ void * translation_thread(void * dummy)
 //                 rtx_message("ship's longitude = %f \n",ship_pos_longitude);
 //                 rtx_message("ship's latitude = %f \n",ship_pos_latitude);
 #endif
-rtx_message("distance = %f \n",distance_static);
+// rtx_message("distance = %f \n",distance_static);
                 if ((distance_static < 2000.0) && (ais.Ship[i].speed_over_ground != 0.0)
                         && ((ais.Ship[i].course_over_ground != 0.0) || (ais.Ship[i].heading != 0.0)))
                 {
@@ -558,7 +558,7 @@ rtx_message("num_obst: %d    obst_p: %d\n",num_obstP,obst_p.size());
 					*(current_pos_longitude - destination.longitude)
 					+(current_pos_latitude - destination.latitude)
 					*(current_pos_latitude - destination.latitude)));
-			dist_limit = 1000;//2*dist_dest;
+			dist_limit = 2000;//2*dist_dest;
 			for ( p = 0; p < num_obstP-1; p=p+2)
 			{
  rtx_message("dest: %lf  imit: %lf  obst: front= %lf back= %lf",dist_dest, dist_limit, obst_p[p].dist, obst_p[p+1].dist);

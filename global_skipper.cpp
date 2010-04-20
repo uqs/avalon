@@ -107,7 +107,7 @@ void * translation_thread(void * dummy)
     DestinationData destination; //actual array!!
     SkipperFlags skipperflags;
 
-    double dest_dist = 2000;
+    double dest_dist = 1000;
     double closest_distance;
     int i,p;
     double distance;
@@ -258,7 +258,10 @@ void * translation_thread(void * dummy)
 
                     rtx_message("destinationtype = %d  \n", destination.Data[destination.destNr].type);
 #endif
-
+rtx_message("distance to next destination = %f \n",  (sqrt((current_pos_longitude - destination.Data[destination.destNr].longitude)
+                                    *(current_pos_longitude - destination.Data[destination.destNr].longitude)
+                                    + (current_pos_latitude - destination.Data[destination.destNr].latitude)
+                                    *(current_pos_latitude - destination.Data[destination.destNr].latitude))));
                     if(((sqrt((current_pos_longitude - destination.Data[destination.destNr].longitude)
                                         *(current_pos_longitude - destination.Data[destination.destNr].longitude)
                                         + (current_pos_latitude - destination.Data[destination.destNr].latitude)
@@ -267,6 +270,8 @@ void * translation_thread(void * dummy)
                             && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
                     {
                         destination.destNr += 1;
+skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
+skipperFlagData.t_writefrom(skipperflags);
                         assert((destination.destNr < 1000) && (destination.destNr>=0));
                         destination.longitude = destination.Data[destination.destNr].longitude;
                         destination.latitude = destination.Data[destination.destNr].latitude;
@@ -278,8 +283,7 @@ void * translation_thread(void * dummy)
                                     + (current_pos_latitude - destination.Data[destination.destNr].latitude)
                                     *(current_pos_latitude - destination.Data[destination.destNr].latitude))) > 2.2*dest_dist)
                     {
-                        skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
-                        skipperFlagData.t_writefrom(skipperflags);
+                        
                     }
 
                     break;
