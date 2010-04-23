@@ -43,7 +43,7 @@
 #include "aisEval.h"
 
 //#define DEBUG_ISLAND
-#define DEBUG_NAVIGATOR
+// #define DEBUG_NAVIGATOR
 
 /**
  * Global variable for all DDX object
@@ -181,7 +181,7 @@ void * translation_thread(void * dummy)
                 time(&end);
                 timedif = difftime(end,start_time);
             }
-rtx_message("last_calc_ind: %d    navi_call_ind: %d\n",last_calc_index,generalflags.navi_index_call);
+// rtx_message("last_calc_ind: %d    navi_call_ind: %d\n",last_calc_index,generalflags.navi_index_call);
             if((last_calc_index != generalflags.navi_index_call) 
                     && (generalflags.autonom_navigation)) 
                 //&& (timedif > 7.0))  //if this is 1, then do the waypoint-calculation

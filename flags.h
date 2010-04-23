@@ -84,7 +84,11 @@ DDX_STORE_TYPE(Flags,
 
         int navi_state;             // shows the status of the navigator-program
         unsigned long navi_index_call;       // shows which calculation is currently beeing calculated!
-        unsigned long navi_index_answer;      
+        unsigned long navi_index_answer;
+
+	unsigned int skip_index_dest_call;       // changes if the global skipper changes destination point and request a new calculation
+//         unsigned long skip_index_dest_answer;
+
         int autonom_navigation;
         int global_locator;         // to decide which state the global skipper is in 
 
@@ -138,6 +142,9 @@ DDX_STORE_TYPE(SkipperFlags,
         struct
         {
         int global_locator;     //see generalflags for explanation
+	
+	unsigned int skip_index_dest_call;       // changes if the global skipper changes destination point and request a new calculation
+//         unsigned long skip_index_dest_answer;
         }
 );
 

@@ -339,8 +339,8 @@ void * translation_thread(void * dummy)
                             }
                             else if(speed >= 0.9) 
                             {
-                                    u = iter.sailor_main_iter_fn(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144, sailstate.degrees_sail*M_PI/180.0, wind_clean.global_direction_real*M_PI/180.0, imu.attitude.yaw*M_PI/180.0, wind_clean.speed*0.5144); 
-                                    //rtx_message("u_zero = %f \n",u);
+                                    u = iter.sailor_main_iter_fn(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144, sailstate.degrees_sail*M_PI/180.0, wind_clean.global_direction_real*M_PI/180.0, imu.attitude.yaw*M_PI/180.0, wind_clean.speed*0.5144);
+// rtx_message("headS: %f  T_des: %f  xS: %f  yS: %f  aoa: %f  dW: %f  z: %f  vW: %f\n",imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144, sailstate.degrees_sail*M_PI/180.0, wind_clean.global_direction_real*M_PI/180.0, imu.attitude.yaw*M_PI/180.0, wind_clean.speed*0.5144);
 			    }
 
 			    fprintf(thetafile,"%f %f %f %f\n",theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left);

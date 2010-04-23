@@ -40,6 +40,7 @@ DDXVariable dataRcFlags;
 DDXVariable destinationStruct;
 DDXVariable destinationData; //the actual values!
 DDXVariable skipperFlagData;
+DDXVariable dataNaviFlags;
 
 /**
  * Prototypes for utility functions
@@ -56,6 +57,7 @@ int sign(double i);
 const char * varname_navi = "navidata"; //does it have to be in the store as navidata, since its only the type of wypData?
 const char * varname4 = "imu";
 const char * varname_flags = "flags";
+const char * varname_naviflags = "naviflags";
 const char * varname_rcflags = "rcflags";
 
 const char * varname_destStruct = "destStruct";
@@ -106,10 +108,12 @@ void * translation_thread(void * dummy)
     Flags generalflags;
     DestinationData destination; //actual array!!
     SkipperFlags skipperflags;
+    NaviFlags naviflags;
 
     double dest_dist = 1000;
     double closest_distance;
     int i,p;
+//     unsigned int last_skip_index=0;
     double distance;
 
             skipperFlagData.t_readto(skipperflags,0,0);
@@ -118,7 +122,11 @@ void * translation_thread(void * dummy)
             
 
     double current_pos_longitude, current_pos_latitude; //already transformed and in meters
-    
+
+    //initializing the call index
+    skipperFlagData.t_readto(skipperflags,0,0);
+    skipperflags.skip_index_dest_call = 0;
+    skipperFlagData.t_writefrom(skipperflags);
 
     while (1) {
         // Read the next data available, or wait at most 5 seconds
@@ -127,7 +135,7 @@ void * translation_thread(void * dummy)
             dataFlags.t_readto(generalflags,0,0);
             destinationData.t_readto(destination,0,0);
             skipperFlagData.t_readto(skipperflags,0,0);
-
+dataNaviFlags.t_readto(naviflags,0,0);
             //calculate all the distances and vectors:
 
             current_pos_longitude =double (AV_EARTHRADIUS 
@@ -205,6 +213,8 @@ void * translation_thread(void * dummy)
                             destination.latitude = destination.Data[destination.destNr +2 -p].latitude;
                             destination.destNr = (destination.destNr +2 -p);
                             destinationData.t_writefrom(destination);
+skipperflags.skip_index_dest_call ++;
+skipperFlagData.t_writefrom(skipperflags);
 
                             skipperflags.global_locator = AV_FLAGS_GLOBALSK_TRACKER;
                             skipperFlagData.t_writefrom(skipperflags);
@@ -215,7 +225,8 @@ void * translation_thread(void * dummy)
                             destination.longitude = destination.Data[destination.destNr].longitude;
                             destination.latitude = destination.Data[destination.destNr].latitude;
                             destinationData.t_writefrom(destination);
-
+skipperflags.skip_index_dest_call ++;
+skipperFlagData.t_writefrom(skipperflags);
                             skipperflags.global_locator = AV_FLAGS_GLOBALSK_CLOSING;
                             skipperFlagData.t_writefrom(skipperflags);
                         }
@@ -238,6 +249,8 @@ void * translation_thread(void * dummy)
                         destination.longitude = current_pos_longitude + 0.5 * (destination.longitude - current_pos_longitude);
                         destination.latitude = current_pos_latitude + 0.5 * (destination.latitude - current_pos_latitude);
                         destinationData.t_writefrom(destination);
+skipperflags.skip_index_dest_call ++;
+skipperFlagData.t_writefrom(skipperflags);
                     }
 
                     if(distance < dest_dist)
@@ -258,10 +271,10 @@ void * translation_thread(void * dummy)
 
                     rtx_message("destinationtype = %d  \n", destination.Data[destination.destNr].type);
 #endif
-rtx_message("distance to next destination = %f \n",  (sqrt((current_pos_longitude - destination.Data[destination.destNr].longitude)
-                                    *(current_pos_longitude - destination.Data[destination.destNr].longitude)
-                                    + (current_pos_latitude - destination.Data[destination.destNr].latitude)
-                                    *(current_pos_latitude - destination.Data[destination.destNr].latitude))));
+// rtx_message("distance to next destination = %f \n",  (sqrt((current_pos_longitude - destination.Data[destination.destNr].longitude)
+//                                     *(current_pos_longitude - destination.Data[destination.destNr].longitude)
+//                                     + (current_pos_latitude - destination.Data[destination.destNr].latitude)
+//                                     *(current_pos_latitude - destination.Data[destination.destNr].latitude))));
                     if(((sqrt((current_pos_longitude - destination.Data[destination.destNr].longitude)
                                         *(current_pos_longitude - destination.Data[destination.destNr].longitude)
                                         + (current_pos_latitude - destination.Data[destination.destNr].latitude)
@@ -270,8 +283,11 @@ rtx_message("distance to next destination = %f \n",  (sqrt((current_pos_longitud
                             && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
                     {
                         destination.destNr += 1;
-skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
+// skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
+// skipperFlagData.t_writefrom(skipperflags);
+skipperflags.skip_index_dest_call ++;
 skipperFlagData.t_writefrom(skipperflags);
+// rtx_message("increase_index_call to %d  \n", naviflags.navi_index_call);
                         assert((destination.destNr < 1000) && (destination.destNr>=0));
                         destination.longitude = destination.Data[destination.destNr].longitude;
                         destination.latitude = destination.Data[destination.destNr].latitude;
@@ -302,6 +318,8 @@ skipperFlagData.t_writefrom(skipperflags);
                     {
                         skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
                         skipperFlagData.t_writefrom(skipperflags);
+skipperflags.skip_index_dest_call ++;
+skipperFlagData.t_writefrom(skipperflags);
                     }
 
                     break;
@@ -320,6 +338,8 @@ skipperFlagData.t_writefrom(skipperflags);
                     {
                         skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
                         skipperFlagData.t_writefrom(skipperflags);
+skipperflags.skip_index_dest_call ++;
+skipperFlagData.t_writefrom(skipperflags);
                     }
 
                     break;
@@ -403,6 +423,7 @@ int main (int argc, const char * argv[])
     DOC(DDX_STORE_REGISTER_TYPE (store.getId(), DestinationStruct));
     DOC(DDX_STORE_REGISTER_TYPE (store.getId(), DestinationData));
     DOC(DDX_STORE_REGISTER_TYPE (store.getId(), SkipperFlags));
+	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), NaviFlags));
 
 
 	//// Connect to variables, and create variables for the target-data
@@ -414,6 +435,7 @@ int main (int argc, const char * argv[])
 	DOB(store.registerVariable(destinationStruct, varname_destStruct, "DestinationStruct"));
     //desired course for AVALON:
 	DOB(store.registerVariable(skipperFlagData, varname_skipperflags, "SkipperFlags"));
+	DOB(store.registerVariable(dataNaviFlags, varname_naviflags, "NaviFlags"));
 
 
 	// Start the working thread

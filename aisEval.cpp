@@ -322,7 +322,7 @@ void * translation_thread(void * dummy)
 			else
 			    {angle_safe=heading_ship+AV_PI*0.5;}
 
-rtx_message("angle_av_sh= %lf    head_sh= %lf     ang_safe= %lf\n", angle_avalon_ship*180/AV_PI,heading_ship*180/AV_PI,angle_safe*180/AV_PI);
+// rtx_message("angle_av_sh= %lf    head_sh= %lf     ang_safe= %lf\n", angle_avalon_ship*180/AV_PI,heading_ship*180/AV_PI,angle_safe*180/AV_PI);
 			destination.longitude = ship_pos_longitude+1.5*radius_relativ*sin(angle_safe);
 			destination.latitude  = ship_pos_latitude+1.5*radius_relativ*cos(angle_safe);
 			destinationData.t_writefrom(destination);
@@ -332,7 +332,7 @@ rtx_message("angle_av_sh= %lf    head_sh= %lf     ang_safe= %lf\n", angle_avalon
 		    }
                     angle_tang_rear	= remainder(((angle_avalon_ship - asin(radius_relativ/dist_avalon_ship))*180.0/AV_PI),360.0) * AV_PI/180.0;
                     angle_tang_front	= remainder(((angle_avalon_ship + asin(radius_relativ/dist_avalon_ship))*180.0/AV_PI),360.0) * AV_PI/180.0;
- rtx_message("ang_rear: %lf    ang_rel: %lf    ang_front: %lf",angle_tang_rear,angle_relativ,angle_tang_front);
+//  rtx_message("ang_rear: %lf    ang_rel: %lf    ang_front: %lf",angle_tang_rear,angle_relativ,angle_tang_front);
 		    if ((remainder(((angle_relativ - angle_tang_rear)*180.0/AV_PI),360.0)>0)
 		      && (remainder(((angle_relativ - angle_tang_front)*180.0/AV_PI),360.0)<0))
 		    {

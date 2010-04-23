@@ -183,7 +183,7 @@ void * translation_thread(void * dummy)
 
 		    speed_app_X = dirtyWind.speed * cos(workingWind.bearing_app * AV_PI / 180.0);
 		    speed_app_Y = dirtyWind.speed * sin(workingWind.bearing_app * AV_PI / 180.0);
-
+// rtx_message("Windspeed in boat system: x= %f  y= %f",speed_app_X, speed_app_Y);
 		    workingWind.speed = sqrt(pow((speed_app_X - boatData.velocity.x),2) + pow((speed_app_Y + boatData.velocity.y),2));
 
 		    /**doing the right thing with the new values to avoid leaps (-180 to 180) - for every value, there is two operations:**/

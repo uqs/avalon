@@ -166,6 +166,7 @@ void * translation_thread(void * dummy)
     double vec_dist_buoy_y;
     double dist_buoy;
     unsigned long old_navi_index = 0;
+    unsigned long last_skip_index = 0;
 
     int p;
     double vec_prev_to_next_wyp_x, vec_prev_to_next_wyp_y;
@@ -222,7 +223,7 @@ void * translation_thread(void * dummy)
                 }
                 break;
             }
-rtx_message("next WP: x= %lf, y= %lf",waypoints.Data[current_wyp].longitude+4.380225573914934e+06,waypoints.Data[current_wyp].latitude-1.111949403453934e+06);
+// rtx_message("next WP: x= %lf, y= %lf",waypoints.Data[current_wyp].longitude+4.380225573914934e+06,waypoints.Data[current_wyp].latitude-1.111949403453934e+06);
             //write the current desired heading to store:
             desiredHeading.heading = waypoints.Data[current_wyp].heading;
             headingData.t_writefrom(desiredHeading);
@@ -346,7 +347,7 @@ rtx_message("next WP: x= %lf, y= %lf",waypoints.Data[current_wyp].longitude+4.38
                     rtx_message("normalnavi: dist to next trajectory: %f meters\n", dist_next_trajectory);
                     rtx_message("normalnavi: dist to curr wyp: %f meters\n", dist_curr_wyp);
 #endif
-
+// rtx_message("current_wyp = %d, dist = %f  dx = %f dy = %f \n",current_wyp,dist_curr_wyp, waypoints.Data[current_wyp].longitude - current_pos_longitude, waypoints.Data[current_wyp].latitude - current_pos_latitude);
                     //go through all the conditions and take measures:
                     //
                     //GO INTO GOAL APPROACH
@@ -356,7 +357,7 @@ rtx_message("next WP: x= %lf, y= %lf",waypoints.Data[current_wyp].longitude+4.38
                         rtx_message("normalnavi: going into goal approach mode\n");
 #endif
                         naviflags.navi_state = AV_FLAGS_NAVI_GOAL_APPROACH;
-                        dataNaviFlags.t_writefrom(naviflags);
+//                         dataNaviFlags.t_writefrom(naviflags);
                         last_state = AV_FLAGS_NAVI_NORMALNAVIGATION;
                     }
 
@@ -379,14 +380,18 @@ rtx_message("next WP: x= %lf, y= %lf",waypoints.Data[current_wyp].longitude+4.38
                     rtx_message("heading_curr_to_next: %f; heading_to_next: %f; course_prev_to_next: %f; \n",heading_curr_to_next_wyp*180/AV_PI,heading_to_next_wyp*180/AV_PI,heading_prev_to_next_wyp*180/AV_PI);
 #endif
                     // DO A NEWCALCULATION -> GO INTO NEWCALC MODE
-                    if(((fabs(cleanedwind.global_direction_real_long - waypoints.Data[current_wyp].winddirection) > 40.0)
-                       || ((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3)  && (dist_next_trajectory > 100.0)) || (dist_solltrajectory > 100.0) || (generalflags.global_locator == AV_FLAGS_GLOBALSK_AVOIDANCE)) && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END )
+                    if(((fabs(cleanedwind.global_direction_real_long - waypoints.Data[current_wyp].winddirection) > 40.0) || (last_skip_index != generalflags.skip_index_dest_call)
+                       || ((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3)  && (dist_next_trajectory > 100.0)) || (dist_solltrajectory > 100.0)) && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END )
                         {
-#ifdef DEBUG_SKIPPER
+// #ifdef DEBUG_SKIPPER
                             rtx_message("normalnavi: switching to newcalculation state; reason:");
-                            if(fabs(cleanedwind.global_direction_real_long - waypoints.Data[current_wyp].winddirection) > 40.0)
+			    if(fabs(cleanedwind.global_direction_real_long - waypoints.Data[current_wyp].winddirection) > 40.0)
                             {
                                 rtx_message("wind has changed\n");
+                            }
+                            if(last_skip_index != generalflags.skip_index_dest_call)
+                            {
+                                rtx_message("new destination point\n");
                             }
                             if(((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3)  && (dist_next_trajectory > 100.0)))
                             {
@@ -396,12 +401,15 @@ rtx_message("next WP: x= %lf, y= %lf",waypoints.Data[current_wyp].longitude+4.38
                             {
                                 rtx_message("dist_solltrajectory too bigi (%f meters) \n",dist_solltrajectory);
                             }
-#endif
+// #endif
+			    last_skip_index = generalflags.skip_index_dest_call;
                             naviflags.navi_state = AV_FLAGS_NAVI_NEWCALCULATION;
                             naviflags.navi_index_call ++;
                             dataNaviFlags.t_writefrom(naviflags);
                             last_state = AV_FLAGS_NAVI_NORMALNAVIGATION;
                         }
+// desiredHeading.heading = heading_to_wyp*180.0/AV_PI;
+// headingData.t_writefrom(desiredHeading);
 
                     never_again = 0;
 
@@ -415,6 +423,7 @@ rtx_message("next WP: x= %lf, y= %lf",waypoints.Data[current_wyp].longitude+4.38
 #ifdef DEBUG_SKIPPER
                         rtx_message("You are there, congratulations");
 #endif
+rtx_message("You are there, congratulations!!!!!!!!!!!!!!!!!!!!!!!! (goal approach");
                         naviflags.navi_state = AV_FLAGS_NAVI_IDLE;
                         dataNaviFlags.t_writefrom(naviflags);
                     }
