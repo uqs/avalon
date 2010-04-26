@@ -52,7 +52,7 @@ DDXVariable shipData; //already prcessed information, showing the dangerous poin
 DDXVariable shipStruct;
 DDXVariable aisData; //actual ais data
 DDXVariable aisStruct;
-DDXVariable obstacle;
+DDXVariable aisDestData;
 DDXVariable destinationData;
 DDXVariable destinationStruct;
 DDXVariable skipperFlagData;
@@ -74,7 +74,7 @@ const char * varname_shipData = "shipData";
 const char * varname_shipStruct = "shipStruct";
 const char * varname_aisData = "aisData";
 const char * varname_aisStruct = "aisStruct";
-const char * varname_obstacle = "obstacle";
+const char * varname_aisDestData = "aisDestData";
 const char * varname_destData = "destData";
 const char * varname_destStruct = "destStruct";
 const char * varname_flags = "flags";
@@ -129,7 +129,7 @@ void * translation_thread(void * dummy)
     imuCleanData imu_clean;
     ShipData ship; //transformed information about ship (ais)
     AisData ais;				//gps-struct
-    Obstacle obst;
+    AisDestData ais_dest;
     DestinationData destination; 
     Flags generalflags;
     SkipperFlags skipperflags;	
@@ -147,6 +147,8 @@ void * translation_thread(void * dummy)
     
     double heading_avalon;
     double speed_avalon;
+    double angle_to_dest;
+    double speed_to_dest; 
     double vel_avalon_long;
     double vel_avalon_lat;
     double speed_ship;
@@ -183,36 +185,30 @@ void * translation_thread(void * dummy)
     int num_obstP;
     
     
-    
+    dataFlags.t_readto(generalflags,0,0);
+    ais_dest.new_dest_long=0;
+    ais_dest.new_dest_lat=0;
+    ais_dest.ais_dest_index=0;
+    ais_dest.global_skipper_flag=generalflags.global_locator;
+    aisDestData.t_writefrom(ais_dest);
 
     obst_p.reserve(4);
 
     while (1)
     {
-//  generalflags.state=124312;
         dataFlags.t_readto(generalflags,0,0);
-// generalflags.state=AV_FLAGS_ST_NORMALSAILING;
+
         // Read the next data available, or wai
 // rtx_message("flag: %d",generalflags.state);
         if (dataBoat.t_readto(boatData,10,1) && (generalflags.state == AV_FLAGS_ST_NORMALSAILING || generalflags.state == AV_FLAGS_ST_UPWINDSAILING || generalflags.state == AV_FLAGS_ST_DOWNWINDSAILING ))
         {
 
             aisData.t_readto(ais,0,0);
-// ais.number_of_ships=0;
-// 
-// ship.Data[0].mmsi=11111;
-// ship.Data[0].timestamp=0.1;
-// ship.Data[0].longitude=1;
-// ship.Data[0].latitude=1;
-// ship.shipCount=1;
-// 	    obstacle.t_readto(obst,0,0);
             shipData.t_readto(ship,0,0);
             destinationData.t_readto(destination,0,0);
-// destination.longitude=500;
-// destination.latitude=400;
+skipperFlagData.t_readto(skipperflags,0,0);
             dataImuClean.t_readto(imu_clean,0,0);
-// imu_clean.velocity.x=5;
-// imu_clean.velocity.y=5;
+
             current_pos_longitude = (AV_EARTHRADIUS 
                     *cos((boatData.position.latitude * AV_PI/180))*(AV_PI/180)
                     *boatData.position.longitude);
@@ -275,7 +271,7 @@ void * translation_thread(void * dummy)
 //                 rtx_message("ship's latitude = %f \n",ship_pos_latitude);
 #endif
 // rtx_message("distance = %f \n",distance_static);
-                if ((distance_static < 2000.0) && (ais.Ship[i].speed_over_ground != 0.0)
+                if ((distance_static < 2500.0) && (ais.Ship[i].speed_over_ground != 0.0)
                         && ((ais.Ship[i].course_over_ground != 0.0) || (ais.Ship[i].heading != 0.0)))
                 {
 		    heading_ship = ais.Ship[i].heading*AV_PI/180.0; // TODO degree or rad??
@@ -288,14 +284,23 @@ void * translation_thread(void * dummy)
 #endif
 
 		    speed_ship		= 0.5144444 * ais.Ship[i].speed_over_ground;
-                    heading_avalon     	= atan2((destination.latitude - current_pos_latitude) , (destination.longitude - current_pos_longitude));
+                    heading_avalon     	= boatData.attitude.yaw*AV_PI/180.0;
+		    angle_relativ	= atan2(vel_relativ_long, vel_relativ_lat);
+                    angle_avalon_ship	= atan2((ship_pos_longitude-current_pos_longitude) , (ship_pos_latitude-current_pos_latitude));
+		    angle_to_dest	= atan2((destination.longitude - current_pos_longitude),(destination.latitude - current_pos_latitude));
+// rtx_message("delta_x: %f delta_y: %f \n",destination.longitude - current_pos_longitude,destination.latitude - current_pos_latitude);
+// rtx_message("head abs: %f head to dest: %f \n",heading_avalon,angle_to_dest);
+		    // take the average velocity over the last "num_speed_history" measurements
 		    speed_avalon	= 0.5144444 * sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
-//                     speed_avalon_all.insert(speed_avalon_all.begin(),speed_avalon);
-// 		    if(speed_avalon_all.size()>num_speed_history)
-// 		      {speed_avalon_all.resize(num_speed_history);}
-// 		    speed_avalon = 0;
-// 		    for (l=0;l<speed_avalon_all.size();l++)
-// 		      {speed_avalon = speed_avalon + 1.0/speed_avalon_all.size()*speed_avalon_all[l];}
+                    speed_avalon_all.insert(speed_avalon_all.begin(),speed_avalon);
+		    if(speed_avalon_all.size()>num_speed_history)
+		      {speed_avalon_all.resize(num_speed_history);}
+		    speed_avalon = 0;
+		    for (l=0;l<speed_avalon_all.size();l++)
+		      {speed_avalon = speed_avalon + 1.0/speed_avalon_all.size()*speed_avalon_all[l];}
+		    speed_to_dest = speed_avalon*cos(angle_to_dest);
+// rtx_message("velocity avalon abs: %f vel to dest: %f \n",speed_avalon,speed_to_dest);
+
 
                     vel_avalon_long	= sin(heading_avalon) * speed_avalon;
                     vel_avalon_lat	= cos(heading_avalon) * speed_avalon;
@@ -306,8 +311,7 @@ void * translation_thread(void * dummy)
 // rtx_message("avalon vel: long= %lf lat= %lf      ship vel: long= %lf lat= %lf", vel_avalon_long,vel_avalon_lat,vel_ship_long, vel_ship_lat);
 // rtx_message("relativ vel: long= %lf lat= %lf", vel_avalon_long-vel_ship_long,vel_avalon_lat-vel_ship_lat);
 // 		    angle_relativ	= atan2(vel_relativ_lat, vel_relativ_long);
-		    angle_relativ	= atan2(vel_relativ_long, vel_relativ_lat);
-                    angle_avalon_ship	= atan2((ship_pos_longitude-current_pos_longitude) , (ship_pos_latitude-current_pos_latitude));
+
 
                     ship_length		= 1;  // ship length, if not from AIS
                     threshold_radius	= 395;  // to be modified: additional safety distance
@@ -323,11 +327,16 @@ void * translation_thread(void * dummy)
 			    {angle_safe=heading_ship+AV_PI*0.5;}
 
 // rtx_message("angle_av_sh= %lf    head_sh= %lf     ang_safe= %lf\n", angle_avalon_ship*180/AV_PI,heading_ship*180/AV_PI,angle_safe*180/AV_PI);
-			destination.longitude = ship_pos_longitude+1.5*radius_relativ*sin(angle_safe);
-			destination.latitude  = ship_pos_latitude+1.5*radius_relativ*cos(angle_safe);
-			destinationData.t_writefrom(destination);
-			skipperflags.global_locator  = AV_FLAGS_GLOBALSK_SURVIVE;
-			skipperFlagData.t_writefrom(skipperflags);
+			ais_dest.new_dest_long = ship_pos_longitude+1.5*radius_relativ*sin(angle_safe);
+			ais_dest.new_dest_lat = ship_pos_latitude+1.5*radius_relativ*cos(angle_safe);
+			ais_dest.ais_dest_index ++;
+			ais_dest.global_skipper_flag = AV_FLAGS_GLOBALSK_SURVIVE;
+			aisDestData.t_writefrom(ais_dest);			
+// destination.longitude = ship_pos_longitude+1.5*radius_relativ*sin(angle_safe);
+// 			destination.latitude  = ship_pos_latitude+1.5*radius_relativ*cos(angle_safe);
+// 			destinationData.t_writefrom(destination);
+// 			skipperflags.global_locator  = AV_FLAGS_GLOBALSK_SURVIVE;
+// 			skipperFlagData.t_writefrom(skipperflags);
 			continue;
 		    }
                     angle_tang_rear	= remainder(((angle_avalon_ship - asin(radius_relativ/dist_avalon_ship))*180.0/AV_PI),360.0) * AV_PI/180.0;
@@ -337,8 +346,8 @@ void * translation_thread(void * dummy)
 		      && (remainder(((angle_relativ - angle_tang_front)*180.0/AV_PI),360.0)<0))
 		    {
 			// On collision course with a ship, check ALL ships for obstacles
-			skipperflags.global_locator  = AV_FLAGS_GLOBALSK_AVOIDANCE;
-			skipperFlagData.t_writefrom(skipperflags);
+// 			skipperflags.global_locator  = AV_FLAGS_GLOBALSK_AVOIDANCE;
+// 			skipperFlagData.t_writefrom(skipperflags);
 			collision = true;
 			break;
 		    }
@@ -636,9 +645,16 @@ rtx_message("numbers of obstacles: %d\n",obst_p_start.size());
 		}
 	    }
 
-	    destination.longitude = safe_waypoint_long;
-	    destination.latitude  = safe_waypoint_lat;
-	    destinationData.t_writefrom(destination);
+	    ais_dest.new_dest_long = safe_waypoint_long;
+	    ais_dest.new_dest_lat = safe_waypoint_lat;
+	    ais_dest.ais_dest_index ++;
+	    ais_dest.global_skipper_flag = AV_FLAGS_GLOBALSK_AVOIDANCE;
+	    aisDestData.t_writefrom(ais_dest);
+// 	    destination.longitude = safe_waypoint_long;
+// 	    destination.latitude  = safe_waypoint_lat;
+// 	    destinationData.t_writefrom(destination);
+// 			skipperflags.global_locator  = AV_FLAGS_GLOBALSK_AVOIDANCE;
+// 			skipperFlagData.t_writefrom(skipperflags);
 	}
     }
 
@@ -795,7 +811,7 @@ int main (int argc, const char * argv[])
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), ShipData));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), AisStruct));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), AisData));
-	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), Obstacle));
+	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), AisDestData));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), DestinationStruct));
         DOC(DDX_STORE_REGISTER_TYPE (store.getId(), DestinationData));
         DOC(DDX_STORE_REGISTER_TYPE (store.getId(), SkipperFlags));
@@ -805,7 +821,7 @@ int main (int argc, const char * argv[])
 	DOB(store.registerVariable(dataFlags, varname_flags, "Flags"));
         DOB(store.registerVariable(aisStruct, varname_aisStruct, "AisStruct"));
         DOB(store.registerVariable(aisData, varname_aisData, "AisData"));
-	DOB(store.registerVariable(obstacle, varname_obstacle, "Obstacle"));
+	DOB(store.registerVariable(aisDestData, varname_aisDestData, "AisDestData"));
         DOB(store.registerVariable(dataBoat, varname4, "imuData"));
 	DOB(store.registerVariable(dataImuClean, varname_imuClean, "imuCleanData"));
         DOB(store.registerVariable(shipStruct, varname_shipStruct, "ShipStruct"));

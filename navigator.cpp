@@ -166,7 +166,7 @@ void * translation_thread(void * dummy)
         // Read the next data available, or wait at most 5 seconds
         if (dataBoat.t_readto(boatData,10,1))
         {
-            //naviData.t_readto(boatData,0,0); //not necessary, isn't it?
+//             naviData.t_readto(boatData,0,0); //not necessary, isn't it?
             waypointData.t_readto(waypoints,0,0);
             dataFlags.t_readto(generalflags,0,0);
             dataNaviFlags.t_readto(naviflags,0,0);
@@ -211,6 +211,8 @@ rtx_message("new_path_calc!!!\n");
                 rtx_message("start: %f %f m; end: %f %f m \n",transformation.longitude_start_transf, transformation.latitude_start_transf,
                         destination.longitude, destination.latitude);
 #endif 
+// rtx_message("start: %f %f m; end: %f %f m \n",transformation.longitude_start_transf+4.380225573914934e+06, transformation.latitude_start_transf-1.111949403453934e+06,
+//                         destination.longitude+4.380225573914934e+06, destination.latitude-1.111949403453934e+06);
 
                 if ((destination.longitude - transformation.longitude_start_transf)>0)
                 {

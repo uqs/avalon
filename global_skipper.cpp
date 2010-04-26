@@ -25,8 +25,10 @@
 #include <DDXStore.h>
 #include <DDXVariable.h>
 #include "imu.h"
+#include "ais.h"
 #include "flags.h"
 #include "destination.h"
+
 
 // #define DEBUG_GLOBSKIPPER
 
@@ -39,8 +41,10 @@ DDXVariable dataFlags;
 DDXVariable dataRcFlags;
 DDXVariable destinationStruct;
 DDXVariable destinationData; //the actual values!
+DDXVariable aisDestData;
 DDXVariable skipperFlagData;
 DDXVariable dataNaviFlags;
+
 
 /**
  * Prototypes for utility functions
@@ -60,6 +64,7 @@ const char * varname_flags = "flags";
 const char * varname_naviflags = "naviflags";
 const char * varname_rcflags = "rcflags";
 
+const char * varname_aisDestData = "aisDestData";
 const char * varname_destStruct = "destStruct";
 const char * varname_destData = "destData";
 
@@ -109,24 +114,24 @@ void * translation_thread(void * dummy)
     DestinationData destination; //actual array!!
     SkipperFlags skipperflags;
     NaviFlags naviflags;
+    AisDestData ais_dest;
 
     double dest_dist = 1000;
     double closest_distance;
     int i,p;
-//     unsigned int last_skip_index=0;
+    bool first=true;
+    unsigned int ais_dest_index_last=0;
     double distance;
-
-            skipperFlagData.t_readto(skipperflags,0,0);
-            skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
-            skipperFlagData.t_writefrom(skipperflags);
-            
-
-    double current_pos_longitude, current_pos_latitude; //already transformed and in meters
 
     //initializing the call index
     skipperFlagData.t_readto(skipperflags,0,0);
     skipperflags.skip_index_dest_call = 0;
+    skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
     skipperFlagData.t_writefrom(skipperflags);
+            
+
+    double current_pos_longitude, current_pos_latitude; //already transformed and in meters
+
 
     while (1) {
         // Read the next data available, or wait at most 5 seconds
@@ -135,9 +140,29 @@ void * translation_thread(void * dummy)
             dataFlags.t_readto(generalflags,0,0);
             destinationData.t_readto(destination,0,0);
             skipperFlagData.t_readto(skipperflags,0,0);
-dataNaviFlags.t_readto(naviflags,0,0);
+	    aisDestData.t_readto(ais_dest,0,0);
             //calculate all the distances and vectors:
-
+// rtx_message("index: %d      last: %d",ais_dest.ais_dest_index,ais_dest_index_last);
+if (ais_dest.ais_dest_index != ais_dest_index_last)
+  {
+rtx_message("listen to ais     index_last= %d\n", ais_dest_index_last);
+destination.longitude = ais_dest.new_dest_long;
+destination.latitude = ais_dest.new_dest_lat;
+destinationData.t_writefrom(destination);
+skipperflags.global_locator = ais_dest.global_skipper_flag;
+skipperflags.skip_index_dest_call ++;
+skipperFlagData.t_writefrom(skipperflags);
+// while(generalflags.global_locator != ais_dest.global_skipper_flag)
+// {
+// skipperflags.global_locator = ais_dest.global_skipper_flag;
+// skipperFlagData.t_writefrom(skipperflags);
+// }
+      
+  }
+if (generalflags.global_locator == ais_dest.global_skipper_flag)
+{
+ais_dest_index_last=ais_dest.ais_dest_index;
+}
             current_pos_longitude =double (AV_EARTHRADIUS 
                     *cos((boatData.position.latitude * AV_PI/180))*(AV_PI/180)
                     *boatData.position.longitude);
@@ -214,7 +239,7 @@ dataNaviFlags.t_readto(naviflags,0,0);
                             destination.destNr = (destination.destNr +2 -p);
                             destinationData.t_writefrom(destination);
 skipperflags.skip_index_dest_call ++;
-skipperFlagData.t_writefrom(skipperflags);
+rtx_message("increased skip index to %d",skipperflags.skip_index_dest_call);
 
                             skipperflags.global_locator = AV_FLAGS_GLOBALSK_TRACKER;
                             skipperFlagData.t_writefrom(skipperflags);
@@ -226,7 +251,6 @@ skipperFlagData.t_writefrom(skipperflags);
                             destination.latitude = destination.Data[destination.destNr].latitude;
                             destinationData.t_writefrom(destination);
 skipperflags.skip_index_dest_call ++;
-skipperFlagData.t_writefrom(skipperflags);
                             skipperflags.global_locator = AV_FLAGS_GLOBALSK_CLOSING;
                             skipperFlagData.t_writefrom(skipperflags);
                         }
@@ -251,6 +275,7 @@ skipperFlagData.t_writefrom(skipperflags);
                         destinationData.t_writefrom(destination);
 skipperflags.skip_index_dest_call ++;
 skipperFlagData.t_writefrom(skipperflags);
+rtx_message("increased skip index to %d",skipperflags.skip_index_dest_call);
                     }
 
                     if(distance < dest_dist)
@@ -285,13 +310,15 @@ skipperFlagData.t_writefrom(skipperflags);
                         destination.destNr += 1;
 // skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
 // skipperFlagData.t_writefrom(skipperflags);
-skipperflags.skip_index_dest_call ++;
-skipperFlagData.t_writefrom(skipperflags);
+
 // rtx_message("increase_index_call to %d  \n", naviflags.navi_index_call);
                         assert((destination.destNr < 1000) && (destination.destNr>=0));
                         destination.longitude = destination.Data[destination.destNr].longitude;
                         destination.latitude = destination.Data[destination.destNr].latitude;
                         destinationData.t_writefrom(destination);
+skipperflags.skip_index_dest_call ++;
+skipperFlagData.t_writefrom(skipperflags);
+rtx_message("increased skip index to %d",skipperflags.skip_index_dest_call);
                     }   
 
                     if((sqrt((current_pos_longitude - destination.Data[destination.destNr].longitude)
@@ -299,7 +326,8 @@ skipperFlagData.t_writefrom(skipperflags);
                                     + (current_pos_latitude - destination.Data[destination.destNr].latitude)
                                     *(current_pos_latitude - destination.Data[destination.destNr].latitude))) > 2.2*dest_dist)
                     {
-                        
+// 			skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
+//                         skipperFlagData.t_writefrom(skipperflags);
                     }
 
                     break;
@@ -313,13 +341,18 @@ skipperFlagData.t_writefrom(skipperflags);
 #ifdef DEBUG_GLOBSKIPPER
             rtx_message("Collision: collision distance = %f \n", distance);
 #endif
-
-                    if((distance < 100/*.2*dest_dist*/) || (distance > 2*dest_dist))
+// 		    if(first)
+// 		    {
+// 			skipperflags.skip_index_dest_call ++;
+// skipperFlagData.t_writefrom(skipperflags);
+// rtx_message("increased skip index to %d",skipperflags.skip_index_dest_call);
+// 			first=false;
+// 		    }
+                    if((distance < 200/*.2*dest_dist*/) || (distance > 2*dest_dist))
                     {
                         skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
                         skipperFlagData.t_writefrom(skipperflags);
-skipperflags.skip_index_dest_call ++;
-skipperFlagData.t_writefrom(skipperflags);
+// 			first=true;
                     }
 
                     break;
@@ -334,12 +367,10 @@ skipperFlagData.t_writefrom(skipperflags);
             rtx_message("Collision: collision distance = %f \n", distance);
 #endif
 
-                    if((distance < 100/*.2*dest_dist*/) || (distance > 600))
+                    if((distance < 200/*.2*dest_dist*/) || (distance > 600))
                     {
                         skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
                         skipperFlagData.t_writefrom(skipperflags);
-skipperflags.skip_index_dest_call ++;
-skipperFlagData.t_writefrom(skipperflags);
                     }
 
                     break;
@@ -422,6 +453,7 @@ int main (int argc, const char * argv[])
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), imuData));
     DOC(DDX_STORE_REGISTER_TYPE (store.getId(), DestinationStruct));
     DOC(DDX_STORE_REGISTER_TYPE (store.getId(), DestinationData));
+	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), AisDestData));
     DOC(DDX_STORE_REGISTER_TYPE (store.getId(), SkipperFlags));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), NaviFlags));
 
@@ -433,6 +465,7 @@ int main (int argc, const char * argv[])
 		//destination of AVALON:
 	DOB(store.registerVariable(destinationData, varname_destData, "DestinationData"));
 	DOB(store.registerVariable(destinationStruct, varname_destStruct, "DestinationStruct"));
+	DOB(store.registerVariable(aisDestData, varname_aisDestData, "AisDestData"));
     //desired course for AVALON:
 	DOB(store.registerVariable(skipperFlagData, varname_skipperflags, "SkipperFlags"));
 	DOB(store.registerVariable(dataNaviFlags, varname_naviflags, "NaviFlags"));

@@ -58,4 +58,17 @@ DDX_STORE_TYPE(Obstacle,
 
 );
 
+DDX_STORE_TYPE(AisDestData,
+        struct {
+
+        double new_dest_long;
+	double new_dest_lat;
+
+	unsigned int ais_dest_index;
+	int global_skipper_flag;
+
+        }
+
+);
+
 #endif //AIS_H
