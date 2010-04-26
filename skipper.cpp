@@ -223,7 +223,12 @@ void * translation_thread(void * dummy)
                 }
                 break;
             }
-// rtx_message("next WP: x= %lf, y= %lf",waypoints.Data[current_wyp].longitude+4.380225573914934e+06,waypoints.Data[current_wyp].latitude-1.111949403453934e+06);
+	    
+#ifdef DEBUG_SKIPPER
+	    rtx_message("next WP: x= %lf, y= %lf",waypoints.Data[current_wyp].longitude+4.380225573914934e+06,
+			    waypoints.Data[current_wyp].latitude-1.111949403453934e+06);
+#endif
+
             //write the current desired heading to store:
             desiredHeading.heading = waypoints.Data[current_wyp].heading;
             headingData.t_writefrom(desiredHeading);
@@ -266,13 +271,15 @@ void * translation_thread(void * dummy)
             heading_prev_to_next_wyp = remainder((-(atan2(vec_prev_to_next_wyp_y,vec_prev_to_next_wyp_x)) + AV_PI/2),2*AV_PI); //richtig genullt!! 
             heading_curr_to_next_wyp = remainder((-(atan2(vec_fix_next_y,vec_fix_next_x)) + AV_PI/2),2*AV_PI); //richtig genullt!! 
             ///////
-            dist_solltrajectory = (vec_dist_wyp_x * vec_fix_curr_y - vec_dist_wyp_y * vec_fix_curr_x) / (sqrt((double) (vec_fix_curr_x * vec_fix_curr_x) + (double) (vec_fix_curr_y * vec_fix_curr_y)));
-            dist_next_trajectory = fabs((vec_dist_wyp_x * vec_fix_next_y - vec_dist_wyp_y * vec_fix_next_x) / (sqrt((double) (vec_fix_next_x * vec_fix_next_x) + (double) (vec_fix_next_y * vec_fix_next_y))));
+            dist_solltrajectory = (vec_dist_wyp_x * vec_fix_curr_y - vec_dist_wyp_y * vec_fix_curr_x) / 
+		    (sqrt((double) (vec_fix_curr_x * vec_fix_curr_x) + (double) (vec_fix_curr_y * vec_fix_curr_y)));
+            dist_next_trajectory = fabs((vec_dist_wyp_x * vec_fix_next_y - vec_dist_wyp_y * vec_fix_next_x) / 
+			    (sqrt((double) (vec_fix_next_x * vec_fix_next_x) + (double) (vec_fix_next_y * vec_fix_next_y))));
             dist_buoy = sqrt((vec_dist_buoy_x*vec_dist_buoy_x) + (vec_dist_buoy_y*vec_dist_buoy_y));
             ///////
 
-
 #ifdef DEBUG_SKIPPER
+	    rtx_message("dist to next trajectory: %f \n", dist_next_trajectory);
             rtx_message("current_wyp = %d, desired heading = %f \n",current_wyp,desiredHeading.heading);
 #endif
 
@@ -292,9 +299,9 @@ void * translation_thread(void * dummy)
                     ///get back to normalnavigation:
                     if(generalflags.navi_index_answer == generalflags.navi_index_call)
                     {
-#ifdef DEBUG_SKIPPER
+//#ifdef DEBUG_SKIPPER
                         rtx_message("newcalc: switching to normalnavigation\n");
-#endif
+//#endif
                         //switch to state normalsailing!!
                         naviflags.navi_state = AV_FLAGS_NAVI_NORMALNAVIGATION;
                         dataNaviFlags.t_writefrom(naviflags);
@@ -346,8 +353,10 @@ void * translation_thread(void * dummy)
 #ifdef DEBUG_SKIPPER
                     rtx_message("normalnavi: dist to next trajectory: %f meters\n", dist_next_trajectory);
                     rtx_message("normalnavi: dist to curr wyp: %f meters\n", dist_curr_wyp);
+		    rtx_message("current_wyp = %d, dist = %f  dx = %f dy = %f \n",current_wyp,dist_curr_wyp, 
+				    waypoints.Data[current_wyp].longitude - current_pos_longitude, 
+				    waypoints.Data[current_wyp].latitude - current_pos_latitude);
 #endif
-// rtx_message("current_wyp = %d, dist = %f  dx = %f dy = %f \n",current_wyp,dist_curr_wyp, waypoints.Data[current_wyp].longitude - current_pos_longitude, waypoints.Data[current_wyp].latitude - current_pos_latitude);
                     //go through all the conditions and take measures:
                     //
                     //GO INTO GOAL APPROACH
@@ -357,7 +366,6 @@ void * translation_thread(void * dummy)
                         rtx_message("normalnavi: going into goal approach mode\n");
 #endif
                         naviflags.navi_state = AV_FLAGS_NAVI_GOAL_APPROACH;
-//                         dataNaviFlags.t_writefrom(naviflags);
                         last_state = AV_FLAGS_NAVI_NORMALNAVIGATION;
                     }
 
@@ -370,18 +378,22 @@ void * translation_thread(void * dummy)
                         waypoints.Data[current_wyp].passed = 1;
                         waypointData.t_writefrom(waypoints);
 
-#ifdef DEBUG_SKIPPER
+//#ifdef DEBUG_SKIPPER
                         rtx_message("normalnavi: nächster wyp ansteuern (new wyp = %d)\n", current_wyp+1);
-#endif
+//#endif
                         last_state = AV_FLAGS_NAVI_NORMALNAVIGATION;
                     }
 
 #ifdef DEBUG_SKIPPER
-                    rtx_message("heading_curr_to_next: %f; heading_to_next: %f; course_prev_to_next: %f; \n",heading_curr_to_next_wyp*180/AV_PI,heading_to_next_wyp*180/AV_PI,heading_prev_to_next_wyp*180/AV_PI);
+                    rtx_message("heading_curr_to_next: %f; heading_to_next: %f; course_prev_to_next: %f; \n",heading_curr_to_next_wyp*180/AV_PI,
+				    heading_to_next_wyp*180/AV_PI,heading_prev_to_next_wyp*180/AV_PI);
 #endif
                     // DO A NEWCALCULATION -> GO INTO NEWCALC MODE
-                    if(((fabs(cleanedwind.global_direction_real_long - waypoints.Data[current_wyp].winddirection) > 40.0) || (last_skip_index != generalflags.skip_index_dest_call)
-                       || ((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3)  && (dist_next_trajectory > 100.0)) || (dist_solltrajectory > 100.0)) && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END )
+                    if((((fabs(cleanedwind.global_direction_real_long - waypoints.Data[current_wyp].winddirection) > 40.0)
+			    || ((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3) 
+			    && (dist_next_trajectory > 100.0)) || (dist_solltrajectory > 100.0) 
+			    || (generalflags.global_locator == AV_FLAGS_GLOBALSK_AVOIDANCE)) && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END ) 
+			    || ((waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END) && (dist_curr_wyp < 80.0)))
                         {
 // #ifdef DEBUG_SKIPPER
                             rtx_message("normalnavi: switching to newcalculation state; reason:");
@@ -389,6 +401,9 @@ void * translation_thread(void * dummy)
                             {
                                 rtx_message("wind has changed\n");
                             }
+                            //if(((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3)  
+				//	    && (dist_next_trajectory > 100.0)))
+
                             if(last_skip_index != generalflags.skip_index_dest_call)
                             {
                                 rtx_message("new destination point\n");
@@ -420,10 +435,9 @@ void * translation_thread(void * dummy)
                     //always the direct heading:!!!!!!
                     if (dist_curr_wyp < 50.0)
                     {
-#ifdef DEBUG_SKIPPER
+//#ifdef DEBUG_SKIPPER
                         rtx_message("You are there, congratulations");
-#endif
-rtx_message("You are there, congratulations!!!!!!!!!!!!!!!!!!!!!!!! (goal approach");
+//#endif
                         naviflags.navi_state = AV_FLAGS_NAVI_IDLE;
                         dataNaviFlags.t_writefrom(naviflags);
                     }
@@ -475,28 +489,28 @@ rtx_message("You are there, congratulations!!!!!!!!!!!!!!!!!!!!!!!! (goal approa
 // Some self-defined utility functions:
 int sign(int i) // gives back the sign of an int
 {
-    if (i>=0)
-        return 1;
-    else
-        return -1;
+	if (i>=0)
+		return 1;
+	else
+		return -1;
 }
 
 int sign(double i) // gives back the sign of a float
 {
-    if (i>=0)
-        return 1;
-    else
-        return -1;
+	if (i>=0)
+		return 1;
+	else
+		return -1;
 }
 
 
 int main (int argc, const char * argv[])
 {
 	RtxThread * th;
-    int ret;
+	int ret;
 
 	// Process the command line
-    if ((ret = RTX_GETOPT_CMD (producerOpts, argc, argv, NULL, producerHelpStr)) == -1) {
+	if ((ret = RTX_GETOPT_CMD (producerOpts, argc, argv, NULL, producerHelpStr)) == -1) {
 		RTX_GETOPT_PRINT (producerOpts, argv[0], NULL, producerHelpStr);
 		exit (1);
 	}
@@ -510,18 +524,18 @@ int main (int argc, const char * argv[])
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), Flags));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), NaviFlags));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), imuData));
-    DOC(DDX_STORE_REGISTER_TYPE (store.getId(), WaypointStruct));
+	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), WaypointStruct));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), WaypointData));
-    DOC(DDX_STORE_REGISTER_TYPE (store.getId(), DestinationStruct));
-    DOC(DDX_STORE_REGISTER_TYPE (store.getId(), DestinationData));
-    DOC(DDX_STORE_REGISTER_TYPE (store.getId(), DesiredHeading));
-    //DOC(DDX_STORE_REGISTER_TYPE (store.getId(), Weather));
+	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), DestinationStruct));
+	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), DestinationData));
+	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), DesiredHeading));
+	//DOC(DDX_STORE_REGISTER_TYPE (store.getId(), Weather));
 
 
 
 	// Connect to variables, and create variables for the target-data
 	DOB(store.registerVariable(dataWindClean, varname2, "WindCleanData"));
-    DOB(store.registerVariable(dataBoat, varname4, "imuData"));
+	DOB(store.registerVariable(dataBoat, varname4, "imuData"));
 	//flags:
 	DOB(store.registerVariable(dataFlags, varname_flags, "Flags"));
 	DOB(store.registerVariable(dataNaviFlags, varname_naviflags, "NaviFlags"));
@@ -532,27 +546,27 @@ int main (int argc, const char * argv[])
 	//destination of AVALON:
 	DOB(store.registerVariable(destinationData, varname_destData, "DestinationData"));
 	DOB(store.registerVariable(destinationStruct, varname_destStruct, "DestinationStruct"));
-    //desired course for AVALON:
+	//desired course for AVALON:
 	DOB(store.registerVariable(headingData, varname_course, "DesiredHeading"));
-    // Information about the wind
+	// Information about the wind
 	//DOB(store.registerVariable(weatherData, varname_weather, "Weather"));
 
 
 	// Start the working thread
-    DOP(th = rtx_thread_create ("skipper thread", 0,
-								RTX_THREAD_SCHED_OTHER, RTX_THREAD_PRIO_MIN, 0,
-								RTX_THREAD_CANCEL_DEFERRED,
-								translation_thread, NULL,
-								NULL, NULL));
+	DOP(th = rtx_thread_create ("skipper thread", 0,
+				RTX_THREAD_SCHED_OTHER, RTX_THREAD_PRIO_MIN, 0,
+				RTX_THREAD_CANCEL_DEFERRED,
+				translation_thread, NULL,
+				NULL, NULL));
 
 	// Wait for Ctrl-C
-    DOC (rtx_main_wait_shutdown (0));
+	DOC (rtx_main_wait_shutdown (0));
 	rtx_message_routine ("Ctrl-C detected. Shutting down Skipper...");
 
 	// Terminating the thread
-    rtx_thread_destroy_sync (th);
+	rtx_thread_destroy_sync (th);
 
 	// The destructors will take care of cleaning up the memory
-    return (0);
+	return (0);
 
 }

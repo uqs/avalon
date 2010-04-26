@@ -115,9 +115,9 @@ void * translation_thread(void * dummy)
     DestinationData destination;
     DesiredHeading desiredHeading; //course that goes to HE
 
-    // double simheading;
-    double simspeed = 30*0.51444;
-    // double headingError = 0;             //in percent
+    double simheading;
+    double simspeed = 12*0.51444;
+    double headingError = 4;             //in percent
     double heading_average;
     double headingHistory[8];
 
@@ -136,6 +136,10 @@ void * translation_thread(void * dummy)
         headingHistory[i] = desiredHeading.heading;
     }
 
+    FILE * boatpos;
+    boatpos = fopen("boatpos.txt","w");
+
+	
 
 	while (1) {
 		// Read the next data available, or wait at most 5 seconds
@@ -148,17 +152,18 @@ void * translation_thread(void * dummy)
             dataNaviFlags.t_readto(naviflags,0,0);
 
 
-            cleanedwind.speed_long = 10; //knots
-            cleanedwind.global_direction_real = 160; //45; //remainder((rand() % 360),360); //generate winddirection;
+            cleanedwind.speed_long = 20; //knots
+            cleanedwind.global_direction_real = -45; //45; //remainder((rand() % 360),360); //generate winddirection;
             cleanedwind.bearing_real = remainder((cleanedwind.global_direction_real - boatData.attitude.yaw),360); //45; //remainder((rand() % 360),360); //generate winddirection;
             //rtx_message("first_time = %d \n",first_time);
             if(first_time)
             {
                 //write starting position into the store:
-                boatData.position.longitude = 6.950442 ; //degrees east
-                boatData.position.latitude = 46.938110; //degrees north
+                boatData.position.longitude = -40.0; //6.950442 ; //degrees east
+                boatData.position.latitude = 10.0; //46.938110; //degrees north
                 first_time = 0;
-		boatData.speed = 1;
+		boatData.speed = 0.25;
+		boatData.attitude.yaw = 90;
                 dataBoat.t_writefrom(boatData);
                 continue;
             }
@@ -168,7 +173,7 @@ void * translation_thread(void * dummy)
                                     *cos((boatData.position.latitude * AV_PI/180))*(AV_PI/180)
                                     *boatData.position.longitude);
             current_pos_latitude = double (AV_EARTHRADIUS
-                                    *(AV_PI/180)*boatData.position.latitude);
+                                   *(AV_PI/180)*boatData.position.latitude);
 
             //calculate the next path
 
@@ -184,19 +189,23 @@ void * translation_thread(void * dummy)
                 heading_average += 1.0/8.0 * headingHistory[u];
             }
 
-	    desiredHeading.heading = 90;
-            //simheading = headingError + heading_average;
-            next_pos_longitude = current_pos_longitude + cos((-desiredHeading.heading*AV_PI/180 + AV_PI/2))*simspeed;
-            next_pos_latitude = current_pos_latitude + sin((-desiredHeading.heading*AV_PI/180 + AV_PI/2))*simspeed;
-            //next_pos_longitude = current_pos_longitude + cos(remainder(-desiredHeading.heading*AV_PI/180 + AV_PI/2,2*AV_PI))*simspeed;
-            //next_pos_latitude = current_pos_latitude + sin(remainder(-desiredHeading.heading*AV_PI/180 + AV_PI/2,2*AV_PI))*simspeed;
+
+	    //desiredHeading.heading = 45;
+            simheading = headingError + heading_average;
+            //next_pos_longitude = current_pos_longitude + cos((-desiredHeading.heading*AV_PI/180 + AV_PI/2))*simspeed;
+            //next_pos_latitude = current_pos_latitude + sin((-desiredHeading.heading*AV_PI/180 + AV_PI/2))*simspeed;
+            next_pos_longitude = current_pos_longitude + cos(remainder(-simheading*AV_PI/180 + AV_PI/2,2*AV_PI))*simspeed;
+            next_pos_latitude = current_pos_latitude + sin(remainder(-simheading*AV_PI/180 + AV_PI/2,2*AV_PI))*simspeed;
             ///////
-	    boatData.speed = boatData.speed + 1;
+	    //boatData.speed = boatData.speed + 1;
             boatData.position.latitude = next_pos_latitude / (AV_EARTHRADIUS * AV_PI/180);
             boatData.position.longitude = next_pos_longitude / (AV_EARTHRADIUS * cos((boatData.position.latitude * AV_PI/180)) *(AV_PI/180));
             ///////
+	    fprintf(boatpos, "%d %d \n",int(next_pos_longitude),int(next_pos_latitude));
+
+	    //boatData.attitude.yaw += 5;
             dataBoat.t_writefrom(boatData);
-            //dataWindClean.t_writefrom(cleanedwind);
+            dataWindClean.t_writefrom(cleanedwind);
         }
 
             //has to be modified:
@@ -221,6 +230,8 @@ void * translation_thread(void * dummy)
 		}
             rtx_timer_sleep(1);
 	}
+
+	fclose(boatpos);
 
 	return NULL;
 }

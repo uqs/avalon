@@ -368,15 +368,15 @@ rtx_message("new_path_calc!!!\n");
                 Dijkstra3D::ShortestPath::const_iterator it;
 
                 /////////////////////////////////////////////////////////////
-                FILE * pathfile;
-                char filename[20];
-                sprintf(filename,"pathsolution_%d",calculation_iterator);
-                pathfile = fopen(filename,"w");
+                //FILE * pathfile;
+                //char filename[20];
+                //sprintf(filename,"pathsolution_%d",calculation_iterator);
+                //pathfile = fopen(filename,"w");
 
-                for (it=path.begin();it!=path.end();it++) {
-                    fprintf(pathfile,"%d %d \n",it->x, it->y);
-                }
-                fclose(pathfile);
+                //for (it=path.begin();it!=path.end();it++) {
+                    //fprintf(pathfile,"%d %d \n",it->x, it->y);
+                //}
+                //fclose(pathfile);
                 ////////////////////////////////////////////////////////////
                 //////////////writing the calculated waypoints into the store in an array
                 ////////////////////////////////////////////////////////////
@@ -402,7 +402,9 @@ rtx_message("new_path_calc!!!\n");
 #endif
                         waypoints.Data[arrayPointer].longitude = last_wyp_data.longitude;
                         waypoints.Data[arrayPointer].latitude = last_wyp_data.latitude;
-                        //        fprintf(pathfile,"%d %d \n",last_wyp_data.longitude,last_wyp_data.latitude);
+
+                        //fprintf(pathfile,"%d %d \n",last_wyp_data.longitude,last_wyp_data.latitude);
+
                         waypoints.Data[arrayPointer].heading = last_wyp_data.heading;
                         waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_PASSBY;
                         waypoints.Data[arrayPointer].passed = 0;
@@ -423,6 +425,9 @@ rtx_message("new_path_calc!!!\n");
                     {
                         waypoints.Data[arrayPointer].longitude = last_wyp_data.longitude;
                         waypoints.Data[arrayPointer].latitude = last_wyp_data.latitude;
+
+                        //fprintf(pathfile,"%d %d \n",last_wyp_data.longitude,last_wyp_data.latitude);
+
                         waypoints.Data[arrayPointer].heading = last_wyp_data.heading;
                         waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_PASSBY;
                         waypoints.Data[arrayPointer].passed = 1;
@@ -438,6 +443,9 @@ rtx_message("new_path_calc!!!\n");
                 waypoints.Data[arrayPointer].longitude = last_wyp_data.longitude;
                 waypoints.Data[arrayPointer].latitude = last_wyp_data.latitude;
                 waypoints.Data[arrayPointer].heading = last_wyp_data.heading;
+
+		//fprintf(pathfile,"%d %d \n",last_wyp_data.longitude,last_wyp_data.latitude);
+
                 waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_END;
                 waypoints.Data[arrayPointer].passed = 0;
                 waypoints.Data[arrayPointer].windspeed = windSpeed;

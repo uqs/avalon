@@ -265,19 +265,6 @@ remotecontrol/fast:
 .PHONY : remotecontrol/fast
 
 #=============================================================================
-# Target rules for targets named rootsolver_test
-
-# Build rule for target.
-rootsolver_test: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 rootsolver_test
-.PHONY : rootsolver_test
-
-# fast build rule for target.
-rootsolver_test/fast:
-	$(MAKE) -f CMakeFiles/rootsolver_test.dir/build.make CMakeFiles/rootsolver_test.dir/build
-.PHONY : rootsolver_test/fast
-
-#=============================================================================
 # Target rules for targets named ruddermain
 
 # Build rule for target.
@@ -673,21 +660,6 @@ remotecontrol.s:
 .PHONY : remotecontrol.s
 
 # target to build an object file
-rootsolver_test.o:
-	$(MAKE) -f CMakeFiles/rootsolver_test.dir/build.make CMakeFiles/rootsolver_test.dir/rootsolver_test.o
-.PHONY : rootsolver_test.o
-
-# target to preprocess a source file
-rootsolver_test.i:
-	$(MAKE) -f CMakeFiles/rootsolver_test.dir/build.make CMakeFiles/rootsolver_test.dir/rootsolver_test.i
-.PHONY : rootsolver_test.i
-
-# target to generate assembly for a file
-rootsolver_test.s:
-	$(MAKE) -f CMakeFiles/rootsolver_test.dir/build.make CMakeFiles/rootsolver_test.dir/rootsolver_test.s
-.PHONY : rootsolver_test.s
-
-# target to build an object file
 ruddermain.o:
 	$(MAKE) -f CMakeFiles/ruddermain.dir/build.make CMakeFiles/ruddermain.dir/ruddermain.o
 .PHONY : ruddermain.o
@@ -734,37 +706,31 @@ sailmain_keepalive.s:
 
 # target to build an object file
 sailor_main_iter_fn.o:
-	$(MAKE) -f CMakeFiles/rootsolver_test.dir/build.make CMakeFiles/rootsolver_test.dir/sailor_main_iter_fn.o
 	$(MAKE) -f CMakeFiles/sailor_statemachine.dir/build.make CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.o
 .PHONY : sailor_main_iter_fn.o
 
 # target to preprocess a source file
 sailor_main_iter_fn.i:
-	$(MAKE) -f CMakeFiles/rootsolver_test.dir/build.make CMakeFiles/rootsolver_test.dir/sailor_main_iter_fn.i
 	$(MAKE) -f CMakeFiles/sailor_statemachine.dir/build.make CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.i
 .PHONY : sailor_main_iter_fn.i
 
 # target to generate assembly for a file
 sailor_main_iter_fn.s:
-	$(MAKE) -f CMakeFiles/rootsolver_test.dir/build.make CMakeFiles/rootsolver_test.dir/sailor_main_iter_fn.s
 	$(MAKE) -f CMakeFiles/sailor_statemachine.dir/build.make CMakeFiles/sailor_statemachine.dir/sailor_main_iter_fn.s
 .PHONY : sailor_main_iter_fn.s
 
 # target to build an object file
 sailor_rudder_iter_fn.o:
-	$(MAKE) -f CMakeFiles/rootsolver_test.dir/build.make CMakeFiles/rootsolver_test.dir/sailor_rudder_iter_fn.o
 	$(MAKE) -f CMakeFiles/sailor_statemachine.dir/build.make CMakeFiles/sailor_statemachine.dir/sailor_rudder_iter_fn.o
 .PHONY : sailor_rudder_iter_fn.o
 
 # target to preprocess a source file
 sailor_rudder_iter_fn.i:
-	$(MAKE) -f CMakeFiles/rootsolver_test.dir/build.make CMakeFiles/rootsolver_test.dir/sailor_rudder_iter_fn.i
 	$(MAKE) -f CMakeFiles/sailor_statemachine.dir/build.make CMakeFiles/sailor_statemachine.dir/sailor_rudder_iter_fn.i
 .PHONY : sailor_rudder_iter_fn.i
 
 # target to generate assembly for a file
 sailor_rudder_iter_fn.s:
-	$(MAKE) -f CMakeFiles/rootsolver_test.dir/build.make CMakeFiles/rootsolver_test.dir/sailor_rudder_iter_fn.s
 	$(MAKE) -f CMakeFiles/sailor_statemachine.dir/build.make CMakeFiles/sailor_statemachine.dir/sailor_rudder_iter_fn.s
 .PHONY : sailor_rudder_iter_fn.s
 
@@ -909,7 +875,6 @@ help:
 	@echo "... porttracker"
 	@echo "... rebuild_cache"
 	@echo "... remotecontrol"
-	@echo "... rootsolver_test"
 	@echo "... ruddermain"
 	@echo "... sailmain"
 	@echo "... sailmain_keepalive"
@@ -969,9 +934,6 @@ help:
 	@echo "... remotecontrol.o"
 	@echo "... remotecontrol.i"
 	@echo "... remotecontrol.s"
-	@echo "... rootsolver_test.o"
-	@echo "... rootsolver_test.i"
-	@echo "... rootsolver_test.s"
 	@echo "... ruddermain.o"
 	@echo "... ruddermain.i"
 	@echo "... ruddermain.s"

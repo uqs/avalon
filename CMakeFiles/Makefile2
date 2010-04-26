@@ -505,48 +505,13 @@ clean: CMakeFiles/remotecontrol.dir/clean
 .PHONY : clean
 
 #=============================================================================
-# Target rules for target CMakeFiles/rootsolver_test.dir
-
-# All Build rule for target.
-CMakeFiles/rootsolver_test.dir/all:
-	$(MAKE) -f CMakeFiles/rootsolver_test.dir/build.make CMakeFiles/rootsolver_test.dir/depend
-	$(MAKE) -f CMakeFiles/rootsolver_test.dir/build.make CMakeFiles/rootsolver_test.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  17 18 19
-	@echo "Built target rootsolver_test"
-.PHONY : CMakeFiles/rootsolver_test.dir/all
-
-# Include target in all.
-all: CMakeFiles/rootsolver_test.dir/all
-.PHONY : all
-
-# Build rule for subdir invocation for target.
-CMakeFiles/rootsolver_test.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/gbuesser/avalon/CMakeFiles 3
-	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/rootsolver_test.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/gbuesser/avalon/CMakeFiles 0
-.PHONY : CMakeFiles/rootsolver_test.dir/rule
-
-# Convenience name for target.
-rootsolver_test: CMakeFiles/rootsolver_test.dir/rule
-.PHONY : rootsolver_test
-
-# clean rule for target.
-CMakeFiles/rootsolver_test.dir/clean:
-	$(MAKE) -f CMakeFiles/rootsolver_test.dir/build.make CMakeFiles/rootsolver_test.dir/clean
-.PHONY : CMakeFiles/rootsolver_test.dir/clean
-
-# clean rule for target.
-clean: CMakeFiles/rootsolver_test.dir/clean
-.PHONY : clean
-
-#=============================================================================
 # Target rules for target CMakeFiles/ruddermain.dir
 
 # All Build rule for target.
 CMakeFiles/ruddermain.dir/all:
 	$(MAKE) -f CMakeFiles/ruddermain.dir/build.make CMakeFiles/ruddermain.dir/depend
 	$(MAKE) -f CMakeFiles/ruddermain.dir/build.make CMakeFiles/ruddermain.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  20 21
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  17 18
 	@echo "Built target ruddermain"
 .PHONY : CMakeFiles/ruddermain.dir/all
 
@@ -581,7 +546,7 @@ clean: CMakeFiles/ruddermain.dir/clean
 CMakeFiles/sailmain.dir/all:
 	$(MAKE) -f CMakeFiles/sailmain.dir/build.make CMakeFiles/sailmain.dir/depend
 	$(MAKE) -f CMakeFiles/sailmain.dir/build.make CMakeFiles/sailmain.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  22 23
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  19 20
 	@echo "Built target sailmain"
 .PHONY : CMakeFiles/sailmain.dir/all
 
@@ -616,7 +581,7 @@ clean: CMakeFiles/sailmain.dir/clean
 CMakeFiles/sailmain_keepalive.dir/all:
 	$(MAKE) -f CMakeFiles/sailmain_keepalive.dir/build.make CMakeFiles/sailmain_keepalive.dir/depend
 	$(MAKE) -f CMakeFiles/sailmain_keepalive.dir/build.make CMakeFiles/sailmain_keepalive.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  24
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  21
 	@echo "Built target sailmain_keepalive"
 .PHONY : CMakeFiles/sailmain_keepalive.dir/all
 
@@ -651,7 +616,7 @@ clean: CMakeFiles/sailmain_keepalive.dir/clean
 CMakeFiles/sailor_statemachine.dir/all:
 	$(MAKE) -f CMakeFiles/sailor_statemachine.dir/build.make CMakeFiles/sailor_statemachine.dir/depend
 	$(MAKE) -f CMakeFiles/sailor_statemachine.dir/build.make CMakeFiles/sailor_statemachine.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  25 26 27 28
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  22 23 24 25
 	@echo "Built target sailor_statemachine"
 .PHONY : CMakeFiles/sailor_statemachine.dir/all
 
@@ -686,7 +651,7 @@ clean: CMakeFiles/sailor_statemachine.dir/clean
 CMakeFiles/sailor_transitions.dir/all:
 	$(MAKE) -f CMakeFiles/sailor_transitions.dir/build.make CMakeFiles/sailor_transitions.dir/depend
 	$(MAKE) -f CMakeFiles/sailor_transitions.dir/build.make CMakeFiles/sailor_transitions.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  29 30
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  26 27
 	@echo "Built target sailor_transitions"
 .PHONY : CMakeFiles/sailor_transitions.dir/all
 
@@ -721,7 +686,7 @@ clean: CMakeFiles/sailor_transitions.dir/clean
 CMakeFiles/simulator.dir/all:
 	$(MAKE) -f CMakeFiles/simulator.dir/build.make CMakeFiles/simulator.dir/depend
 	$(MAKE) -f CMakeFiles/simulator.dir/build.make CMakeFiles/simulator.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  31
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  28
 	@echo "Built target simulator"
 .PHONY : CMakeFiles/simulator.dir/all
 
@@ -756,7 +721,7 @@ clean: CMakeFiles/simulator.dir/clean
 CMakeFiles/skipper.dir/all:
 	$(MAKE) -f CMakeFiles/skipper.dir/build.make CMakeFiles/skipper.dir/depend
 	$(MAKE) -f CMakeFiles/skipper.dir/build.make CMakeFiles/skipper.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  32
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  29
 	@echo "Built target skipper"
 .PHONY : CMakeFiles/skipper.dir/all
 
@@ -791,7 +756,7 @@ clean: CMakeFiles/skipper.dir/clean
 CMakeFiles/skipper2.dir/all:
 	$(MAKE) -f CMakeFiles/skipper2.dir/build.make CMakeFiles/skipper2.dir/depend
 	$(MAKE) -f CMakeFiles/skipper2.dir/build.make CMakeFiles/skipper2.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  33
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  30
 	@echo "Built target skipper2"
 .PHONY : CMakeFiles/skipper2.dir/all
 
@@ -826,7 +791,7 @@ clean: CMakeFiles/skipper2.dir/clean
 CMakeFiles/system-state.dir/all:
 	$(MAKE) -f CMakeFiles/system-state.dir/build.make CMakeFiles/system-state.dir/depend
 	$(MAKE) -f CMakeFiles/system-state.dir/build.make CMakeFiles/system-state.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  34
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  31
 	@echo "Built target system-state"
 .PHONY : CMakeFiles/system-state.dir/all
 
@@ -861,7 +826,7 @@ clean: CMakeFiles/system-state.dir/clean
 CMakeFiles/testaufruf.dir/all:
 	$(MAKE) -f CMakeFiles/testaufruf.dir/build.make CMakeFiles/testaufruf.dir/depend
 	$(MAKE) -f CMakeFiles/testaufruf.dir/build.make CMakeFiles/testaufruf.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  35
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  32
 	@echo "Built target testaufruf"
 .PHONY : CMakeFiles/testaufruf.dir/all
 
@@ -896,7 +861,7 @@ clean: CMakeFiles/testaufruf.dir/clean
 CMakeFiles/windcleaner.dir/all:
 	$(MAKE) -f CMakeFiles/windcleaner.dir/build.make CMakeFiles/windcleaner.dir/depend
 	$(MAKE) -f CMakeFiles/windcleaner.dir/build.make CMakeFiles/windcleaner.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  36
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/gbuesser/avalon/CMakeFiles  33
 	@echo "Built target windcleaner"
 .PHONY : CMakeFiles/windcleaner.dir/all
 
