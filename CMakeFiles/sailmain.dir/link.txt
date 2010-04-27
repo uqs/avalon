@@ -1,1 +1,0 @@
-/usr/bin/c++      CMakeFiles/sailmain.dir/sailmain.o CMakeFiles/sailmain.dir/SailMotor.o  -o sailmain -rdynamic -L/home/gbuesser/avalon/eposlib-test -L/usr/local/lib -lddxx -lddx -lrtx -lcan -lepos -lpthread -lrt -Wl,-rpath,/home/gbuesser/avalon/eposlib-test:/usr/local/lib 

@@ -1,1 +1,0 @@
-/usr/bin/c++      CMakeFiles/sailor_transitions.dir/sailor_transitions.o CMakeFiles/sailor_transitions.dir/Ship.o  -o sailor_transitions -rdynamic -L/home/gbuesser/avalon/eposlib-test -L/usr/local/lib -lddxx -lddx -lrtx -lpthread -lrt -Wl,-rpath,/home/gbuesser/avalon/eposlib-test:/usr/local/lib 

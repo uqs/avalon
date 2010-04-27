@@ -1,1 +1,0 @@
-/usr/bin/c++      CMakeFiles/mtod.dir/mtod.o  -o mtod -rdynamic -L/home/gbuesser/avalon/eposlib-test -L/usr/local/lib 
