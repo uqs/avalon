@@ -12,7 +12,7 @@
 #include <gsl/gsl_math.h>
 #include <gsl/gsl_roots.h>
 #include <gsl/gsl_min.h>
-
+// #define ROOT_FINDING
 
 //sailor_main_iter_class::sailor_main_iter_class()
 //{
@@ -76,6 +76,7 @@ double sailor_main_iter_class::sailor_main_iter_fn(double heading_speed, double 
 		x_hi = gsl_min_fminimizer_x_upper (s);
 
 		status = gsl_min_test_interval (x_lo, x_hi, 0.001, 0.0);
+		alpha_r  = x;
 	}
 	while (status == GSL_CONTINUE && iter < max_iter);
 

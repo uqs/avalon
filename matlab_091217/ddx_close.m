@@ -19,8 +19,8 @@ function ddx_close( robot )
   Done( robot.desiredheading );
   Done( robot.imu );
   Done( robot.cleanimu );
-  Done( robot.AisStruct );
-  Done( robot.AisData );
+  Done( robot.aisStruct );
+  Done( robot.aisData );
   Done( robot.destStruct );
   Done( robot.destData );
   Done( robot.wypStruct );

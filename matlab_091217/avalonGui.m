@@ -169,7 +169,6 @@ cla(handles.AxesDesiredHeading);
 % aoa_sail       = deg2rad(str2double(get(handles.sail_angle,'String')));
 
 %% run simulation
-
 simulationOne;
 
 %% open evaluation panel (make it visible) after the simulationOne

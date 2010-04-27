@@ -20,9 +20,11 @@ addpath '.'
 % SoC = 70;
 % hPatch = thermometer(hAx,[0 20 100],SoC);
 %% init variables
-double d_wind
-double v_wind
+
+double d_wind;
+double v_wind;
 avalon = ddx_init();
+
 parameter;
 
 % theta_dot_star = [0 5 0 -5];
@@ -39,15 +41,23 @@ alpha_rudder_l          = 0;
 aoa_sail                = 0;
 timer                   = 0;
 des_heading             = 0;
-p1_0                    = 4.578069e+06;  % lat,  y-axis
-p2_0                    = -7.27922e+05;  % long, x-axis
+p1_0                    = 5.148802010262783e+06;  % lat,  y-axis
+p2_0                    = -0.907461908158755e+06;  % long, x-axis
+
+% other boats
+num_boats               = 1;
+boat_x                  =-0.908461908158755e+06; % [m]
+boat_y                  =5.149802010262783e+06;  % [m]
+boat_heading            =deg2rad(130); % in rad
+boat_speed              =25*0.5144; % [m/s]
 % wypx                    = []
 while (t < T_sim && ~Stop && ~rcflags_emergency_stop)
     %% read DDX Store variables
     
     %     [joystick, rudder, sail, flags, rcflags, desiredheading, imu, cleanimu, destStruct, destData, wypStruct, wypData ] = ddx_read( avalon );
-    [joystick, rudder, sail, flags, rcflags, desiredheading, imu, cleanimu] = ddx_read( avalon );
-    
+    [joystick, rudder, sail, flags, rcflags, desiredheading, imu, cleanimu, obstacle] = ddx_read( avalon );
+    %pause
+        
     vel(1,1)            = cleanimu.velocity.x*0.5144; % knots into [m/s]
     vel(2,1)            = -cleanimu.velocity.y*0.5144;% [m/s]
     vel(3,1)            = deg2rad(imu.gyro.z);
@@ -87,6 +97,12 @@ while (t < T_sim && ~Stop && ~rcflags_emergency_stop)
     alpha_rudder_p      = [alpha_rudder_p alpha_rudder_r];
     flags_state                         = flags.state;
     rcflags_sailorstate_requested       = rcflags.sailorstate_requested;
+    
+    obst_long           = obstacle.longitude;
+    obst_lat            = obstacle.latitude;
+    obst_angle          = obstacle.angle;
+    
+    
     % destinationx                        = destData.latitude;
     % destinationy                        = destData.longitude;
     
@@ -192,8 +208,8 @@ while (t < T_sim && ~Stop && ~rcflags_emergency_stop)
     else
         
         % ---------------------------------------------------------- set rudder
-        set(handles.rudder_angle,'String',num2str(10*rad2deg(alpha_rudder_r)));
-        d_rudderValue = 10*rad2deg(alpha_rudder_r);
+        set(handles.rudder_angle,'String',num2str(rad2deg(alpha_rudder_r)));
+        d_rudderValue = rad2deg(alpha_rudder_r);
         % set slider for rudder angle
         if (isempty(d_rudderValue) || d_rudderValue < -50 || d_rudderValue > 50)
             set(handles.slider_rudderangle,'Value',0);
@@ -202,8 +218,8 @@ while (t < T_sim && ~Stop && ~rcflags_emergency_stop)
             set(handles.slider_rudderangle,'Value',d_rudderValue);
         end
         
-        set(handles.rudder_angle_left,'String',num2str(rad2deg(10*alpha_rudder_l)));
-        d_rudderValue_l = 10*rad2deg(alpha_rudder_l);
+        set(handles.rudder_angle_left,'String',num2str(rad2deg(alpha_rudder_l)));
+        d_rudderValue_l = rad2deg(alpha_rudder_l);
         % set slider for rudder angle
         if (isempty(d_rudderValue_l) || d_rudderValue_l < -50 || d_rudderValue_l > 50)
             set(handles.slider_rudderangleLeft,'Value',0);
@@ -284,9 +300,9 @@ while (t < T_sim && ~Stop && ~rcflags_emergency_stop)
     
     if t == 0
         rcflags_sailorstate_requested     = 3;          % = AV_FLAGS_ST_NORMALSAILING
-        pose(1,1)                         = 4.578273e+06;
-        pose(2,1)                         = -7.27919e+05;
-        vel(1,1)                          = 0.5;
+        pose(1,1)                         = -0.907461908158755e+06;
+        pose(2,1)                         = 5.148802010262783e+06;
+        vel(1,1)                          = 0.0;
         
     end
     
@@ -303,15 +319,19 @@ while (t < T_sim && ~Stop && ~rcflags_emergency_stop)
 %     set(handles.N_dampingEdit   ,'String',num2str(round(100*N_damping)/100));
 %     set(handles.N_sailEdit      ,'String',num2str(round(100*N_sail)/100));
     
-    p1_0                                = 4.578273e+06;  % long = -8.696893;
-    p2_0                                = -7.27919e+05;  % lat  = 41.1734;
+    p1_0                                = -0.907461908158755e+06;  % long = -8.696893;
+    p2_0                                = 5.148802010262783e+06;  % lat  = 41.1734;
     %    destpoint_i                         = [(destinationx-p1_0) (destinationy-p2_0)];
     %    wyp                                 = [(wypx-p1_0) (wypy-p2_0)];
     
-    wind    = [ones(1,5)*(world_size/20-world_size/2); ones(1,5)*(world_size/20-world_size/2)] + ([0,-world_size/20, +world_size/20, -world_size/20, 0; 0, world_size/40, 0, -world_size/40, 0]'*[cos(d_wind+pi) sin(d_wind+pi); -sin(d_wind+pi) cos(d_wind+pi)])';
-    traj(n,:)                           = [(pose(1)-p1_0),(pose(2)-p2_0),pose(3)];
+    wind_p      = [ones(1,5)*(world_size/20-world_size/2); ones(1,5)*(world_size/20-world_size/2)] + ([0,-world_size/20, +world_size/20, -world_size/20, 0; 0, world_size/40, 0, -world_size/40, 0]'*[cos(d_wind+pi) sin(d_wind+pi); -sin(d_wind+pi) cos(d_wind+pi)])';
+    traj(n,:)   = [(pose(1)-p1_0),(pose(2)-p2_0),pose(3)];
     
-    plot(handles.AxesTrajectory, traj(:,2),traj(:,1), wind(2,:),wind(1,:),'g');% , destpoint_i(2), destpoint_i(1),'o', wyp(2), wyp(1),'+');%,wind(2,:),wind(1,:),'g');
+    boat_x      = boat_x + boat_speed*sin(boat_heading)*delta_t;
+    boat_y      = boat_y + boat_speed*cos(boat_heading)*delta_t;
+
+    
+    plot(handles.AxesTrajectory, traj(:,2),traj(:,1), wind_p(2,:),wind_p(1,:),'g',boat_x-p1_0,boat_y-p2_0,'rx');% , destpoint_i(2), destpoint_i(1),'o', wyp(2), wyp(1),'+');%,wind_p(2,:),wind_p(1,:),'g');
     
 %     if timer <= 25;
 %         plot(handles.AxesDotHeadingChange, rad2deg(alpha_rudder_r), rad2deg(vel(3,1)),'r','MarkerSize',8);
@@ -372,13 +392,14 @@ while (t < T_sim && ~Stop && ~rcflags_emergency_stop)
     sailstate.degrees_sail              = rad2deg(reminderRad( aoa_sail ));
     rudderstateleft.degrees_rudder      = rad2deg(reminderRad(-alpha_rudder_l));
     rudderstateright.degrees_rudder     = rad2deg(reminderRad(-alpha_rudder_r));
-
     wind.speed                          = V_wind/0.5144;                 % v_wind                                        % [kn]
     wind.direction                      = rad2deg(reminderRad(d_wind - pose(3) - aoa_sail));   % rad2deg(g_r - aoa_sail -pi)the windsensor is mounted on the mast, so the rot position has to be concidered
     wind.voltage                        = 12;                                           % randomly set to 12 Volt
     wind.temperature                    = 20;                                           % constant temp of 20°
     wind.uptodate                       = 2;                                            % wind Temp/Voltage up to date? -> 0:no,  else:yes
     
+%     AisStruct.Positionboat.long         = kruckers bötli long
+% AisStruct.Positionboat.heading          = kruckers heading
     joystick.buttons(1)                 = joy_but1;
     joystick.buttons(2)                 = joy_but2;
     joystick.buttons(3)                 = joy_but3;
@@ -392,6 +413,22 @@ while (t < T_sim && ~Stop && ~rcflags_emergency_stop)
     joystick.axes(2)                    = joy_axes2;
     joystick.axes(3)                    = joy_axes3;
     joystick.axes(4)                    = joy_axes4;
+    
+    [boat_long boat_lat]                = xy2ll([boat_x;boat_y]);
+    aisStruct.mmsi                      = 111111;
+    aisStruct.navigational_status       = 0;
+    aisStruct.rate_of_turn              = 0;
+    aisStruct.speed_over_ground         = boat_speed;
+    aisStruct.position_accuracy         = 1;
+    aisStruct.longitude                 = boat_long;
+    aisStruct.latitude                  = boat_lat;
+    aisStruct.course_over_ground        = boat_heading*180/pi;
+    aisStruct.heading                   = boat_heading*180/pi;
+    aisStruct.destination(1)            = 0;
+    aisStruct.time_of_arrival           = 0;
+    
+    aisData.number_of_ships             = num_boats;
+    aisData.ship(1)                     = aisStruct;
     
     %variables for the rcflags, if remotecontroll.cpp is not used !
     %----------------------------------------------------------------------------------------------------
@@ -407,9 +444,11 @@ while (t < T_sim && ~Stop && ~rcflags_emergency_stop)
     rcflags.man_in_charge               = 1; % = AV_FLAGS_MIC_SAILOR
     rcflags.autonom_navigation          = 1;
     
-    ddx_write( avalon, wind, joystick, rudder, rcflags, sailstate, rudderstateright, rudderstateleft, desiredheading, imu) %desiredheading,
-    %% Plotting
     
+% pause
+    ddx_write( avalon, wind, joystick, rudder, rcflags, sailstate, rudderstateright, rudderstateleft, desiredheading, imu)%, aisData) %desiredheading,
+    %% Plotting
+%     pause
     % traj(n,:) = [pose(1),pose(2)];
     waveforces(n,:)     = [X_waves, Y_waves, N_waves];
     sailforces(n,:)     = [X_sail, Y_sail, N_sail];
@@ -533,14 +572,14 @@ plot(handles.AxesTrajectoryWaypoint2, traj(:,2),traj(:,1));
 axis(handles.AxesTrajectoryWaypoint2,'equal');
 
 % Sailforces
-hold(handles.AxesSailforce,'on');
-plot(handles.AxesSailforce, 1:(n-1),sailforces(:,1),'r',1:(n-1),sailforces(:,2),'g');%,1:(n-1),sailforces(:,3),'b');
-legend(handles.AxesSailforce, 'Fsail_x', 'Fsail_y', 'Location', 'Best'); %', 'Ms_z'
+% hold(handles.AxesSailforce,'on');
+% plot(handles.AxesSailforce, 1:(n-1),sailforces(:,1),'r',1:(n-1),sailforces(:,2),'g');%,1:(n-1),sailforces(:,3),'b');
+% legend(handles.AxesSailforce, 'Fsail_x', 'Fsail_y', 'Location', 'Best'); %', 'Ms_z'
 
 % Rudder angle - Heading
-% hold(handles.AxesSailforce,'on');
-% plot(handles.AxesSailforce, 0:delta_t:t, rad2deg(pose3_p),'k', 0:delta_t:t, -rad2deg(alpha_rudder_p),'--');
-% legend(handles.AxesSailforce, 'Heading', 'Rudder_{angle}','Location', 'Best');
+hold(handles.AxesSailforce,'on');
+plot(handles.AxesSailforce, 0:delta_t:t, rad2deg(pose3_p),'k', 0:delta_t:t, -rad2deg(alpha_rudder_p),'--');
+legend(handles.AxesSailforce, 'Heading', 'Rudder_{angle}','Location', 'Best');
 
 % Odometry
 % hold(handles.AxesOdoAngle,'on');

@@ -1,5 +1,5 @@
 % function [joystick, rudder, sail, flags, rcflags, desiredheading, imu, cleanimu, destStruct, destData, wypStruct, wypData ] = ddx_read( robot )
-function [joystick, rudder, sail, flags, rcflags, desiredheading, imu, cleanimu] = ddx_read( robot )%, 
+function [joystick, rudder, sail, flags, rcflags, desiredheading, imu, cleanimu, obstacle] = ddx_read( robot )%, 
   
   %localization     = DDXRead( robot.localization );
   %control          = DDXRead( robot.control );
@@ -20,8 +20,9 @@ function [joystick, rudder, sail, flags, rcflags, desiredheading, imu, cleanimu]
   desiredheading   = DDXRead( robot.desiredheading );
   imu              = DDXRead( robot.imu );
   cleanimu         = DDXRead( robot.cleanimu );
-  %AisStruct        = DDXRead( robot.AisStruct );
-  %AisData          = DDXRead( robot.AisData );
+  obstacle         = DDXRead( robot.obstacle );
+  %AisStruct        = DDXRead( robot.aisStruct );
+  %AisData          = DDXRead( robot.aisData );
   %destStruct       = DDXRead( robot.destStruct );
   %destData         = DDXRead( robot.destData );
   %wypStruct        = DDXRead( robot.wypStruct );

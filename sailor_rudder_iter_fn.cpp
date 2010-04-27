@@ -124,6 +124,7 @@ double sailor_rudder_iter_fn(double x, void *params)
     N_rudder_des        = N_sail - N_damping - N_des;
     Y_rudder            = N_rudder_des/1.7;
     Y_rudder_right      = Y_rudder/2.0;
+rtx_message("rudderforce: %f",Y_rudder_right);
 // rtx_message("desired: %f  damping: %f  sail: %f  rudder: %f",N_des, N_damping, N_sail, N_rudder_des);
     v_r_tot         = sqrt((speed_x*speed_x) + ((speed_y - 1.7*heading_speed)*(speed_y - 1.7*heading_speed)));
     d_water         = atan2((speed_y - 1.7*heading_speed)*0.01,speed_x); 

@@ -1,12 +1,14 @@
 function [winkel] = reminderRad(alpha)
 
-if alpha > pi
-    alpha = alpha - 2*pi;
-end
+alpha = mod(alpha+pi,2*pi)-pi;
 
-if alpha < -pi
-    alpha = alpha + 2*pi;
-end
+% if alpha > pi
+%     alpha = alpha - 2*pi;
+% end
+% 
+% if alpha < -pi
+%     alpha = alpha + 2*pi;
+% end
 
 winkel = alpha;
 

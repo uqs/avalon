@@ -25,6 +25,7 @@ if isempty(robot_variable)
     IMUCLEANDATA_MSG     = 'struct { struct { double roll; } attitude; struct { double x; double y; double z; double drift; } velocity; } imuCleanData';
     AISSTRUCT_MSG        = 'struct { unsigned long mmsi; unsigned int navigational_status; double rate_of_turn; unsigned int speed_over_ground; unsigned int position_accuracy; double longitude; double latitude; double course_over_ground; double heading; char destination[21]; double time_of_arrival; double timestamp;} AisStruct ';
     AISDATA_MSG          = 'struct { int number_of_ships; AisStruct Ship[15]; } AisData';
+    OBSTACLE_MSG         = 'struct { double angle; double dist; double t_crit; double longitude; double latitude; } Obstacle';
     
     DESTINATIONSTRUCT_MSG   = 'struct { double longitude; double latitude; int passed; int type; } DestinationStruct';
     DESTINATIONDATA_MSG     = 'struct { DestinationStruct Data[1000]; double longitude; double latitude; int destNr; } DestinationData';
@@ -59,6 +60,7 @@ if isempty(robot_variable)
         RegisterType( out.store, IMUCLEANDATA_MSG );
         RegisterType( out.store, AISSTRUCT_MSG );
         RegisterType( out.store, AISDATA_MSG );
+        RegisterType( out.store, OBSTACLE_MSG );
         RegisterType( out.store, DESTINATIONSTRUCT_MSG );
         RegisterType( out.store, DESTINATIONDATA_MSG );
        RegisterType( out.store, WAYPOINTSTRUCT_MSG );
@@ -83,8 +85,9 @@ if isempty(robot_variable)
         RegisterVariable( out.store, 'desiredheading', 'DesiredHeading' );
         RegisterVariable( out.store, 'imu', 'imuData' );
         RegisterVariable( out.store, 'cleanimu', 'imuCleanData' );
-        RegisterVariable( out.store, 'AisStruct', 'AisStruct');
-        RegisterVariable( out.store, 'AisData', 'AisData' );
+        RegisterVariable( out.store, 'aisStruct', 'AisStruct');
+        RegisterVariable( out.store, 'aisData', 'AisData' );
+        RegisterVariable( out.store, 'obstacle', 'Obstacle' );
         RegisterVariable( out.store, 'destStruct', 'DestinationStruct' );
         RegisterVariable( out.store, 'destData', 'DestinationData' );
        RegisterVariable( out.store, 'wypStruct', 'WaypointStruct' );
@@ -109,8 +112,9 @@ if isempty(robot_variable)
         out.desiredheading   = Variable( out.store, 'desiredheading' );
         out.imu              = Variable( out.store, 'imu' );
         out.cleanimu         = Variable( out.store, 'cleanimu' );
-        out.AisStruct        = Variable( out.store, 'AisStruct' );
-        out.AisData          = Variable( out.store, 'AisData' );
+        out.aisStruct        = Variable( out.store, 'aisStruct' );
+        out.aisData          = Variable( out.store, 'aisData' );
+        out.obstacle         = Variable( out.store, 'obstacle' );
         out.destStruct       = Variable( out.store, 'destStruct' );
         out.destData         = Variable( out.store, 'destData' );
        out.wypStruct        = Variable( out.store, 'wypStruct' );

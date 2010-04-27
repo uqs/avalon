@@ -392,8 +392,9 @@ void * translation_thread(void * dummy)
                     if((((fabs(cleanedwind.global_direction_real_long - waypoints.Data[current_wyp].winddirection) > 40.0)
 			    || ((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3) 
 			    && (dist_next_trajectory > 100.0)) || (dist_solltrajectory > 100.0) 
-			    || (generalflags.global_locator == AV_FLAGS_GLOBALSK_AVOIDANCE)) && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END ) 
-			    || ((waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END) && (dist_curr_wyp < 80.0)))
+			    /*|| (generalflags.global_locator == AV_FLAGS_GLOBALSK_AVOIDANCE)*/) && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END ) 
+			    || ((waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END) && (dist_curr_wyp < 80.0))
+			    || (last_skip_index != generalflags.skip_index_dest_call))
                         {
 // #ifdef DEBUG_SKIPPER
                             rtx_message("normalnavi: switching to newcalculation state; reason:");
@@ -415,6 +416,10 @@ void * translation_thread(void * dummy)
                             if (dist_solltrajectory > 100.0)
                             {
                                 rtx_message("dist_solltrajectory too bigi (%f meters) \n",dist_solltrajectory);
+                            }
+			    if (last_skip_index != generalflags.skip_index_dest_call)
+                            {
+                                rtx_message("new destination location \n");
                             }
 // #endif
 			    last_skip_index = generalflags.skip_index_dest_call;
