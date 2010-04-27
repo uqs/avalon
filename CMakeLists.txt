@@ -1,14 +1,15 @@
+cmake_minimum_required(VERSION 2.6)
 
 
 # ADD_DEFINITIONS( -ggdb -Wall -O3 -fno-stack-protector )
 ADD_DEFINITIONS( -ggdb -Wall )
 
 INCLUDE_DIRECTORIES(
-	 ${CMAKE_HOME_DIRECTORY}/eposlib-test /usr/local/include
+	 ${CMAKE_HOME_DIRECTORY}/eposlib /usr/local/include
 )
 
 LINK_DIRECTORIES(
-	 ${CMAKE_HOME_DIRECTORY}/eposlib-test /usr/local/lib
+	 ${CMAKE_HOME_DIRECTORY}/eposlib /usr/local/lib
 )
 
 # ADD_EXECUTABLE(windsensor windsensor.cpp)
@@ -24,19 +25,19 @@ ADD_EXECUTABLE(remotecontrol remotecontrol.cpp)
 TARGET_LINK_LIBRARIES(remotecontrol ddxx ddx rtx pthread rt )
 
 ADD_EXECUTABLE(ruddermain ruddermain.cpp RudderMotor.cpp)
-TARGET_LINK_LIBRARIES(ruddermain ddxx ddx rtx can epos pthread rt )
+TARGET_LINK_LIBRARIES(ruddermain ddxx ddx rtx epos can pthread rt )
 
 ADD_EXECUTABLE(porttracker porttracker.cpp RudderMotor.cpp)
-TARGET_LINK_LIBRARIES(porttracker ddxx ddx rtx can epos pthread rt )
+TARGET_LINK_LIBRARIES(porttracker ddxx ddx rtx  epos can pthread rt )
 
 ADD_EXECUTABLE(eposdebug eposdebug.cpp RudderMotor.cpp SailMotor.cpp)
-TARGET_LINK_LIBRARIES(eposdebug ddxx ddx rtx can epos pthread rt )
+TARGET_LINK_LIBRARIES(eposdebug ddxx ddx rtx epos can pthread rt )
 
 # ADD_EXECUTABLE(ais ais.cpp)
 # TARGET_LINK_LIBRARIES(ais ddxx ddx rtx can epos pthread rt )
 
 ADD_EXECUTABLE(aisEval aisEval.cpp)
-TARGET_LINK_LIBRARIES(aisEval ddxx ddx rtx can epos pthread rt )
+TARGET_LINK_LIBRARIES(aisEval ddxx ddx rtx epos can pthread rt )
 
 ADD_EXECUTABLE(sailor_transitions sailor_transitions.cpp Ship.cpp)
 TARGET_LINK_LIBRARIES(sailor_transitions ddxx ddx rtx pthread rt )
@@ -48,17 +49,17 @@ TARGET_LINK_LIBRARIES(sailor_statemachine gsl gslcblas ddxx ddx rtx pthread rt )
 #TARGET_LINK_LIBRARIES(sailor_statemachine_testGB ddxx ddx rtx pthread rt )
 
 ADD_EXECUTABLE(sailmain sailmain.cpp SailMotor.cpp)
-TARGET_LINK_LIBRARIES(sailmain ddxx ddx rtx can epos pthread rt )
+TARGET_LINK_LIBRARIES(sailmain ddxx ddx rtx epos can pthread rt )
 
 ADD_EXECUTABLE(sailmain_keepalive sailmain_keepalive.cpp)
-TARGET_LINK_LIBRARIES(sailmain_keepalive ddxx ddx rtx can epos pthread rt )
+TARGET_LINK_LIBRARIES(sailmain_keepalive ddxx ddx rtx pthread rt )
 
 # Commented out while I don't have cmt
 # ADD_EXECUTABLE(imu imu.cpp)
 # TARGET_LINK_LIBRARIES(imu ddxx ddx rtx pthread rt cmt -fno-stack-protector)
 
 ADD_EXECUTABLE(windcleaner windcleaner.cpp)
-TARGET_LINK_LIBRARIES(windcleaner ddxx ddx rtx can epos pthread rt )
+TARGET_LINK_LIBRARIES(windcleaner ddxx ddx rtx pthread rt )
 
 ADD_EXECUTABLE(imucleaner imucleaner.cpp)
 TARGET_LINK_LIBRARIES(imucleaner ddxx ddx rtx pthread rt )
