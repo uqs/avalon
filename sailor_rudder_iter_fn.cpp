@@ -140,8 +140,17 @@ double sailor_rudder_iter_fn(double x, void *params)
     {     vorzeichenRR = 1;} 
     else
     {     vorzeichenRR = -1;  }
-    return k*(1.9*(1.0-exp(-fabs(remainder((-d_water + x*180.0/AV_PI),360.0)*AV_PI/180.0)*9.0))-2.4*fabs(remainder((-d_water + x*180.0/AV_PI),360.0)*AV_PI/180.0))*cos(-d_water+x)*cos(d_water)*signum(-vorzeichenR) + k*1.28*sin(fabs(remainder((-d_water + x*180.0/AV_PI),360.0)*AV_PI/180.0))*sin(-d_water+x)*signum(vorzeichenR)*sin(fabs(d_water))*signum(-vorzeichenRR) - Y_rudder_right;
+    double output = k*(1.9*(1.0-exp(-fabs(remainder((-d_water + x*180.0/AV_PI),360.0)*AV_PI/180.0)*9.0))-2.4*fabs(remainder((-d_water + x*180.0/AV_PI),360.0)*AV_PI/180.0))*cos(-d_water+x)*cos(d_water)*signum(-vorzeichenR) + k*1.28*sin(fabs(remainder((-d_water + x*180.0/AV_PI),360.0)*AV_PI/180.0))*sin(-d_water+x)*signum(vorzeichenR)*sin(fabs(d_water))*signum(-vorzeichenRR) - Y_rudder_right;
     //return 0.5*dens_water*v_r_tot*v_r_tot*A_rudder;//k*(1.9*(1-exp(-fabs(remainder((-d_water + x*180.0/AV_PI),360.0)*AV_PI/180.0)*9))-2.4*fabs(remainder((-d_water + x*180.0/AV_PI),360.0)*AV_PI/180.0));
+	//
+#ifdef ROOT_FINDING
+	// do nothing
+#else
+	// Square the value to help minimisation
+	output *= output;
+#endif
+	
+	return output;
 }
 
 int signum(double i) 

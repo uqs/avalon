@@ -2,7 +2,10 @@
 #ifndef SAILOR_RUDDER_ITER_FN_H
 #define SAILOR_RUDDER_ITER_FN_H
 
-// parameters must be in radiand !!!!!!!!!!
+// parameters must be in radian !!!!!!!!!!
+//
+// Uncomment the following line to active root finding and not minimsation
+// #define ROOT_FINDING
 
 struct rudder_iter_params
    {
