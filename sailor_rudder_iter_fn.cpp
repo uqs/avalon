@@ -124,7 +124,6 @@ double sailor_rudder_iter_fn(double x, void *params)
     N_rudder_des        = N_sail - N_damping - N_des;
     Y_rudder            = N_rudder_des/1.7;
     Y_rudder_right      = Y_rudder/2.0;
-rtx_message("rudderforce: %f",Y_rudder_right);
 // rtx_message("desired: %f  damping: %f  sail: %f  rudder: %f",N_des, N_damping, N_sail, N_rudder_des);
     v_r_tot         = sqrt((speed_x*speed_x) + ((speed_y - 1.7*heading_speed)*(speed_y - 1.7*heading_speed)));
     d_water         = atan2((speed_y - 1.7*heading_speed)*0.01,speed_x); 
@@ -141,9 +140,11 @@ rtx_message("rudderforce: %f",Y_rudder_right);
     {     vorzeichenRR = 1;} 
     else
     {     vorzeichenRR = -1;  }
-    double output = k*(1.9*(1.0-exp(-fabs(remainder((-d_water + x*180.0/AV_PI),360.0)*AV_PI/180.0)*9.0))-2.4*fabs(remainder((-d_water + x*180.0/AV_PI),360.0)*AV_PI/180.0))*cos(-d_water+x)*cos(d_water)*signum(-vorzeichenR) + k*1.28*sin(fabs(remainder((-d_water + x*180.0/AV_PI),360.0)*AV_PI/180.0))*sin(-d_water+x)*signum(vorzeichenR)*sin(fabs(d_water))*signum(-vorzeichenRR) - Y_rudder_right;
+    double output = k*(1.9*(1.0-exp(-fabs(remainder((-d_water + x)*180.0/AV_PI,360.0)*AV_PI/180.0)*9.0))-2.4*fabs(remainder((-d_water + x)*180.0/AV_PI,360.0)*AV_PI/180.0))*cos(-d_water+x)*cos(d_water)*signum(-vorzeichenR) + k*1.28*sin(fabs(remainder((-d_water + x)*180.0/AV_PI,360.0)*AV_PI/180.0))*sin(-d_water+x)*signum(vorzeichenR)*sin(fabs(d_water))*signum(-vorzeichenRR) - Y_rudder_right;
+//     double output = k*(1.9*(1.0-exp(-fabs(remainder((-d_water + x*180.0/AV_PI),360.0)*AV_PI/180.0)*9.0))-2.4*fabs(remainder((-d_water + x*180.0/AV_PI),360.0)*AV_PI/180.0))*cos(-d_water+x)*cos(d_water)*signum(-vorzeichenR) + k*1.28*sin(fabs(remainder((-d_water + x*180.0/AV_PI),360.0)*AV_PI/180.0))*sin(-d_water+x)*signum(vorzeichenR)*sin(fabs(d_water))*signum(-vorzeichenRR) - Y_rudder_right;
     //return 0.5*dens_water*v_r_tot*v_r_tot*A_rudder;//k*(1.9*(1-exp(-fabs(remainder((-d_water + x*180.0/AV_PI),360.0)*AV_PI/180.0)*9))-2.4*fabs(remainder((-d_water + x*180.0/AV_PI),360.0)*AV_PI/180.0));
 	//
+// rtx_message("rudderforce: %f, error: %f",Y_rudder_right,output);
 #ifdef ROOT_FINDING
 	// do nothing
 #else
