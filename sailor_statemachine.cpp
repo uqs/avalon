@@ -344,7 +344,7 @@ void * translation_thread(void * dummy)
 			    }
 // rtx_message("rudder degrees: %f",u);
 			    fprintf(thetafile,"%f %f %f %f\n",theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left);
-rtx_message("NORM theta dot desired: %lf   torque_des: %lf    rudder: %lf\n",theta_dot_des, torque_des, u);
+// rtx_message("NORM theta dot desired: %lf   torque_des: %lf    rudder: %lf\n",theta_dot_des, torque_des, u);
 			    rudder.degrees_left = u;
 			    rudder.degrees_right = u;
 			    last_state = AV_FLAGS_ST_NORMALSAILING;
@@ -575,7 +575,7 @@ rtx_message("UPWI theta dot desired: %lf   torque_des: %lf    rudder: %lf\n",the
 			    }
 // 			    rtx_message("u_zero = %f \n",u);
 // 			    rtx_message("des_head = %f, head = %f \n",desired_heading_after_tack,imu.attitude.yaw);
-rtx_message("TACK  theta dot desired: %lf   torque_des: %lf    rudder: %lf\n",theta_dot_des, torque_des, u);
+// rtx_message("TACK  theta dot desired: %lf   torque_des: %lf    rudder: %lf\n",theta_dot_des, torque_des, u);
 			    fprintf(thetafile,"%f %f %f %f\n",theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left);
 			    rudder.degrees_left = u;
 			    rudder.degrees_right = u;

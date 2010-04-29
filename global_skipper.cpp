@@ -326,8 +326,9 @@ rtx_message("increased skip index to %d",skipperflags.skip_index_dest_call);
                                     + (current_pos_latitude - destination.Data[destination.destNr].latitude)
                                     *(current_pos_latitude - destination.Data[destination.destNr].latitude))) > 2.2*dest_dist)
                     {
-// 			skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
-//                         skipperFlagData.t_writefrom(skipperflags);
+			skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
+skipperflags.skip_index_dest_call ++;
+                        skipperFlagData.t_writefrom(skipperflags);
                     }
 
                     break;
