@@ -1818,6 +1818,9 @@ int can_read_message_handler(const can_message_t* message)
 	}
 #endif
 
+        for (i = 0; i < EPOS_NUM_NODES; ++i)
+	  epos_read.node[i].msg_id = 0;
+
 	if (message->content[0] == 0x80)
 		//We have an error message --> print for debug
 	{ //TODO: add id to be shure message is not for LSS
@@ -1837,6 +1840,9 @@ int can_read_message_handler(const can_message_t* message)
 
 		if ((message->id >= 0x581) && (message->id <= (0x581+EPOS_NUM_NODES-1)))
 		{
+			epos_read.node[(message->id - 0x581)].msg_id = message->id;
+			for (i = 0; i < 8; ++i)
+   				epos_read.node[(message->id - 0x581)].msg_content[i] = message->content[i];
 
 			if ((message->content[1]==0x7F)
 					&& (message->content[2]==0x60)

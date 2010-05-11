@@ -133,10 +133,10 @@ double sailor_rudder_iter_fn(double x, void *params)
 // rtx_message("desired: %f  damping: %f  sail: %f  rudder: %f",N_des, N_damping, N_sail, N_rudder_des);
     v_r_tot         = sqrt((speed_x*speed_x) + ((speed_y - 1.7*heading_speed)*(speed_y - 1.7*heading_speed)));
     d_water         = atan2((speed_y - 1.7*heading_speed)*0.01,speed_x); 
-    d_water         = remainder((d_water*180.0/AV_PI),360.0)*AV_PI/180.0;
+    d_water         = remainder(d_water,2*AV_PI);
     k               = 0.5*dens_water*v_r_tot*v_r_tot*A_rudder;
     incid_angle     = -d_water + x;
-    incid_angle     = remainder((incid_angle*180.0/AV_PI),360.0)*AV_PI/180.0;
+    incid_angle     = remainder(incid_angle,2*AV_PI);
 
 // rtx_message("v_r_tot: %f  d_water: %f  incid: %f rudder: %f\n",v_r_tot, d_water, incid_angle, x);
     if (incid_angle >= 0.0)
@@ -154,14 +154,16 @@ double sailor_rudder_iter_fn(double x, void *params)
     //return 0.5*dens_water*v_r_tot*v_r_tot*A_rudder;//k*(1.9*(1-exp(-fabs(remainder((-d_water + x*180.0/AV_PI),360.0)*AV_PI/180.0)*9))-2.4*fabs(remainder((-d_water + x*180.0/AV_PI),360.0)*AV_PI/180.0));
 	//
 
+
+// same model as in the matlab-file
 c_rudder_drag = 1.28*sin(fabs(-d_water + x));
 c_rudder_lift = 1.9*(1-exp(-fabs(incid_angle)*9))-2.4*fabs(incid_angle);
 // rtx_message("c_r_drag: %f, c_r_lift: %f\n",c_rudder_drag,c_rudder_lift);
-F_lift_v_right = 1.0/2*dens_water*c_rudder_lift*v_r_tot*v_r_tot*A_rudder*cos(incid_angle);
-F_drag_v_right = 1.0/2*dens_water*c_rudder_drag*v_r_tot*v_r_tot*A_rudder*sin(incid_angle)*vorzeichenR;
+F_lift_v_right = 1.0/2.0*dens_water*c_rudder_lift*v_r_tot*v_r_tot*A_rudder*cos(incid_angle);
+F_drag_v_right = 1.0/2.0*dens_water*c_rudder_drag*v_r_tot*v_r_tot*A_rudder*sin(incid_angle)*vorzeichenR;
 
-F_lift_v_left = 1.0/2*dens_water*c_rudder_lift*v_r_tot*v_r_tot*A_rudder*cos(incid_angle);
-F_drag_v_left = 1.0/2*dens_water*c_rudder_drag*v_r_tot*v_r_tot*A_rudder*sin(incid_angle)*vorzeichenR;
+F_lift_v_left = 1.0/2.0*dens_water*c_rudder_lift*v_r_tot*v_r_tot*A_rudder*cos(incid_angle);
+F_drag_v_left = 1.0/2.0*dens_water*c_rudder_drag*v_r_tot*v_r_tot*A_rudder*sin(incid_angle)*vorzeichenR;
 // rtx_message("F_lift_R: %f, F_drag_R: %f, F_lift_L: %f, F_drag_L: %f\n",F_lift_v_right,F_drag_v_right,F_lift_v_left,F_drag_v_left);
 
 Y_rudder_right = F_lift_v_right*cos(d_water)*vorzeichenR + F_drag_v_right*sin(-d_water);

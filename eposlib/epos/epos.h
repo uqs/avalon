@@ -127,6 +127,9 @@ typedef struct {
   int max_profile_velocity;
 
   epos_error_t error;                             // errors
+
+  int msg_id;                    		  // ID of the last CAN messag received by the node
+  unsigned char msg_content[8];  		  // Content of the last CAN messag received by the node
 } epos_node_read_t;
 
 typedef struct {

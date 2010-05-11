@@ -277,7 +277,7 @@ void * translation_thread(void * dummy)
 			    (sqrt((double) (vec_fix_next_x * vec_fix_next_x) + (double) (vec_fix_next_y * vec_fix_next_y))));
             dist_buoy = sqrt((vec_dist_buoy_x*vec_dist_buoy_x) + (vec_dist_buoy_y*vec_dist_buoy_y));
             ///////
-
+rtx_message("heading to lWP: %f\n",heading_to_wyp*180/AV_PI);
 #ifdef DEBUG_SKIPPER
 	    rtx_message("dist to next trajectory: %f \n", dist_next_trajectory);
             rtx_message("current_wyp = %d, desired heading = %f \n",current_wyp,desiredHeading.heading);
