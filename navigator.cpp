@@ -137,7 +137,7 @@ void * translation_thread(void * dummy)
     WindCleanData cleanedWind;
     imuData boatData;
     WaypointData waypoints;
-    WaypointStruct last_wyp_data;
+    WaypointStruct wyp_data,last_wyp_data;
     Flags generalflags;
     rcFlags rcflags;
     NaviFlags naviflags;
@@ -250,9 +250,9 @@ rtx_message("new_path_calc!!!\n");
                     continue;
                 }
 
-#ifdef DEBUG_NAVIGATOR
-                rtx_message("2: xsize: %d, ysize %d; xstart = %d, xend = %d \n",xSize, ySize, transformation.x_start, transformation.x_end);
-#endif
+// #ifdef DEBUG_NAVIGATOR
+                rtx_message("2: xsize: %d, ysize %d; xstart = %d, xend = %d, ystart = %d, yend = %d \n",xSize, ySize, transformation.x_start, transformation.x_end, transformation.y_start, transformation.y_end);
+// #endif
 
                 //initializing the grid:
                 UISpace vspace(0,100,xSize,
@@ -271,12 +271,12 @@ rtx_message("new_path_calc!!!\n");
                 ///////////////////////////////////////////////////////////////////////////////////////
 
                 //transformation winddirection into correct mathematical direction:
-                windDirection = remainder(((-(cleanedWind.global_direction_real_long - 90))*(AV_PI / 180)),2*AV_PI);  //in rad and mathematically correct!!
+                windDirection = remainder(((-(cleanedWind.global_direction_real_long - 90))*(AV_PI / 180.0)),2*AV_PI);  //in rad and mathematically correct!!
                 windSpeed = cleanedWind.speed_long;    	//in knots
 
-#ifdef DEBUG_NAVIGATOR
+// #ifdef DEBUG_NAVIGATOR
                 rtx_message("windspeed = %f, winddirection = %f\n",windSpeed,windDirection);
-#endif
+// #endif
 
                 ///////////////////////////////////////////////////////////////////////////////////////////
                 //initialize some things:
@@ -359,7 +359,8 @@ rtx_message("new_path_calc!!!\n");
                 rtx_message("Starting search\n");
 #endif
 
-                int res = pfinder.search(start, goal, path);
+                int res;
+		res = pfinder.search(start, goal, path);
 
 #ifdef DEBUG_NAVIGATOR
                 rtx_message("Search result %d Path size %d\n",res,path.size());
@@ -368,15 +369,22 @@ rtx_message("new_path_calc!!!\n");
                 Dijkstra3D::ShortestPath::const_iterator it;
 
                 /////////////////////////////////////////////////////////////
-                //FILE * pathfile;
-                //char filename[20];
-                //sprintf(filename,"pathsolution_%d",calculation_iterator);
-                //pathfile = fopen(filename,"w");
+                FILE * pathfile;
+                char filename[20];
+#if 1
+                sprintf(filename,"path_%d",calculation_iterator);
+                pathfile = fopen(filename,"w");
 
-                //for (it=path.begin();it!=path.end();it++) {
-                    //fprintf(pathfile,"%d %d \n",it->x, it->y);
-                //}
-                //fclose(pathfile);
+                for (it=path.begin();it!=path.end();it++) {
+                    double longitude = ((it->x)*AV_NAVI_GRID_SIZE+transformation.longitude_offset);
+                    double latitude = ((it->y)*AV_NAVI_GRID_SIZE+transformation.latitude_offset);
+                    double heading =remainder((-(headingTable16[(it->theta)]*180/AV_PI)+90),360.0);
+                    fprintf(pathfile,"%d %d %e %e %e\n",it->x, it->y, longitude, latitude, heading);
+                }
+                fclose(pathfile);
+#endif
+		sprintf(filename,"pathsolution_%d",calculation_iterator);
+                pathfile = fopen(filename,"w");
                 ////////////////////////////////////////////////////////////
                 //////////////writing the calculated waypoints into the store in an array
                 ////////////////////////////////////////////////////////////
@@ -393,9 +401,32 @@ rtx_message("new_path_calc!!!\n");
 #endif
                     if(arrayPointer >= 100) break;
 
-                    if((fabs(last_wyp_data.heading - (remainder((-(headingTable16[(it->theta)]*180/AV_PI)+90.0),360.0))) > 1e-2) 
-                            && (arrayPointer != 0)
-                            && (waypoints.Data[arrayPointer-1].longitude != last_wyp_data.longitude && waypoints.Data[arrayPointer - 1].latitude != last_wyp_data.latitude))
+                    wyp_data.longitude = ((it->x)*AV_NAVI_GRID_SIZE+transformation.longitude_offset);
+                    wyp_data.latitude = ((it->y)*AV_NAVI_GRID_SIZE+transformation.latitude_offset);
+                    wyp_data.heading =remainder((-(headingTable16[(it->theta)]*180/AV_PI)+90),360.0);
+                    wyp_data.wyp_type = AV_WYP_TYPE_PASSBY;
+                    wyp_data.windspeed = windSpeed;
+                    wyp_data.winddirection = remainder(-(windDirection - AV_PI/2),2*AV_PI)*180/AV_PI;
+
+
+
+                    if(arrayPointer == 0)
+                    {
+                        waypoints.Data[arrayPointer].longitude = wyp_data.longitude;
+                        waypoints.Data[arrayPointer].latitude = wyp_data.latitude;
+
+                        fprintf(pathfile,"%d %d %f\n",wyp_data.longitude,wyp_data.latitude, wyp_data.heading);
+
+                        waypoints.Data[arrayPointer].heading = wyp_data.heading;
+                        waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_PASSBY;
+                        waypoints.Data[arrayPointer].passed = 1;
+                        waypoints.Data[arrayPointer].windspeed = windSpeed;
+                        waypoints.Data[arrayPointer].winddirection = remainder(-(windDirection - AV_PI/2),2*AV_PI)*180/AV_PI;
+                        
+                        arrayPointer = 1;
+                    } else if((fabs(remainder(wyp_data.heading - last_wyp_data.heading, 360.)) > 1e-2) 
+                            && (waypoints.Data[arrayPointer-1].longitude != wyp_data.longitude)
+			    && (waypoints.Data[arrayPointer - 1].latitude != wyp_data.latitude))
                     {
 #ifdef DEBUG_NAVIGATOR
                         printf("inserted into store: last wyp \n");
@@ -403,7 +434,7 @@ rtx_message("new_path_calc!!!\n");
                         waypoints.Data[arrayPointer].longitude = last_wyp_data.longitude;
                         waypoints.Data[arrayPointer].latitude = last_wyp_data.latitude;
 
-                        //fprintf(pathfile,"%d %d \n",last_wyp_data.longitude,last_wyp_data.latitude);
+                        fprintf(pathfile,"%d %d %f\n",last_wyp_data.longitude,last_wyp_data.latitude, last_wyp_data.heading);
 
                         waypoints.Data[arrayPointer].heading = last_wyp_data.heading;
                         waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_PASSBY;
@@ -414,29 +445,7 @@ rtx_message("new_path_calc!!!\n");
                         arrayPointer++;
                     }
 
-                    last_wyp_data.longitude = ((it->x)*AV_NAVI_GRID_SIZE+transformation.longitude_offset);
-                    last_wyp_data.latitude = ((it->y)*AV_NAVI_GRID_SIZE+transformation.latitude_offset);
-                    last_wyp_data.heading =remainder((-(headingTable16[(it->theta)]*180/AV_PI)+90),360.0);
-                    last_wyp_data.wyp_type = AV_WYP_TYPE_PASSBY;
-                    last_wyp_data.windspeed = windSpeed;
-                    last_wyp_data.winddirection = remainder(-(windDirection - AV_PI/2),2*AV_PI)*180/AV_PI;
-
-                    if(arrayPointer == 0)
-                    {
-                        waypoints.Data[arrayPointer].longitude = last_wyp_data.longitude;
-                        waypoints.Data[arrayPointer].latitude = last_wyp_data.latitude;
-
-                        //fprintf(pathfile,"%d %d \n",last_wyp_data.longitude,last_wyp_data.latitude);
-
-                        waypoints.Data[arrayPointer].heading = last_wyp_data.heading;
-                        waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_PASSBY;
-                        waypoints.Data[arrayPointer].passed = 1;
-                        waypoints.Data[arrayPointer].windspeed = windSpeed;
-                        waypoints.Data[arrayPointer].winddirection = remainder(-(windDirection - AV_PI/2),2*AV_PI)*180/AV_PI;
-                        
-                        arrayPointer = 1;
-                    }
-
+		    last_wyp_data = wyp_data;
                 }
 
 
@@ -444,15 +453,15 @@ rtx_message("new_path_calc!!!\n");
                 waypoints.Data[arrayPointer].latitude = last_wyp_data.latitude;
                 waypoints.Data[arrayPointer].heading = last_wyp_data.heading;
 
-		//fprintf(pathfile,"%d %d \n",last_wyp_data.longitude,last_wyp_data.latitude);
 
+		fprintf(pathfile,"%d %d %f\n",last_wyp_data.longitude,last_wyp_data.latitude, last_wyp_data.heading);
                 waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_END;
                 waypoints.Data[arrayPointer].passed = 0;
                 waypoints.Data[arrayPointer].windspeed = windSpeed;
                 waypoints.Data[arrayPointer].winddirection = remainder(-(windDirection - AV_PI/2),2*AV_PI)*180/AV_PI;
 
 
-                //fclose(pathfile);
+                fclose(pathfile);
                 calculation_iterator++;
                 //finished with that string
 

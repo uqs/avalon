@@ -117,7 +117,7 @@ void * translation_thread(void * dummy)
 
     double simheading;
     double simspeed = 12*0.51444;
-    double headingError = 4;             //in percent
+    double headingError = 4;             //in degree
     double heading_average;
     double headingHistory[8];
 
@@ -152,8 +152,8 @@ void * translation_thread(void * dummy)
             dataNaviFlags.t_readto(naviflags,0,0);
 
 
-            cleanedwind.speed_long = 20; //knots
-            cleanedwind.global_direction_real = -45; //45; //remainder((rand() % 360),360); //generate winddirection;
+            cleanedwind.speed_long = 15.0/0.5144; //knots
+            cleanedwind.global_direction_real_long = -90;//57; //45; //remainder((rand() % 360),360); //generate winddirection;
             cleanedwind.bearing_real = remainder((cleanedwind.global_direction_real - boatData.attitude.yaw),360); //45; //remainder((rand() % 360),360); //generate winddirection;
             //rtx_message("first_time = %d \n",first_time);
             if(first_time)
@@ -192,6 +192,7 @@ void * translation_thread(void * dummy)
 
 	    //desiredHeading.heading = 45;
             simheading = headingError + heading_average;
+// rtx_message("simheading: %f", simheading);
             //next_pos_longitude = current_pos_longitude + cos((-desiredHeading.heading*AV_PI/180 + AV_PI/2))*simspeed;
             //next_pos_latitude = current_pos_latitude + sin((-desiredHeading.heading*AV_PI/180 + AV_PI/2))*simspeed;
             next_pos_longitude = current_pos_longitude + cos(remainder(-simheading*AV_PI/180 + AV_PI/2,2*AV_PI))*simspeed;
@@ -200,6 +201,7 @@ void * translation_thread(void * dummy)
 	    //boatData.speed = boatData.speed + 1;
             boatData.position.latitude = next_pos_latitude / (AV_EARTHRADIUS * AV_PI/180);
             boatData.position.longitude = next_pos_longitude / (AV_EARTHRADIUS * cos((boatData.position.latitude * AV_PI/180)) *(AV_PI/180));
+	    boatData.attitude.yaw = heading_average;
             ///////
 	    fprintf(boatpos, "%d %d \n",int(next_pos_longitude),int(next_pos_latitude));
 

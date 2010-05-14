@@ -225,8 +225,8 @@ void * translation_thread(void * dummy)
             }
 	    
 #ifdef DEBUG_SKIPPER
-	    rtx_message("next WP: x= %lf, y= %lf",waypoints.Data[current_wyp].longitude+4.380225573914934e+06,
-			    waypoints.Data[current_wyp].latitude-1.111949403453934e+06);
+	    rtx_message("next WP: x= %lf, y= %lf head= %f",waypoints.Data[current_wyp].longitude+4.380225573914934e+06,
+			    waypoints.Data[current_wyp].latitude-1.111949403453934e+06, waypoints.Data[current_wyp].heading);
 #endif
 
             //write the current desired heading to store:
@@ -277,12 +277,11 @@ void * translation_thread(void * dummy)
 			    (sqrt((double) (vec_fix_next_x * vec_fix_next_x) + (double) (vec_fix_next_y * vec_fix_next_y))));
             dist_buoy = sqrt((vec_dist_buoy_x*vec_dist_buoy_x) + (vec_dist_buoy_y*vec_dist_buoy_y));
             ///////
-rtx_message("heading to lWP: %f\n",heading_to_wyp*180/AV_PI);
+// rtx_message("heading to lWP: %f\n",heading_to_wyp*180/AV_PI);
 #ifdef DEBUG_SKIPPER
 	    rtx_message("dist to next trajectory: %f \n", dist_next_trajectory);
             rtx_message("current_wyp = %d, desired heading = %f \n",current_wyp,desiredHeading.heading);
 #endif
-
             //begin statemachine:
 
             switch(generalflags.navi_state)
