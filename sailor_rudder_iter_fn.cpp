@@ -75,10 +75,17 @@ double sailor_rudder_iter_fn(double x, void *params)
     double F_drag_v_right;
     double F_lift_v_left;
     double F_drag_v_left;
+    double V_wind_x;
+    double V_wind_y;
     
     // neccessary coordn. transformation
 //     speed_y              = -speed_y;
 
+V_wind_x=(V_wind*cos(d_wind-pose_3)+speed_x);
+V_wind_y=(V_wind*sin(d_wind-pose_3)+speed_y);
+V_wind=sqrt((V_wind_x)*(V_wind_x)+(V_wind_y)*(V_wind_y));
+// double d_wind_1=remainder(atan2(V_wind_y,V_wind_x)-aoa_sail,2*AV_PI);
+// rtx_message("Wind: Speed= %f, angle= %f",V_wind, d_wind);
 //     torque_des           = 0.7*torque_des;
     N_damping            = signum(heading_speed)*A_hull_3*0.5*dens_water*C_d_3*((width/2.0*heading_speed)*(width/2.0*heading_speed));
     N_damp_rot           = signum(heading_speed)*1600.0*(width/2.0*heading_speed*heading_speed);
@@ -87,7 +94,9 @@ double sailor_rudder_iter_fn(double x, void *params)
     aoa                  = aoa_sail;  // [rad]
     d_wind_r             = d_wind - pose_3;  // [rad] 
     d_wind_r             = remainder((d_wind_r*180.0/AV_PI),360.0)*AV_PI/180.0;
+
     d2aoa                = remainder(((-d_wind_r+aoa)*180.0/AV_PI),360.0)*AV_PI/180.0;
+// rtx_message("aoa: %f  d2aoa: %f  d_wind_r: %f",aoa, d2aoa, d_wind_r);
 
     if (fabs(d2aoa) <= 2.0*AV_PI/180.0)    
     {    c_sail_lift     = 0.0;}
@@ -101,7 +110,7 @@ double sailor_rudder_iter_fn(double x, void *params)
     c_sail_drag          = 1.28*sin(fabs(-d_wind_r+aoa));
     F_lift_V_w           = 1.0/2.0*dens_air*c_sail_lift*V_wind*V_wind*A_sail*cos(-d_wind_r+aoa);
     F_drag_V_w           = 1.0/2.0*dens_air*c_sail_drag*V_wind*V_wind*A_sail*sin(-d_wind_r+aoa)*signum(-d_wind_r+aoa);
-
+// rtx_message("c_sail_lift %f, c_sail_drag %f, F_lift %f, F_drag %f",c_sail_lift, c_sail_drag, F_lift_V_w, F_drag_V_w);
     if (d_wind_r >= 0.0)
     {    vorzeichen = 1; }
     else
@@ -125,12 +134,13 @@ double sailor_rudder_iter_fn(double x, void *params)
     N_sail              = X_sail*x_to_sail_coa*signum(aoa) + Y_sail*y_to_sail_coa;
     sail_factor         = 0.1;
     N_sail              = sail_factor*N_sail;
+// rtx_message("aoa: %f  d_wind_r: %f  sail: %f\n",aoa, d_wind_r, N_sail);
 // N_sail=0;
     N_des               = 0.9*torque_des;//*0.81;
-    N_rudder_des        = N_sail - N_damping - N_des;
+    N_rudder_des        = -N_sail + N_damping + N_des;
     Y_rudder            = -N_rudder_des/1.7;  //+??
     Y_rudder_right      = Y_rudder/2.0;
-// rtx_message("desired: %f  damping: %f  sail: %f  rudder: %f",N_des, N_damping, N_sail, N_rudder_des);
+// rtx_message("desired: %f  damping: %f  sail: %f  rudder: %f\n",N_des, N_damping, N_sail, N_rudder_des);
     v_r_tot         = sqrt((speed_x*speed_x) + ((speed_y - 1.7*heading_speed)*(speed_y - 1.7*heading_speed)));
     d_water         = atan2((speed_y - 1.7*heading_speed)*0.01,speed_x); 
     d_water         = remainder(d_water,2*AV_PI);
@@ -138,7 +148,7 @@ double sailor_rudder_iter_fn(double x, void *params)
     incid_angle     = -d_water + x;
     incid_angle     = remainder(incid_angle,2*AV_PI);
 
-// rtx_message("v_r_tot: %f  d_water: %f  incid: %f rudder: %f\n",v_r_tot, d_water, incid_angle, x);
+// rtx_message("v_r_tot: %f  d_water: %f  incid: %f rudder: %f",v_r_tot, d_water, incid_angle, x);
     if (incid_angle >= 0.0)
     {     vorzeichenR  = 1; }
     else
@@ -158,7 +168,7 @@ double sailor_rudder_iter_fn(double x, void *params)
 // same model as in the matlab-file
 c_rudder_drag = 1.28*sin(fabs(-d_water + x));
 c_rudder_lift = 1.9*(1-exp(-fabs(incid_angle)*9))-2.4*fabs(incid_angle);
-// rtx_message("c_r_drag: %f, c_r_lift: %f\n",c_rudder_drag,c_rudder_lift);
+// rtx_message("c_r_drag: %f, c_r_lift: %f",c_rudder_drag,c_rudder_lift);
 F_lift_v_right = 1.0/2.0*dens_water*c_rudder_lift*v_r_tot*v_r_tot*A_rudder*cos(incid_angle);
 F_drag_v_right = 1.0/2.0*dens_water*c_rudder_drag*v_r_tot*v_r_tot*A_rudder*sin(incid_angle)*vorzeichenR;
 

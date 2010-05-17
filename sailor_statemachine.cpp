@@ -342,7 +342,7 @@ void * translation_thread(void * dummy)
                                     u = iter.sailor_main_iter_fn(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144, sailstate.degrees_sail*M_PI/180.0, wind_clean.global_direction_real*M_PI/180.0, imu.attitude.yaw*M_PI/180.0, wind_clean.speed*0.5144);
 // rtx_message("headS: %f  T_des: %f  xS: %f  yS: %f  aoa: %f  dW: %f  z: %f  vW: %f\n",imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144, sailstate.degrees_sail*M_PI/180.0, wind_clean.global_direction_real*M_PI/180.0, imu.attitude.yaw*M_PI/180.0, wind_clean.speed*0.5144);
 			    }
-// rtx_message("rudder degrees: %f",u);
+// rtx_message("rudder degrees: %f",u*AV_PI/180.0);
 			    fprintf(thetafile,"%f %f %f %f\n",theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left);
 // rtx_message("NORM theta dot desired: %lf   torque_des: %lf    rudder: %lf\n",theta_dot_des, torque_des, u);
 			    rudder.degrees_left = u;
@@ -418,7 +418,7 @@ void * translation_thread(void * dummy)
                                     u = iter.sailor_main_iter_fn(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144, sailstate.degrees_sail*M_PI/180.0, wind_clean.global_direction_real*M_PI/180.0, imu.attitude.yaw*M_PI/180.0, wind_clean.speed*0.5144); 
                                     //rtx_message("u_zero = %f \n",u);
 			    }                          
-rtx_message("UPWI theta dot desired: %lf   torque_des: %lf    rudder: %lf\n",theta_dot_des, torque_des, u);
+// rtx_message("UPWI theta dot desired: %lf   torque_des: %lf    rudder: %lf\n",theta_dot_des, torque_des, u);
 			    fprintf(thetafile,"%f %f %f %f\n",theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left);
 			    rudder.degrees_left = u;
 			    rudder.degrees_right = u;
@@ -577,6 +577,7 @@ rtx_message("UPWI theta dot desired: %lf   torque_des: %lf    rudder: %lf\n",the
 // 			    rtx_message("des_head = %f, head = %f \n",desired_heading_after_tack,imu.attitude.yaw);
 // rtx_message("TACK  theta dot desired: %lf   torque_des: %lf    rudder: %lf\n",theta_dot_des, torque_des, u);
 			    fprintf(thetafile,"%f %f %f %f\n",theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left);
+// rtx_message("rudder degrees: %f",u*AV_PI/180.0);
 			    rudder.degrees_left = u;
 			    rudder.degrees_right = u;
 			    last_state = AV_FLAGS_ST_TACK;
@@ -669,6 +670,7 @@ rtx_message("UPWI theta dot desired: %lf   torque_des: %lf    rudder: %lf\n",the
 			    }
 
 			    fprintf(thetafile,"%f %f %f %f\n",theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left);
+// rtx_message("rudder degrees: %f",u*AV_PI/180.0);
 			    rudder.degrees_left = u;
 			    rudder.degrees_right = u;
 			    last_state = AV_FLAGS_ST_JIBE;
