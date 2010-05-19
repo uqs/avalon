@@ -213,7 +213,7 @@ void * translation_thread(void * dummy)
             }
 
             //bring the current_buoy counter up to speed
-            for(p = 0; p < 10; p++)
+            for(p = 0; p < 100; p++)
             {
                 current_wyp = p; 
 
@@ -282,6 +282,7 @@ void * translation_thread(void * dummy)
 	    rtx_message("dist to next trajectory: %f \n", dist_next_trajectory);
             rtx_message("current_wyp = %d, desired heading = %f \n",current_wyp,desiredHeading.heading);
 #endif
+// rtx_message("dist to next wp (%d)= %f", current_wyp,dist_curr_wyp);
             //begin statemachine:
 
             switch(generalflags.navi_state)
@@ -298,9 +299,9 @@ void * translation_thread(void * dummy)
                     ///get back to normalnavigation:
                     if(generalflags.navi_index_answer == generalflags.navi_index_call)
                     {
-//#ifdef DEBUG_SKIPPER
+#ifdef DEBUG_SKIPPER
                         rtx_message("newcalc: switching to normalnavigation\n");
-//#endif
+#endif
                         //switch to state normalsailing!!
                         naviflags.navi_state = AV_FLAGS_NAVI_NORMALNAVIGATION;
                         dataNaviFlags.t_writefrom(naviflags);
@@ -389,8 +390,8 @@ void * translation_thread(void * dummy)
 #endif
                     // DO A NEWCALCULATION -> GO INTO NEWCALC MODE
                     if((((fabs(cleanedwind.global_direction_real_long - waypoints.Data[current_wyp].winddirection) > 40.0)
-			    || ((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3) 
-			    && (dist_next_trajectory > 100.0)) || (dist_solltrajectory > 100.0) 
+			    /*|| ((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3) 
+			    && (dist_next_trajectory > 100.0))*/ || (dist_solltrajectory > 100.0) 
 			    /*|| (generalflags.global_locator == AV_FLAGS_GLOBALSK_AVOIDANCE)*/) && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END ) 
 			    || ((waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END) && (dist_curr_wyp < 80.0))
 			    || (last_skip_index != generalflags.skip_index_dest_call))

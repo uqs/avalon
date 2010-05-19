@@ -250,9 +250,9 @@ void * translation_thread(void * dummy)
 					continue;
 				}
 
-				// #ifdef DEBUG_NAVIGATOR
+				#ifdef DEBUG_NAVIGATOR
 				rtx_message("2: xsize: %d, ysize %d; xstart = %d, xend = %d, ystart = %d, yend = %d \n",xSize, ySize, transformation.x_start, transformation.x_end, transformation.y_start, transformation.y_end);
-				// #endif
+				#endif
 
 				//initializing the grid:
 				UISpace vspace(0,100,xSize,
@@ -274,9 +274,9 @@ void * translation_thread(void * dummy)
 				windDirection = remainder(((-(cleanedWind.global_direction_real_long - 90))*(AV_PI / 180.0)),2*AV_PI);  //in rad and mathematically correct!!
 				windSpeed = cleanedWind.speed_long;    	//in knots
 
-				// #ifdef DEBUG_NAVIGATOR
+				#ifdef DEBUG_NAVIGATOR
 				rtx_message("windspeed = %f, winddirection = %f\n",windSpeed,windDirection);
-				// #endif
+				#endif
 
 				///////////////////////////////////////////////////////////////////////////////////////////
 				//initialize some things:
@@ -331,6 +331,7 @@ void * translation_thread(void * dummy)
 					}
 				}
 				//-----> theta at the start is mapTheta_start_correct!!
+// rtx_message("start_theta = %d \n",mapTheta_start_correct);
 #ifdef DEBUG_NAVIGATOR
 				rtx_message("start_theta = %d \n",mapTheta_start_correct);
 #endif
@@ -391,6 +392,7 @@ void * translation_thread(void * dummy)
 
 				last_wyp_data.heading = headingTable16[mapTheta_start_correct]; 
 				arrayPointer = 0;
+// int coun=-1;
 
 				for (it=path.begin();it!=path.end();it++) {
 #ifdef DEBUG_NAVIGATOR
@@ -400,7 +402,7 @@ void * translation_thread(void * dummy)
 							(last_wyp_data.heading - (remainder((-(headingTable16[(it->theta)]*180/AV_PI)+90.0),360.0))));
 #endif
 					if(arrayPointer >= 100) break;
-
+// coun++;
 					wyp_data.longitude = ((it->x)*AV_NAVI_GRID_SIZE+transformation.longitude_offset);
 					wyp_data.latitude = ((it->y)*AV_NAVI_GRID_SIZE+transformation.latitude_offset);
 					wyp_data.heading =remainder((-(headingTable16[(it->theta)]*180/AV_PI)+90),360.0);
@@ -415,8 +417,8 @@ void * translation_thread(void * dummy)
 						waypoints.Data[arrayPointer].longitude = wyp_data.longitude;
 						waypoints.Data[arrayPointer].latitude = wyp_data.latitude;
 
-						fprintf(pathfile,"%d %d %f\n",wyp_data.longitude,wyp_data.latitude, wyp_data.heading);
-
+						fprintf(pathfile,"%d %d %f\n",wyp_data.longitude,wyp_data.latitude, wyp_data.heading);/**//**/
+// rtx_message("count: %d",coun);
 						waypoints.Data[arrayPointer].heading = wyp_data.heading;
 						waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_PASSBY;
 						waypoints.Data[arrayPointer].passed = 1;
@@ -426,14 +428,17 @@ void * translation_thread(void * dummy)
 						arrayPointer = 1;
 					} else if((fabs(remainder(wyp_data.heading - last_wyp_data.heading, 360.)) > 1e-2) 
 							&& ((waypoints.Data[arrayPointer-1].longitude != wyp_data.longitude)
-								|| (waypoints.Data[arrayPointer - 1].latitude != wyp_data.latitude)))
+								|| (waypoints.Data[arrayPointer - 1].latitude != wyp_data.latitude))
+							&& ((waypoints.Data[0].longitude != last_wyp_data.longitude)	//because we always had the first wyp twice
+								|| (waypoints.Data[0].latitude != last_wyp_data.latitude)))
 					{
 #ifdef DEBUG_NAVIGATOR
 						printf("inserted into store: last wyp \n");
 #endif
 						waypoints.Data[arrayPointer].longitude = last_wyp_data.longitude;
 						waypoints.Data[arrayPointer].latitude = last_wyp_data.latitude;
-
+// rtx_message("count: %d",coun);
+// rtx_message("diff head: %f, head_curr: %f  head_last: %f",fabs(remainder(wyp_data.heading - last_wyp_data.heading, 360.)), wyp_data.heading,last_wyp_data.heading );
 						fprintf(pathfile,"%d %d %f\n",last_wyp_data.longitude,last_wyp_data.latitude, last_wyp_data.heading);
 
 						waypoints.Data[arrayPointer].heading = last_wyp_data.heading;

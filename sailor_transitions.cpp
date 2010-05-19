@@ -239,6 +239,7 @@ void * translation_thread(void * dummy)
                          * remainder((desired_heading.heading + sign(remainder(desired_heading.heading - wind_clean.global_direction_real,360.0))
                          * AV_SAILOR_TACK_HYSTERESIS - wind_clean.global_direction_real),360.0) < 0))
                 {
+rtx_message("head= %f   wind_dir= %f    des_head= %f",imu.attitude.yaw, wind_clean.global_direction_real, desired_heading.heading);
                     if(tacktimeout_diff > 20.0) // next tack only if 20 seconds after the previous
                     {
                         sailorflags.state = AV_FLAGS_ST_TACK;
@@ -252,8 +253,10 @@ void * translation_thread(void * dummy)
                     }
                 }
                 // to DOWNWINDSAILING
+
                 if(fabs(remainder((desired_heading.heading - wind_clean.global_direction_real),360.0)) >= AV_SAILOR_MAX_DOWNWIND_ANGLE)
                 {
+// rtx_message("NORM2UPW  des_head: %f   wind_dir: %f", desired_heading.heading, wind_clean.global_direction_real);
                     sailorflags.state = AV_FLAGS_ST_DOWNWINDSAILING;
                 }
                 // to JIBE
