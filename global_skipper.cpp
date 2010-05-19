@@ -116,7 +116,7 @@ void * translation_thread(void * dummy)
     NaviFlags naviflags;
     AisDestData ais_dest;
 
-    double dest_dist = 1020;
+    double dest_dist = 800;
     double closest_distance;
     int i,p;
     bool first=true;

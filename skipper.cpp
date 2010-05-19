@@ -370,7 +370,7 @@ void * translation_thread(void * dummy)
                     }
 
                     //HEAD TO THE NEXT WAYPOINT
-                    if(((dist_next_trajectory < 20.0) || (dist_curr_wyp < 20.0) 
+                    if(((dist_next_trajectory < 40.0) || (dist_curr_wyp < 40.0) 
                                 || ((sign((remainder(heading_curr_to_next_wyp - heading_to_next_wyp,2*AV_PI)))
                                         *sign(remainder(heading_curr_to_next_wyp - heading_prev_to_next_wyp,2*AV_PI))) == -1))
                             && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END)
