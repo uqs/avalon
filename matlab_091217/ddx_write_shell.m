@@ -1,11 +1,11 @@
-function ddx_write( robot, wind, joystick, rudder, rcflags, sailstate, rudderstateright, rudderstateleft, desiredheading, imu, aisData)
+function ddx_write_shell( robot, wind, rudder, rcflags, sailstate, rudderstateright, rudderstateleft, imu, aisData)
 
 %  DDXWrite( robot.control, control );
 %  DDXWrite( robot.localization, localization );
  DDXWrite( robot.wind, wind );
 %  DDXWrite( robot.cleanwind, cleanwind );
 %  DDXWrite( robot.gps, gps);
-  DDXWrite( robot.joystick, joystick );
+%   DDXWrite( robot.joystick, joystick );
  DDXWrite( robot.rudder, rudder );
  % DDXWrite( robot.sail, sail );
  % DDXWrite( robot.flags, flags );
@@ -20,7 +20,7 @@ function ddx_write( robot, wind, joystick, rudder, rcflags, sailstate, ruddersta
  DDXWrite( robot.imu, imu );
  % DDXWrite( robot.cleanimu, cleanimu );
 %  DDXWrite( robot.aisStruct, aisStruct );
- DDXWrite( robot.aisData, aisData );
+%  DDXWrite( robot.aisData, aisData );
  % DDXWrite( robot.destStruct, destStruct );
  % DDXWrite( robot.destData, destData );
 %  DDXWrite( robot.wypStruct, wypStruct );

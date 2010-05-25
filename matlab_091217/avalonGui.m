@@ -22,7 +22,7 @@ function varargout = avalonGui(varargin)
 
 % Edit the above text to modify the response to help avalonGui
 
-% Last Modified by GUIDE v2.5 07-Mar-2010 09:33:17
+% Last Modified by GUIDE v2.5 08-Apr-2010 14:31:04
 
 % Begin initialization code - DO NOT EDIT
 gui_Singleton = 1;
@@ -70,11 +70,11 @@ axes(handles.axes_pic);
 image(backgroundImage);
 axis off
 % Position
-xlabel(handles.AxesPose,'x [m]');
-ylabel(handles.AxesPose,'y [m]');
-title(handles.AxesPose,'Boat Position');
-grid(handles.AxesPose,'on');
-axis(handles.AxesPose,'equal');
+xlabel(handles.AxesLocal,'x [m]');
+ylabel(handles.AxesLocal,'y [m]');
+title(handles.AxesLocal,'Boat Position');
+grid(handles.AxesLocal,'on');
+axis(handles.AxesLocal,'equal');
 
 % Trajectory
 xlabel(handles.AxesTrajectory,'long [m]');
@@ -83,7 +83,8 @@ title(handles.AxesTrajectory,'Trajectory');
 grid(handles.AxesTrajectory,'on');
 axis(handles.AxesTrajectory,'equal');
 
-% axis(handles.AxesTrajectory,[-world_size/2 world_size/2 -world_size/2 world_size/2]);
+% axis(handles.AxesTrajectory,[-world_size/2 world_size/2 -world_size/2
+% world_size/2]);
 
 % Trajectory Waypoint 2
 xlabel(handles.AxesTrajectoryWaypoint2,'long [m]');
@@ -144,10 +145,10 @@ function simulate_pushbutton_Callback(hObject, eventdata, handles)
 % hObject    handle to simulate_pushbutton (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
-% global d_wind;
-% global v_wind
-% global alpha_rudder;
-% global aoa_sail;
+global d_wind;
+global v_wind
+global alpha_rudder;
+global aoa_sail;
 global Stop;
 Stop = 0;
 
@@ -155,7 +156,7 @@ global T_sim;
 T_sim = str2double(get(handles.t_sim,'String'));
 
 % Clear figures
-cla(handles.AxesPose);
+cla(handles.AxesLocal);
 cla(handles.AxesTrajectory);
 cla(handles.AxesForces);
 cla(handles.AxesVelocity);
@@ -169,9 +170,13 @@ cla(handles.AxesDesiredHeading);
 % aoa_sail       = deg2rad(str2double(get(handles.sail_angle,'String')));
 
 %% run simulation
-simulationOne;
 
-%% open evaluation panel (make it visible) after the simulationOne
+% simulationOne_light;
+simulationOne;
+% simulationOne_gion;
+% simulationOne_shell;
+
+% open evaluation panel (make it visible) after the simulationOne
 
 set(handles.evaluation_panel,'Visible','on');
 set(handles.start_panel,'Visible','off');
@@ -508,7 +513,7 @@ function clear_pushbutton_Callback(hObject, eventdata, handles)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 % Clear figures
-cla(handles.AxesPose);
+cla(handles.AxesLocal);
 cla(handles.AxesTrajectory);
 cla(handles.AxesForces);
 cla(handles.AxesVelocity);
@@ -800,7 +805,7 @@ function N_rudderEdit_Callback(hObject, eventdata, handles)
 % --- Executes during object creation, after setting all properties.
 function N_rudderEdit_CreateFcn(hObject, eventdata, handles)
 % hObject    handle to N_rudderEdit (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
+% eventdata  reserveaxisd - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
 % Hint: edit controls usually have a white background on Windows.
@@ -1314,18 +1319,18 @@ function radiobutton38_Callback(hObject, eventdata, handles)
 
 
 
-function edit26_Callback(hObject, eventdata, handles)
-% hObject    handle to edit26 (see GCBO)
+function num_boats_Callback(hObject, eventdata, handles)
+% hObject    handle to num_boats (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit26 as text
-%        str2double(get(hObject,'String')) returns contents of edit26 as a double
+% Hints: get(hObject,'String') returns contents of num_boats as text
+%        str2double(get(hObject,'String')) returns contents of num_boats as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit26_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit26 (see GCBO)
+function num_boats_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to num_boats (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -1336,28 +1341,28 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
-% --- Executes on button press in radiobutton33.
-function radiobutton33_Callback(hObject, eventdata, handles)
-% hObject    handle to radiobutton33 (see GCBO)
+% --- Executes on button press in avoid_button.
+function avoid_button_Callback(hObject, eventdata, handles)
+% hObject    handle to avoid_button (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hint: get(hObject,'Value') returns toggle state of radiobutton33
+% Hint: get(hObject,'Value') returns toggle state of avoid_button
 
 
 
-function edit27_Callback(hObject, eventdata, handles)
-% hObject    handle to edit27 (see GCBO)
+function distance_out_Callback(hObject, eventdata, handles)
+% hObject    handle to distance_out (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    structure with handles and user data (see GUIDATA)
 
-% Hints: get(hObject,'String') returns contents of edit27 as text
-%        str2double(get(hObject,'String')) returns contents of edit27 as a double
+% Hints: get(hObject,'String') returns contents of distance_out as text
+%        str2double(get(hObject,'String')) returns contents of distance_out as a double
 
 
 % --- Executes during object creation, after setting all properties.
-function edit27_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to edit27 (see GCBO)
+function distance_out_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to distance_out (see GCBO)
 % eventdata  reserved - to be defined in a future version of MATLAB
 % handles    empty - handles not created until after all CreateFcns called
 
@@ -1368,3 +1373,70 @@ if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgr
 end
 
 
+
+function dist_dest_Callback(hObject, eventdata, handles)
+% hObject    handle to dist_dest (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of dist_dest as text
+%        str2double(get(hObject,'String')) returns contents of dist_dest as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function dist_dest_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to dist_dest (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function exp_min_dist_Callback(hObject, eventdata, handles)
+% hObject    handle to exp_min_dist (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of exp_min_dist as text
+%        str2double(get(hObject,'String')) returns contents of exp_min_dist as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function exp_min_dist_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to exp_min_dist (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end
+
+
+
+function exp_time_Callback(hObject, eventdata, handles)
+% hObject    handle to exp_time (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    structure with handles and user data (see GUIDATA)
+
+% Hints: get(hObject,'String') returns contents of exp_time as text
+%        str2double(get(hObject,'String')) returns contents of exp_time as a double
+
+
+% --- Executes during object creation, after setting all properties.
+function exp_time_CreateFcn(hObject, eventdata, handles)
+% hObject    handle to exp_time (see GCBO)
+% eventdata  reserved - to be defined in a future version of MATLAB
+% handles    empty - handles not created until after all CreateFcns called
+
+% Hint: edit controls usually have a white background on Windows.
+%       See ISPC and COMPUTER.
+if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
+    set(hObject,'BackgroundColor','white');
+end

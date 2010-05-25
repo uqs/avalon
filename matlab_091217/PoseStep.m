@@ -52,26 +52,33 @@ N_current = small*N_current;
 
 % wind
 % -------------------------------------------------------------------------
-u_r = v_wind*cos(d_wind-pose(3)-pi) - vel(1,1) - u_c;       %(d_wind-pose(3)-pi) without data from windprofile
-v_r = v_wind*sin(d_wind-pose(3)-pi) - vel(2,1) - v_c;       %Nach Buch minus ( - vel(1)), macht aber keinen Sinn da Kr�fte zunehmen!  
-
-V_wind = sqrt(u_r^2 + v_r^2);
-g_r = atan2(v_r,u_r);
-
-if u_r >= 0
-    g_r = g_r + pi;
-elseif u_r < 0 && v_r > 0
-    g_r = g_r + 2*pi;
-end
+% u_r = v_wind*cos(d_wind-pose(3)-pi) - vel(1,1) - u_c;       %(d_wind-pose(3)-pi) without data from windprofile
+% v_r = v_wind*sin(d_wind-pose(3)-pi) - vel(2,1) - v_c;       %Nach Buch minus ( - vel(1)), macht aber keinen Sinn da Kr�fte zunehmen!  
 % 
-% while g_r > pi
-%     g_r = g_r-pi;
-% end
+% V_wind = sqrt(u_r^2 + v_r^2);
+% g_r = atan2(v_r,u_r);
 % 
-% while g_r < -pi
-%     g_r = g_r+pi;
-% end
-g_r = reminderRad(g_r);
+% if u_r >= 0
+%     g_r = g_r + pi;
+% elseif u_r < 0 && v_r > 0
+%     g_r = g_r + 2*pi;
+V_wind_x=(v_wind*cos(d_wind-pose(3))+vel(1));
+V_wind_y=(v_wind*sin(d_wind-pose(3))+vel(2));
+V_wind=sqrt((V_wind_x)^2+(V_wind_y)^2);
+g_r=reminderRad(atan2(V_wind_y,V_wind_x)-aoa_sail);
+% [d_wind g_r]
+% V_wind=v_wind;
+% g_r=d_wind;
+% % end
+% % 
+% % while g_r > pi
+% %     g_r = g_r-pi;
+% % end
+% % 
+% % while g_r < -pi
+% %     g_r = g_r+pi;
+% % end
+% g_r = reminderRad(g_r);
 
 C_X = C_hat(1)*cos(g_r);
 C_Y = C_hat(2)*sin(g_r);
@@ -131,13 +138,16 @@ N_waves = 0;
 aoa = aoa_sail;
 d_wind_r = d_wind - pose(3); %g_r-pi;
 d_wind_r = reminderRad(d_wind_r);
+
+[aoa d_wind_r];
 d2aoa = reminderRad((-d_wind_r+aoa));
+[aoa d2aoa d_wind_r];
     if abs(d2aoa) <= 2*pi/180             % Hysteresis around "dead into the wind"
         c_sail_lift = 0;
     elseif abs(d2aoa) <= 25*pi/180        % 25deg = max c_sail_lift
         c_sail_lift = (2.24*abs(d2aoa)-2.24*2*pi/180);  % sign(aoa)*
     elseif (abs(d2aoa) > 25*pi/180) && (abs(d2aoa) <= 90*pi/180)
-        c_sail_lift = -0.79*abs(d2aoa)+0.9;           %sign(aoa)*(-0.79*abs(aoa)+0.9)
+        c_sail_lift = -0.79*abs(d2aoa)+1.1;           %sign(aoa)*(-0.79*abs(aoa)+0.9)
     elseif  (abs(d2aoa) > 90*pi/180) && (abs(d2aoa) <= pi)
         c_sail_lift = 0;
     end
@@ -145,7 +155,7 @@ d2aoa = reminderRad((-d_wind_r+aoa));
 c_sail_drag = 1.28*sin(abs(-d_wind_r+aoa));
 F_lift_V_w = 1/2*dens_air*c_sail_lift*V_wind^2*A_sail*cos(-d_wind_r+aoa);%*sign(-d_wind-aoa);
 F_drag_V_w = 1/2*dens_air*c_sail_drag*V_wind^2*A_sail*sin(-d_wind_r+aoa)*sign(-d_wind_r+aoa);
-
+[c_sail_lift c_sail_drag F_lift_V_w F_drag_V_w];
 if d_wind_r >= 0
     vorzeichen = 1;
 else
@@ -155,13 +165,13 @@ end
 if abs(aoa) <= 2*pi/180
     x_to_sail_coa = 0; y_to_sail_coa = 0;
 elseif abs(aoa) <= 40*pi/180
-    x_to_sail_coa = 0.1; y_to_sail_coa = 0.2;
+    x_to_sail_coa = 0.2; y_to_sail_coa = 0.3;
 elseif abs(aoa) > 40*pi/180 && abs(aoa) <= 70*pi/180
-    x_to_sail_coa = 0.3; y_to_sail_coa = 0.3;
+    x_to_sail_coa = 0.3; y_to_sail_coa = 0.35;
 elseif abs(aoa) > 70*pi/180 && abs(aoa) <= 120*pi/180
-    x_to_sail_coa = 0.4; y_to_sail_coa = 0.3;
+    x_to_sail_coa = 0.4; y_to_sail_coa = 0.4;
 elseif abs(aoa) > 120*pi/180 && abs(aoa) <= 150*pi/180
-    x_to_sail_coa = 0.1; y_to_sail_coa = 0.2;
+    x_to_sail_coa = 0.2; y_to_sail_coa = 0.3;
 elseif abs(aoa) > 150*pi/180 && abs(aoa) <= pi
     x_to_sail_coa = 0; y_to_sail_coa = 0;
 end
@@ -176,7 +186,7 @@ N_sail = sail_factor*N_sail;
 % rudder
 % ------------------------------------------------------------------------
 
-alpha_rudder = alpha_rudder_r;
+alpha_rudder = -alpha_rudder_r;
 % velr(1,1) = vel(1,1);
 % if pose(3) > pi/2 || pose(3) < -pi/2
 %     velr(1,1) = -velr(1,1);
@@ -193,6 +203,8 @@ c_rudder_drag = 1.28*sin(abs(-d_water + alpha_rudder));
 
 incid_angle = -d_water + alpha_rudder;
 incid_angle = reminderRad(incid_angle);
+format long
+[v_r_tot d_water incid_angle alpha_rudder];
 % if abs(incid_angle) <= 2*pi/180            % Hysteresis around "dead into the wind"
 %     c_rudder_lift = 0;
 % elseif abs(incid_angle) <= 25*pi/180       % 25deg = max c_sail_lift
@@ -203,7 +215,7 @@ incid_angle = reminderRad(incid_angle);
 %     c_rudder_lift = 0;
 % end
 c_rudder_lift = 1.9*(1-exp(-abs(incid_angle)*9))-2.4*abs(incid_angle);
-
+[c_rudder_drag c_rudder_lift, incid_angle];
 if incid_angle > 0
     vorzeichenR = 1;
 else
@@ -233,10 +245,14 @@ N_rudder = -Y_rudder*1.7;        % 2*Y_rudder ????    distance CoR to rudder-cen
 %N_rudder = 0.4*N_rudder;
 % summarize the forces/moments
 % -------------------------------------------------------------------------
-
+% N_sail=0;
 X = X_sail + X_current + X_wind + X_waves + X_rudder - X_damping;   
 Y = Y_sail + Y_current + Y_wind + Y_waves + Y_rudder - Y_damping;
-N = N_sail + N_current + N_wind + N_waves + N_rudder - N_damping;   % -N_rudder
+N = N_sail + N_current + N_wind + N_waves + N_rudder - N_damping;% -N_rudder
+[aoa d_wind_r N_sail];
+[N N_damping N_sail N_rudder];
+
+0;
 % N = 0.9*N;                                                              % 0.6 correction term by FJ   waves must be additive
 
 %str=['N_rud:' num2str(N_rudder) '   N_sail:' num2str(N_sail) ' N_wind:' num2str(N_wind) '   N:' num2str(N)]; 
@@ -246,7 +262,7 @@ Y_p = [Y_p Y];
 N_p = [N_p N];
 X_drag = [X_drag F_drag_V_w];
 Y_drag = [Y_drag F_lift_V_w];
-
+[vel(3) N vel(1) vel(2) aoa d_wind pose(3) v_wind];
 % discret velocity update
 % -------------------------------------------------------------------------
 % I(3)            = I_z;
@@ -262,6 +278,6 @@ psi             = pose(3);
 R               = [cos(psi) -sin(psi) 0; sin(psi) cos(psi) 0; 0 0 1];
 
 pose            = pose + (R*vel)*delta_t;
-
+[vel(3) N alpha_rudder*180/pi];
 end
 
