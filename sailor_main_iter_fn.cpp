@@ -66,6 +66,14 @@ double sailor_main_iter_class::sailor_main_iter_fn(double heading_speed, double 
 	T = gsl_min_fminimizer_brent;
 	s = gsl_min_fminimizer_alloc (T);
 	gsl_min_fminimizer_set (s, &F, iter_start, x_lo, x_hi);
+//check if there is a minimum
+double output_lo = sailor_rudder_iter_fn(x_lo, &params);
+double output_hi = sailor_rudder_iter_fn(x_hi, &params);
+
+if (output_lo == output_hi)
+{
+    return x_lo*180/M_PI;
+}
 
 	do
 	{

@@ -166,9 +166,9 @@ V_wind=sqrt((V_wind_x)*(V_wind_x)+(V_wind_y)*(V_wind_y));
 
 
 // same model as in the matlab-file
-c_rudder_drag = 1.28*sin(fabs(-d_water + x));
+c_rudder_drag = 1.28*sin(fabs(incid_angle));
 c_rudder_lift = 1.9*(1-exp(-fabs(incid_angle)*9))-2.4*fabs(incid_angle);
-// rtx_message("c_r_drag: %f, c_r_lift: %f",c_rudder_drag,c_rudder_lift);
+// rtx_message("c_r_drag: %f, c_r_lift: %f incid: %f",c_rudder_drag,c_rudder_lift, incid_angle);
 F_lift_v_right = 1.0/2.0*dens_water*c_rudder_lift*v_r_tot*v_r_tot*A_rudder*cos(incid_angle);
 F_drag_v_right = 1.0/2.0*dens_water*c_rudder_drag*v_r_tot*v_r_tot*A_rudder*sin(incid_angle)*vorzeichenR;
 
@@ -179,13 +179,14 @@ F_drag_v_left = 1.0/2.0*dens_water*c_rudder_drag*v_r_tot*v_r_tot*A_rudder*sin(in
 Y_rudder_right = F_lift_v_right*cos(d_water)*vorzeichenR + F_drag_v_right*sin(-d_water);
 double Y_rudder_left = F_lift_v_left*cos(d_water)*vorzeichenR + F_drag_v_left*sin(-d_water);
 // rtx_message("rudderforceR: %f, rudderforceR: %f\n",Y_rudder_right,Y_rudder_left);
-double output = Y_rudder_right+Y_rudder_left-Y_rudder;
+double output = (Y_rudder_right+Y_rudder_left-Y_rudder)/Y_rudder;
+// rtx_message("desired: %f  damping: %f  sail: %f  rudder: %f error: %f\n",N_des, N_damping, N_sail, N_rudder_des, output);
 // rtx_message("rudderforce: %f, error: %f\n",Y_rudder,output);
 #ifdef ROOT_FINDING
 	// do nothing
 #else
 	// Square the value to help minimisation
-	output *= output;
+	output *= 100*output;
 #endif
 	
 	return output;

@@ -345,6 +345,7 @@ void * translation_thread(void * dummy)
 // rtx_message("rudder degrees: %f",u*AV_PI/180.0);
 			    fprintf(thetafile,"%f %f %f %f\n",theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left);
 // rtx_message("NORM theta dot desired: %lf   torque_des: %lf    rudder: %lf\n",theta_dot_des, torque_des, u);
+// rtx_message("\n");
 			    rudder.degrees_left = u;
 			    rudder.degrees_right = u;
 			    last_state = AV_FLAGS_ST_NORMALSAILING;
