@@ -155,6 +155,7 @@ void * translation_thread(void * dummy)
 	double timedif=10.0;
 	bool time_initializer = false;
 	unsigned int last_calc_index = 1234567; //TODO change to some decent number
+	unsigned int last_skip_index = 0;
 
 	//initializing the answer index: 
 	dataNaviFlags.t_readto(naviflags,0,0);
@@ -182,7 +183,7 @@ void * translation_thread(void * dummy)
 				timedif = difftime(end,start_time);
 			}
 			// rtx_message("last_calc_ind: %d    navi_call_ind: %d\n",last_calc_index,generalflags.navi_index_call);
-			if((last_calc_index != generalflags.navi_index_call) 
+			if(((last_calc_index != generalflags.navi_index_call) || (last_skip_index != generalflags.skip_index_dest_call))
 					&& (generalflags.autonom_navigation)) 
 				//&& (timedif > 7.0))  //if this is 1, then do the waypoint-calculation
 			{
@@ -372,7 +373,7 @@ void * translation_thread(void * dummy)
 				/////////////////////////////////////////////////////////////
 				FILE * pathfile;
 				char filename[20];
-#if 1
+#if 0
 				sprintf(filename,"path_%d",calculation_iterator);
 				pathfile = fopen(filename,"w");
 
@@ -471,11 +472,13 @@ void * translation_thread(void * dummy)
 				//finished with that string
 
 				last_calc_index = generalflags.navi_index_call;
+				last_skip_index = generalflags.skip_index_dest_call;
 				naviflags.navi_index_answer = generalflags.navi_index_call;
 				dataNaviFlags.t_writefrom(naviflags);
 				transformationData.t_writefrom(transformation);
 				waypointData.t_writefrom(waypoints);
 				time(&start_time);
+rtx_message("path calc done");
 			}
 
 		} else if (dataWindClean.hasTimedOut()) {

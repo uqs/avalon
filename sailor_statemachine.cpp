@@ -235,17 +235,17 @@ void * translation_thread(void * dummy)
             dataRudderStateLeft.t_readto(rudderstateleft,0,0);
             dataRudderStateRight.t_readto(rudderstateright,0,0);
             dataDesiredHeading.t_readto(desired_heading,0,0);
-
-            if(flags.sailor_no_tack_or_jibe == 1)
-            {
-                if(last_no_tack_or_jibe_value == 0)
-                {
-                    // set desired heading to current heading before beginning
-                    // the wait during no_tack_or_jibe
-                    desired_heading_while_no_tack_or_jibe = imu.attitude.yaw;
-                }
-                desired_heading.heading = desired_heading_while_no_tack_or_jibe;
-            }
+/*rtx_message("des_head= %f", desired_heading.heading);      */
+//             if(flags.sailor_no_tack_or_jibe == 1)
+//             {
+//                 if(last_no_tack_or_jibe_value == 0)
+//                 {
+//                     // set desired heading to current heading before beginning
+//                     // the wait during no_tack_or_jibe
+//                     desired_heading_while_no_tack_or_jibe = imu.attitude.yaw;
+//                 }
+//                 desired_heading.heading = desired_heading_while_no_tack_or_jibe;
+//             }
 
 	    FILE * thetafile;
 	    thetafile = fopen("thetaplot.txt","a+");
@@ -310,6 +310,7 @@ void * translation_thread(void * dummy)
 				    rudderpid = rtx_pid_init(rudderpid, paramstream_rudder, "rudder", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(rudderpid);
 			    }
+// rtx_message("des_head= %f", desired_heading.heading);      
 			    // compensate drift
 			    if(imu_clean.velocity.x > 0.5) // below 0.5kn it probably doesn't make sense to compensate drift
 			    {
@@ -326,7 +327,8 @@ void * translation_thread(void * dummy)
                             // theta_dot_des = imu.theta_star;
                             torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
                             rudder.torque_des = torque_des;
-                            
+// rtx_message("des_head= %f, head= %f\n", desired_heading.heading, imu.attitude.yaw);      
+// rtx_message("des_head= %f, torque_des= %f", desired_heading.heading, torque_des);      
 // rtx_message("theta dot desired: %lf \n",theta_dot_des);
                             speed = 0.5144*sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
                             if (speed <= 0.3)

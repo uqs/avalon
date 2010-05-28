@@ -186,9 +186,10 @@ double output = (Y_rudder_right+Y_rudder_left-Y_rudder)/Y_rudder;
 	// do nothing
 #else
 	// Square the value to help minimisation
-	output *= 100*output;
+	output *= output;
 #endif
-	
+// rtx_message("out: %f,   x: %f", output, x);
+
 	return output;
 }
 

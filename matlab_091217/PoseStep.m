@@ -18,7 +18,7 @@ function [pose, vel_p, vel, X, Y, N, X_p, Y_p, N_p, X_drag, Y_drag, X_waves, Y_w
 
 dens_air = 1.23;            % [kg/m^3] density of air
 dens_water = 1024;          % [kg/m^3] density of water
-g =9.81;                    % [m/s^2]
+% g =9.81;                    % [m/s^2]
 
 % forces
 % -------------------------------------------------------------------------
@@ -38,92 +38,97 @@ N_damping = N_damping + N_damp_rot;% - 1*Y_lateral;
 % current
 % -------------------------------------------------------------------------
 
-u_c = v_current*cos(d_current-pose(3)-pi);
-v_c = v_current*sin(d_current-pose(3)-pi);
-
-X_current = m*v_c*vel(3,1);
-Y_current = -m*u_c*vel(3,1);   %Nach Buch minus,...
+% u_c = v_current*cos(d_current-pose(3)-pi);
+% v_c = v_current*sin(d_current-pose(3)-pi);
+% 
+% X_current = m*v_c*vel(3,1);
+% Y_current = -m*u_c*vel(3,1);   %Nach Buch minus,...
+% N_current = 0;
+% 
+% small=0;
+% X_current = small*X_current;
+% Y_current = small*Y_current;
+% N_current = small*N_current;
+X_current = 0;
+Y_current = 0;
 N_current = 0;
-
-small=0;
-X_current = small*X_current;
-Y_current = small*Y_current;
-N_current = small*N_current;
-
-% wind
-% -------------------------------------------------------------------------
-% u_r = v_wind*cos(d_wind-pose(3)-pi) - vel(1,1) - u_c;       %(d_wind-pose(3)-pi) without data from windprofile
-% v_r = v_wind*sin(d_wind-pose(3)-pi) - vel(2,1) - v_c;       %Nach Buch minus ( - vel(1)), macht aber keinen Sinn da Kr�fte zunehmen!  
 % 
-% V_wind = sqrt(u_r^2 + v_r^2);
-% g_r = atan2(v_r,u_r);
-% 
-% if u_r >= 0
-%     g_r = g_r + pi;
-% elseif u_r < 0 && v_r > 0
-%     g_r = g_r + 2*pi;
+% % wind
+% % -------------------------------------------------------------------------
+% % u_r = v_wind*cos(d_wind-pose(3)-pi) - vel(1,1) - u_c;       %(d_wind-pose(3)-pi) without data from windprofile
+% % v_r = v_wind*sin(d_wind-pose(3)-pi) - vel(2,1) - v_c;       %Nach Buch minus ( - vel(1)), macht aber keinen Sinn da Kr�fte zunehmen!  
+% % 
+% % V_wind = sqrt(u_r^2 + v_r^2);
+% % g_r = atan2(v_r,u_r);
+% % 
+% % if u_r >= 0
+% %     g_r = g_r + pi;
+% % elseif u_r < 0 && v_r > 0
+% %     g_r = g_r + 2*pi;
 V_wind_x=(v_wind*cos(d_wind-pose(3))+vel(1));
 V_wind_y=(v_wind*sin(d_wind-pose(3))+vel(2));
 V_wind=sqrt((V_wind_x)^2+(V_wind_y)^2);
 g_r=reminderRad(atan2(V_wind_y,V_wind_x)-aoa_sail);
-% [d_wind g_r]
-% V_wind=v_wind;
-% g_r=d_wind;
-% % end
-% % 
-% % while g_r > pi
-% %     g_r = g_r-pi;
-% % end
-% % 
-% % while g_r < -pi
-% %     g_r = g_r+pi;
-% % end
-% g_r = reminderRad(g_r);
-
-C_X = C_hat(1)*cos(g_r);
-C_Y = C_hat(2)*sin(g_r);
-
-if g_r > pi/2 && g_r < 3*pi/2
-    C_N_hat = C_hat(4);
-else
-    C_N_hat = C_hat(3);
-end
-
-C_N = C_N_hat*sin(2*g_r);
-
-X_wind = 1/2*dens_air*V_wind^2*C_X*length^2;
-Y_wind = 1/2*dens_air*V_wind^2*C_Y*length^2;
-N_wind = 1/2*dens_air*V_wind^2*C_N*length^3;
-%N_wind = 0.1 * N_wind;
-X_wind = 0.3*X_wind; % 0.6
-Y_wind = 0.3*Y_wind;
-N_wind = 0*N_wind;
+% % [d_wind g_r]
+% % V_wind=v_wind;
+% % g_r=d_wind;
+% % % end
+% % % 
+% % % while g_r > pi
+% % %     g_r = g_r-pi;
+% % % end
+% % % 
+% % % while g_r < -pi
+% % %     g_r = g_r+pi;
+% % % end
+% % g_r = reminderRad(g_r);
+% 
+% C_X = C_hat(1)*cos(g_r);
+% C_Y = C_hat(2)*sin(g_r);
+% 
+% if g_r > pi/2 && g_r < 3*pi/2
+%     C_N_hat = C_hat(4);
+% else
+%     C_N_hat = C_hat(3);
+% end
+% 
+% C_N = C_N_hat*sin(2*g_r);
+% 
+% X_wind = 1/2*dens_air*V_wind^2*C_X*length^2;
+% Y_wind = 1/2*dens_air*V_wind^2*C_Y*length^2;
+% N_wind = 1/2*dens_air*V_wind^2*C_N*length^3;
+% %N_wind = 0.1 * N_wind;
+% X_wind = 0.3*X_wind; % 0.6
+% Y_wind = 0.3*Y_wind;
+X_wind = 0; % 0.6
+Y_wind = 0;
+N_wind = 0;
 %    waves
 %    ---------------------------------------------------------------------
-d_waves = reminderRad(d_waves);
-
-w = 2*pi/T;
-k = 4*pi^2/(g*T^2);
-
-chi = pi - (d_waves-pose(3));
-w_e = w - k*vel(1,1)*cos(chi)+k*vel(2,1)*sin(chi);
-a = dens_water*g*(1-exp(-k*depth))/k^2;
-b = k*length/2*cos(chi);
-c = k*width/2*sin(chi);
-s = (k*h/2)*sin(w_e*t);
-eps = h/2*cos(w_e*t);
-
-if c==0, c=0.001; end
-if b==0, b=0.001; end                   %not so nice (c=0 or b=0)
-
-% X_waves = 2*a*width*sin(b)*sin(c)/c*s;     
-% Y_waves = -2*a*length*sin(b)*sin(c)/b*s;
-% N_waves = a*k*(width^2*sin(b)*(c*cos(c)-sin(c))/c^2-length^2*sin(c)*(b*cos(b)-sin(b))/b^2)*eps*1/6;   % correction term: *small
-%X_waves = 0;
-%Y_waves = 0;
-% N_waves = 0;
-c_d_hull_wave_x = 0.1; % (un)educated guess, tried to get maximum speed to realistic value
-c_d_hull_wave_y = 5000;
+% d_waves = reminderRad(d_waves);
+% 
+% w = 2*pi/T;
+% k = 4*pi^2/(g*T^2);
+% 
+% chi = pi - (d_waves-pose(3));
+% w_e = w - k*vel(1,1)*cos(chi)+k*vel(2,1)*sin(chi);
+% a = dens_water*g*(1-exp(-k*depth))/k^2;
+% b = k*length/2*cos(chi);
+% c = k*width/2*sin(chi);
+% s = (k*h/2)*sin(w_e*t);
+% eps = h/2*cos(w_e*t);
+% 
+% if c==0, c=0.001; end
+% if b==0, b=0.001; end                   %not so nice (c=0 or b=0)
+% 
+% % X_waves = 2*a*width*sin(b)*sin(c)/c*s;     
+% % Y_waves = -2*a*length*sin(b)*sin(c)/b*s;
+% % N_waves = a*k*(width^2*sin(b)*(c*cos(c)-sin(c))/c^2-length^2*sin(c)*(b*cos(b)-sin(b))/b^2)*eps*1/6;   % correction term: *small
+% %X_waves = 0;
+% %Y_waves = 0;
+% % N_waves = 0;
+% c_d_hull_wave_x = 0.1; % (un)educated guess, tried to get maximum speed to realistic value
+% c_d_hull_wave_y = 5000;
 
 X_waves = 0;%sign(vel(1,1))*A_hull(1)*0.5*dens_water*c_d_hull_wave_x*vel(1,1)^4;
 Y_waves = 0;%sign(vel(2,1))*A_hull(2)*0.5*dens_water*c_d_hull_wave_y*vel(2,1)^4;
@@ -139,9 +144,9 @@ aoa = aoa_sail;
 d_wind_r = d_wind - pose(3); %g_r-pi;
 d_wind_r = reminderRad(d_wind_r);
 
-[aoa d_wind_r];
+% [aoa d_wind_r];
 d2aoa = reminderRad((-d_wind_r+aoa));
-[aoa d2aoa d_wind_r];
+% [aoa d2aoa d_wind_r];
     if abs(d2aoa) <= 2*pi/180             % Hysteresis around "dead into the wind"
         c_sail_lift = 0;
     elseif abs(d2aoa) <= 25*pi/180        % 25deg = max c_sail_lift
@@ -155,7 +160,7 @@ d2aoa = reminderRad((-d_wind_r+aoa));
 c_sail_drag = 1.28*sin(abs(-d_wind_r+aoa));
 F_lift_V_w = 1/2*dens_air*c_sail_lift*V_wind^2*A_sail*cos(-d_wind_r+aoa);%*sign(-d_wind-aoa);
 F_drag_V_w = 1/2*dens_air*c_sail_drag*V_wind^2*A_sail*sin(-d_wind_r+aoa)*sign(-d_wind_r+aoa);
-[c_sail_lift c_sail_drag F_lift_V_w F_drag_V_w];
+% [c_sail_lift c_sail_drag F_lift_V_w F_drag_V_w];
 if d_wind_r >= 0
     vorzeichen = 1;
 else
@@ -204,7 +209,7 @@ c_rudder_drag = 1.28*sin(abs(-d_water + alpha_rudder));
 incid_angle = -d_water + alpha_rudder;
 incid_angle = reminderRad(incid_angle);
 format long
-[v_r_tot d_water incid_angle alpha_rudder];
+% [v_r_tot d_water incid_angle alpha_rudder];
 % if abs(incid_angle) <= 2*pi/180            % Hysteresis around "dead into the wind"
 %     c_rudder_lift = 0;
 % elseif abs(incid_angle) <= 25*pi/180       % 25deg = max c_sail_lift
@@ -215,7 +220,7 @@ format long
 %     c_rudder_lift = 0;
 % end
 c_rudder_lift = 1.9*(1-exp(-abs(incid_angle)*9))-2.4*abs(incid_angle);
-[c_rudder_drag c_rudder_lift, incid_angle];
+% [c_rudder_drag c_rudder_lift, incid_angle];
 if incid_angle > 0
     vorzeichenR = 1;
 else
@@ -228,11 +233,11 @@ F_drag_v_right = 1/2*dens_water*c_rudder_drag*v_r_tot^2*A_rudder*sin(incid_angle
 F_lift_v_left = 1/2*dens_water*c_rudder_lift*v_r_tot^2*A_rudder*cos(incid_angle);
 F_drag_v_left = 1/2*dens_water*c_rudder_drag*v_r_tot^2*A_rudder*sin(incid_angle)*sign(vorzeichenR);
 
-if d_water >= 0
-    vorzeichenRR = 1;
-else
-    vorzeichenRR = -1;
-end
+% if d_water >= 0
+%     vorzeichenRR = 1;
+% else
+%     vorzeichenRR = -1;
+% end
 X_rudder_right = F_lift_v_right*sin(abs(d_water)) - F_drag_v_right*cos(d_water);
 Y_rudder_right = F_lift_v_right*cos(d_water)*sign(vorzeichenR) + F_drag_v_right*sin(-d_water);% )*sign(-vorzeichenRR); %sign(vorzeichenR)....))*sign(-vorzeichenRR)
 
@@ -249,8 +254,8 @@ N_rudder = -Y_rudder*1.7;        % 2*Y_rudder ????    distance CoR to rudder-cen
 X = X_sail + X_current + X_wind + X_waves + X_rudder - X_damping;   
 Y = Y_sail + Y_current + Y_wind + Y_waves + Y_rudder - Y_damping;
 N = N_sail + N_current + N_wind + N_waves + N_rudder - N_damping;% -N_rudder
-[aoa d_wind_r N_sail];
-[N N_damping N_sail N_rudder];
+% [aoa d_wind_r N_sail];
+% [N N_damping N_sail N_rudder];
 
 0;
 % N = 0.9*N;                                                              % 0.6 correction term by FJ   waves must be additive
@@ -262,7 +267,7 @@ Y_p = [Y_p Y];
 N_p = [N_p N];
 X_drag = [X_drag F_drag_V_w];
 Y_drag = [Y_drag F_lift_V_w];
-[vel(3) N vel(1) vel(2) aoa d_wind pose(3) v_wind];
+% [vel(3) N vel(1) vel(2) aoa d_wind pose(3) v_wind];
 % discret velocity update
 % -------------------------------------------------------------------------
 % I(3)            = I_z;
@@ -278,6 +283,6 @@ psi             = pose(3);
 R               = [cos(psi) -sin(psi) 0; sin(psi) cos(psi) 0; 0 0 1];
 
 pose            = pose + (R*vel)*delta_t;
-[vel(3) N alpha_rudder*180/pi];
+% [vel(3) N alpha_rudder*180/pi];
 end
 

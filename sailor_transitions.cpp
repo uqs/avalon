@@ -474,13 +474,14 @@ rtx_message("change to normalsailing");
                     sign_wanted_sail_angle = sign(desired_bearing_after_jibe); // +1 for wind from starboard, -1 for port
                     wanted_sail_angle_after_jibe = sign_wanted_sail_angle * AV_SAILOR_DOWNWIND_SAIL_DEGREES;
                 }
-rtx_message("des_head_af = %f   des_bear_af = %f   sail_ang_af = %f   head = %f",desired_heading_after_jibe,desired_bearing_after_jibe, wanted_sail_angle_after_jibe, imu.attitude.yaw);
+// rtx_message("des_head_af = %f   des_bear_af = %f   sail_ang_af = %f   head = %f",desired_heading_after_jibe,desired_bearing_after_jibe, wanted_sail_angle_after_jibe, imu.attitude.yaw);
                 // to NORMALSAILING
                 time(&jibeendtimeout_currenttime);
                 jibeendtimeout_diff = difftime(jibeendtimeout_currenttime, jibeendtimeout_start); // yields time in [s]
                 if((fabs(remainder((wanted_sail_angle_after_jibe - sailstate.degrees_sail),360.0)) < AV_SAILOR_EPSILON_JIBE)
                         || (jibeendtimeout_diff > AV_SAILOR_JIBE_END_TIMEOUT))
                 {
+// rtx_message("to normal sailing; head= %f", imu.attitude.yaw);
                     sailorflags.state = AV_FLAGS_ST_NORMALSAILING;
                     time(&jibetimeout_start); // start the timer
                 }
