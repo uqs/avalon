@@ -35,7 +35,9 @@ timer                   = 0;
 des_heading             = 0;
 p1_0                    = 1.111949403453934e+06;  % lat,  y-axis
 p2_0                    = -4.380225573914934e+06;  % long, x-axis
-data_size=round(T_sim/delta_t)+1;
+save_length             = 180;
+ind=1;
+data_size=round(save_length/delta_t)+1;
 delta_head=zeros(1,data_size);
 delta_rudder=zeros(1,data_size);
 rudder_pos=zeros(1,data_size);
@@ -59,7 +61,7 @@ while (t < T_sim)
 
     [rudder, sail, flags, rcflags, desiredheading, imu, cleanimu, destStruct, destData, aisData, wypStruct, wypData] = ddx_read_shell( avalon );
 
-    if(mod(round(t*1000)/1000,100)==0)
+    if(mod(round(t*1000)/1000,1800)==0)
         d_wind=reminderRad(d_wind+10*pi/180);
         sprintf('wind angle increased to %f degrees',d_wind*180/pi)
     end
@@ -95,10 +97,10 @@ while (t < T_sim)
 %     end
 %     wp_x=0;
 %     wp_y=0;
-%     k=1;
-%     while (wypData.Data(k).passed == 1)
-%         k=k+1;
-%     end
+    k=1;
+    while (wypData.Data(k).passed == 1)
+        k=k+1;
+    end
 %     (wypData.Data(1:k).wyp_type)
 %     k
 %     for i=1:100
@@ -106,32 +108,32 @@ while (t < T_sim)
 %         wp_y_temp(i)=wypData.Data(i).longitude;
 %         wp_head(i)=wypData.Data(i).heading;
 %     end
-% i=1;
+i=1;
 % clear wp_x_loc wp_y_loc wp_x_glo wp_y_glo wp_head
 % wypData.Data(i).wyp_type;
 % 
-% wp_x_glo(i)=wypData.Data(i).latitude;
-%         wp_y_glo(i)=wypData.Data(i).longitude;
-%         wp_head(i)=wypData.Data(i).heading;
-%         i=2;
-% while (wypData.Data(i-1).wyp_type ~= 1)
-%         wp_x_glo(i)=wypData.Data(i).latitude;
-%         wp_y_glo(i)=wypData.Data(i).longitude;
-%         wp_head(i)=wypData.Data(i).heading;
-%         i=i+1;
-%         if i>100
-%             break
-%         end
-% end
-% 
-%     wp_x_loc=wp_x_glo-p1_0;
-%     wp_y_loc=wp_y_glo-p2_0;
+wp_x_glo(i)=wypData.Data(i).latitude;
+        wp_y_glo(i)=wypData.Data(i).longitude;
+        wp_head(i)=wypData.Data(i).heading;
+        i=2;
+while (wypData.Data(i-1).wyp_type ~= 1)
+        wp_x_glo(i)=wypData.Data(i).latitude;
+        wp_y_glo(i)=wypData.Data(i).longitude;
+        wp_head(i)=wypData.Data(i).heading;
+        i=i+1;
+        if i>100
+            break
+        end
+end
+
+    wp_x_loc=wp_x_glo-p1_0;
+    wp_y_loc=wp_y_glo-p2_0;
 %     wp_head;
 % %     wp_x=[wp_x_temp(1);nonzeros(wp_x_temp(2:end))]-p1_0;
 % %     wp_y=[wp_y_temp(1);nonzeros(wp_y_temp(2:end))]-p2_0;
 % %     wp_head=nonzeros(wp_head);
-%     destinationx                        = destData.latitude;
-%     destinationy                        = destData.longitude;
+    destinationx                        = destData.latitude-p1_0;
+    destinationy                        = destData.longitude-p2_0;
 %     
 
     %% control steps for position update
@@ -146,8 +148,8 @@ while (t < T_sim)
             dest_y(i)=destData.Data(i).longitude-p2_0;
             i=i+1;
         end
-        for k=1:i-2
-            dist_desti(k)=sqrt((dest_x(k)-dest_x(k+1))^2+(dest_y(k)-dest_y(k+1))^2);
+        for l=1:i-2
+            dist_desti(l)=sqrt((dest_x(l)-dest_x(l+1))^2+(dest_y(l)-dest_y(l+1))^2);
         end
         save dist dist_desti
 %         dist_boat                         =[sqrt((pose(1)-boat_x).^2+(pose(2)-boat_y).^2) zeros(1,5-num_boats)];
@@ -296,8 +298,13 @@ V_wind=sqrt((V_wind_x)^2+(V_wind_y)^2);
     rcflags.autonom_navigation          = 1;
     ddx_write_shell( avalon, wind, rudder, rcflags, sailstate, rudderstateright, rudderstateleft, imu, aisData)
     t = t + delta_t;
-    if(mod(round(t*100)/100,60)==0)
-        save data traj dest_x dest_y;
+    if(n==data_size)
+        file = ['Simulation_data/data', num2str(ind)];
+        save(file, 'traj', 'dest_x', 'dest_y', 'wp_x_loc', 'wp_y_loc','destinationx','destinationy','k' )
+        save('Simulation_data/ind', 'ind');
+        ind=ind+1;
+        traj=zeros(data_size,3);
+        n=0;
         toc
         tic
         t

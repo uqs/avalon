@@ -168,6 +168,7 @@ void * translation_thread(void * dummy)
     unsigned long old_navi_index = 0;
     unsigned long last_skip_index = 0;
 
+    int count=0;
     int p;
     double vec_prev_to_next_wyp_x, vec_prev_to_next_wyp_y;
     double heading_curr_to_next_wyp;
@@ -191,7 +192,7 @@ void * translation_thread(void * dummy)
             headingData.t_readto(desiredHeading,0,0);
             //dataRcFlags.t_readto(rcflags,0,0);
 
-
+count++;
             //fill the last heading into headingHistory and average it:
             headingHistory[29]= boatData.attitude.yaw;
 
@@ -348,8 +349,11 @@ void * translation_thread(void * dummy)
                     break;
                     /////////////////////////////////////////////////////////////////////////
                 case AV_FLAGS_NAVI_NORMALNAVIGATION:
-
-
+// if(count==50)
+// {
+// count=0;
+// rtx_message("dist_traj = %f",dist_solltrajectory);
+// }
 #ifdef DEBUG_SKIPPER
                     rtx_message("normalnavi: dist to next trajectory: %f meters\n", dist_next_trajectory);
                     rtx_message("normalnavi: dist to curr wyp: %f meters\n", dist_curr_wyp);
@@ -389,10 +393,10 @@ void * translation_thread(void * dummy)
 				    heading_to_next_wyp*180/AV_PI,heading_prev_to_next_wyp*180/AV_PI);
 #endif
                     // DO A NEWCALCULATION -> GO INTO NEWCALC MODE
-                    if((((fabs(cleanedwind.global_direction_real_long - waypoints.Data[current_wyp].winddirection) > 40.0)
+                    if(((fabs(cleanedwind.global_direction_real_long - waypoints.Data[current_wyp].winddirection) > 10.0)
 			    /*|| ((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3) 
-			    && (dist_next_trajectory > 100.0))*/ || (dist_solltrajectory > 100.0) 
-			    /*|| (generalflags.global_locator == AV_FLAGS_GLOBALSK_AVOIDANCE)*/) && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END ) 
+			    && (dist_next_trajectory > 100.0))*/ || (fabs(dist_solltrajectory) > 100.0) 
+			    /*|| (generalflags.global_locator == AV_FLAGS_GLOBALSK_AVOIDANCE)*/)/* && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END ) */
 			    || ((waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END) && (dist_curr_wyp < 80.0))
 			    /*|| (last_skip_index != generalflags.skip_index_dest_call)*/)
                         {
@@ -406,10 +410,15 @@ void * translation_thread(void * dummy)
 				//	    && (dist_next_trajectory > 100.0)))
 
                            
-                            if(((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3)  && (dist_next_trajectory > 100.0)))
-                            {
-                                rtx_message("dist_next_trajectory is increasing \n");
-                            }
+//                             if(((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3)  && (dist_next_trajectory > 100.0)))
+//                             {
+//                                 rtx_message("dist_next_trajectory is increasing \n");
+//                             }
+			    if ((waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END) && (dist_curr_wyp < 80.0))
+			    {
+				rtx_message("reached last waypoint");
+			    }
+
                             if (dist_solltrajectory > 100.0)
                             {
                                 rtx_message("dist_solltrajectory too bigi (%f meters) \n",dist_solltrajectory);

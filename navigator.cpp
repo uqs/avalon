@@ -348,8 +348,8 @@ void * translation_thread(void * dummy)
 				//Dijkstra3D::TransitionApplicator defaultTrans;
 				//Dijkstra3D::CellEvaluator defaultEval; // Default eval, all cell cost are 0
 
-				Dijkstra3D::Coordinate start(transformation.x_start, transformation.y_start, mapTheta_end_correct); //Achtung: changed to mapTheta_end!!!!
-				Dijkstra3D::Coordinate goal(transformation.x_end, transformation.y_end, mapTheta_start_correct);
+				Dijkstra3D::Coordinate start(transformation.x_start, transformation.y_start, mapTheta_start_correct); //Achtung: changed to mapTheta_end!!!!
+				Dijkstra3D::Coordinate goal(transformation.x_end, transformation.y_end, mapTheta_end_correct);
 				AV_lce_Eval tunnelEval(vspace,goal,start);           // Heuristic eval, back to A*
 
 				Dijkstra3D::PathFinder<navi3dCell> pfinder(vspace, tunnelEval, transXEval, 

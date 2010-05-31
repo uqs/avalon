@@ -305,7 +305,7 @@ ais_dest_index_last=ais_dest.ais_dest_index;
                                         *(current_pos_longitude - destination.Data[destination.destNr].longitude)
                                         + (current_pos_latitude - destination.Data[destination.destNr].latitude)
                                         *(current_pos_latitude - destination.Data[destination.destNr].latitude)))
-                                < 0.2*dest_dist)
+                                < 0.1*dest_dist)
                             && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
                     {
                         destination.destNr += 1;
