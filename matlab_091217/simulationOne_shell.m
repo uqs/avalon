@@ -53,14 +53,16 @@ traj=zeros(data_size,3);
 % boat_y                  = ones(1,num_boats)*p2_0-local_size/2;  % [m]
 % boat_heading            = deg2rad(34);%90*rand(1,num_boats)); % in rad
 % boat_speed              =(30 + (50-30)*rand(1,num_boats))*0.5144; % [m/s]
-a=zeros(1,10);
 % wypx                    = []
 while (t < T_sim)
     %% read DDX Store vari5ables
-%     tic
+
     [rudder, sail, flags, rcflags, desiredheading, imu, cleanimu, destStruct, destData, aisData, wypStruct, wypData] = ddx_read_shell( avalon );
-    a(1)=toc;
-%     tic
+
+    if(mod(round(t*1000)/1000,100)==0)
+        d_wind=reminderRad(d_wind+10*pi/180);
+        sprintf('wind angle increased to %f degrees',d_wind*180/pi)
+    end
     vel(1,1)            = cleanimu.velocity.x*0.5144; % knots into [m/s]
     vel(2,1)            = -cleanimu.velocity.y*0.5144;% [m/s]
     vel(3,1)            = deg2rad(imu.gyro.z);
@@ -78,7 +80,6 @@ while (t < T_sim)
     aoa_sail            = reminderRad(sailUpdate(aoa_sail_des, aoa_sail, delta_t, deg2rad(15))); 
     alpha_rudder_l      = rudderUpdate(alpha_rudder_l_des, alpha_rudder_l, delta_t, deg2rad(30));  %35 for delta_t = 0.2
     alpha_rudder_r      = rudderUpdate(alpha_rudder_r_des, alpha_rudder_r, delta_t, deg2rad(30));
-    a(2)=toc;
 %     alpha_rudder_hist(n)      = rad2deg(alpha_rudder_r);
 %     rudder_pos_des(n)=(rudder.degrees_left);
 %     delta_head(n)=rad2deg(des_heading-pose(3));
@@ -108,7 +109,7 @@ while (t < T_sim)
 % i=1;
 % clear wp_x_loc wp_y_loc wp_x_glo wp_y_glo wp_head
 % wypData.Data(i).wyp_type;
-% k;
+% 
 % wp_x_glo(i)=wypData.Data(i).latitude;
 %         wp_y_glo(i)=wypData.Data(i).longitude;
 %         wp_head(i)=wypData.Data(i).heading;
@@ -134,7 +135,6 @@ while (t < T_sim)
 %     
 
     %% control steps for position update
-    a(3)=toc;
     if t == 0
         rcflags_sailorstate_requested     = 3;          % = AV_FLAGS_ST_NORMALSAILING
         pose(1,1)                         =  1.111949403453934e+06;
@@ -153,11 +153,10 @@ while (t < T_sim)
 %         dist_boat                         =[sqrt((pose(1)-boat_x).^2+(pose(2)-boat_y).^2) zeros(1,5-num_boats)];
 %         dist_min                          = min(sqrt((pose(1)-boat_x).^2+(pose(2)-boat_y).^2));
     end
-%     tic
+
     [pose, vel_p, vel, X, Y, N, X_p, Y_p, N_p, X_drag, Y_drag, X_waves, Y_waves, N_waves, X_sail, Y_sail, N_sail, N_rudder, N_damping, V_wind, g_r] = PoseStep_shell(t, delta_t, pose, vel, X_p, Y_p, N_p, X_drag, Y_drag,vel_p, m, aoa_sail, A_sail, A_hull, A_rudder, alpha_rudder_r, alpha_rudder_l, C_d, C_hat, I, v_current, d_current, v_wind, d_wind, d_waves, T, h, depth, length, width, sail_factor);
-%     ax_lim=[-local_size/2+pose(2)-p2_0 local_size/2+pose(2)-p2_0 -local_size/2+pose(1)-p1_0 local_size/2+pose(1)-p1_0];
-%     toc
-    a(4)=toc;
+%     ax_lim=[-local_size/2+pose(2)-p2_0 local_size/2+pose(2)-p2_0
+%     -local_size/2+pose(1)-p1_0 local_size/2+pose(1)-p1_0];
     
     
     
@@ -196,10 +195,7 @@ while (t < T_sim)
 %     pose3_p(n)                             = pose(3);
 %     
 %
-% tic
      traj(n,:)                           = [(pose(1)-p1_0),(pose(2)-p2_0),pose(3)];
-     a(5)=toc;
-% toc    
 
 %     boat_x      = boat_x + boat_speed.*cos(boat_heading)*delta_t;
 %     boat_y      = boat_y + boat_speed.*sin(boat_heading)*delta_t;
@@ -214,7 +210,7 @@ while (t < T_sim)
 %     drawnow;
     %% set speed (along current orientation) in the gui
     
-%     avalon_speed_ms = sqrt(vel(1,1)^2 + vel(2,1)^2);    % [m/s]
+%     avalon_speed_ms = sqrt(vel(1,1)^2 + vel(2,1)^2)    % [m/s]
 %     avalon_speed_kn = avalon_speed_ms/0.5144;       % [kn]
 
     
@@ -244,7 +240,6 @@ while (t < T_sim)
 %         t_min=NaN;
 %         curr_min_dist=NaN;
 %     end
-a(6)=toc;
     imu.attitude.yaw                                = rad2deg(pose(3));
     
     imu.velocity.x                      = vel(1,1)/0.5144;
@@ -267,7 +262,6 @@ V_wind=sqrt((V_wind_x)^2+(V_wind_y)^2);
     wind.temperature                    = 20;                                           % constant temp of 20°
     wind.uptodate                       = 2;                                            % wind Temp/Voltage up to date? -> 0:no,  else:yes
 %     wind.direction*pi/180;
-    a(7)=toc;
     
 %     for i=1:num_boats
 %         [boat_long boat_lat]                = xy2ll([boat_x(i);boat_y(i)]);
@@ -300,9 +294,7 @@ V_wind=sqrt((V_wind_x)^2+(V_wind_y)^2);
     rcflags.sailorstate_requested       = rcflags_sailorstate_requested;
     rcflags.man_in_charge               = 1; % = AV_FLAGS_MIC_SAILOR
     rcflags.autonom_navigation          = 1;
-    a(8)=toc;
     ddx_write_shell( avalon, wind, rudder, rcflags, sailstate, rudderstateright, rudderstateleft, imu, aisData)
-a(9)=toc;
     t = t + delta_t;
     if(mod(round(t*100)/100,60)==0)
         save data traj dest_x dest_y;
@@ -316,11 +308,8 @@ a(9)=toc;
         break;
     end
     n=n+1;
-%     toc
 %     save data;
 %     save data traj;
-    a(10)=toc;
-    a;
 end
 
 ddx_close( avalon );

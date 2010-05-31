@@ -127,7 +127,7 @@
 
 #define AV_NEIGHBORHOOD                    8              // define the grid range: OPTIONS: _8,_24
 // #define GNUPLOT_ENABLED				               //enable the gnuplot-drawing
-#define AV_NAVI_GRID_SIZE	           8            //distance in meters between two nodes!
+#define AV_NAVI_GRID_SIZE	           80            //distance in meters between two nodes!
 
 #define AV_NAUT_MILE                    1852           //1 nautical mile in meters!!
 ////

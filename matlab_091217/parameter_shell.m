@@ -11,7 +11,7 @@
 
 %  simulation variables
 %  -------------------------------------------------------------------------
-T_sim                   = 3000;
+T_sim                   = 7*24*3600;
 delta_t                 = 0.075;% [s] iteration time step (smallest time step of sensor reading)
 local_size              = 1000;
 world_size              = 8000;          % [m] size of the part we are looking at

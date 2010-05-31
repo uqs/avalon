@@ -116,7 +116,7 @@ void * translation_thread(void * dummy)
     NaviFlags naviflags;
     AisDestData ais_dest;
 
-    double dest_dist = 800;
+    double dest_dist = 3500;
     double closest_distance;
     int i,p;
     bool first=true;
@@ -218,13 +218,10 @@ ais_dest_index_last=ais_dest.ais_dest_index;
 
                         i++;
                     }
-
                     assert((destination.destNr < 1000) && (destination.destNr>=0));
-                    //assert((i < 1000) && (i>=0));
 
                     for (p = 0; p < 3; p++)
                     {
-                        rtx_message ("locator: counter p = %d \n",p);
                         if (((sqrt((current_pos_longitude - destination.Data[destination.destNr+2-p].longitude)
                                             *(current_pos_longitude - destination.Data[destination.destNr+2-p].longitude)
                                             + (current_pos_latitude - destination.Data[destination.destNr+2-p].latitude)
@@ -238,9 +235,11 @@ ais_dest_index_last=ais_dest.ais_dest_index;
                             destination.latitude = destination.Data[destination.destNr +2 -p].latitude;
                             destination.destNr = (destination.destNr +2 -p);
                             destinationData.t_writefrom(destination);
-skipperflags.skip_index_dest_call ++;
-rtx_message("increased skip index to %d",skipperflags.skip_index_dest_call);
 
+			    skipperflags.skip_index_dest_call ++;
+#ifdef DEBUG_GLOBSKIPPER
+			    rtx_message("increased skip index to %d",skipperflags.skip_index_dest_call);
+#endif
                             skipperflags.global_locator = AV_FLAGS_GLOBALSK_TRACKER;
                             skipperFlagData.t_writefrom(skipperflags);
                             break;
@@ -250,7 +249,7 @@ rtx_message("increased skip index to %d",skipperflags.skip_index_dest_call);
                             destination.longitude = destination.Data[destination.destNr].longitude;
                             destination.latitude = destination.Data[destination.destNr].latitude;
                             destinationData.t_writefrom(destination);
-skipperflags.skip_index_dest_call ++;
+			    skipperflags.skip_index_dest_call ++;
                             skipperflags.global_locator = AV_FLAGS_GLOBALSK_CLOSING;
                             skipperFlagData.t_writefrom(skipperflags);
                         }
@@ -273,9 +272,11 @@ skipperflags.skip_index_dest_call ++;
                         destination.longitude = current_pos_longitude + 0.5 * (destination.longitude - current_pos_longitude);
                         destination.latitude = current_pos_latitude + 0.5 * (destination.latitude - current_pos_latitude);
                         destinationData.t_writefrom(destination);
-skipperflags.skip_index_dest_call ++;
-skipperFlagData.t_writefrom(skipperflags);
-rtx_message("increased skip index to %d",skipperflags.skip_index_dest_call);
+			skipperflags.skip_index_dest_call ++;
+			skipperFlagData.t_writefrom(skipperflags);
+#ifdef DEBUG_GLOBSKIPPER
+			rtx_message("increased skip index to %d",skipperflags.skip_index_dest_call);
+#endif
                     }
 
                     if(distance < dest_dist)
@@ -308,17 +309,15 @@ rtx_message("increased skip index to %d",skipperflags.skip_index_dest_call);
                             && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
                     {
                         destination.destNr += 1;
-// skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
-// skipperFlagData.t_writefrom(skipperflags);
-
-// rtx_message("increase_index_call to %d  \n", naviflags.navi_index_call);
                         assert((destination.destNr < 1000) && (destination.destNr>=0));
                         destination.longitude = destination.Data[destination.destNr].longitude;
                         destination.latitude = destination.Data[destination.destNr].latitude;
                         destinationData.t_writefrom(destination);
-skipperflags.skip_index_dest_call ++;
-skipperFlagData.t_writefrom(skipperflags);
-rtx_message("increased skip index to %d",skipperflags.skip_index_dest_call);
+			skipperflags.skip_index_dest_call ++;
+			skipperFlagData.t_writefrom(skipperflags);
+// #ifdef DEBUG_GLOBSKIPPER
+			rtx_message("increased skip index to %d",skipperflags.skip_index_dest_call);
+// #endif
                     }   
 
                     if((sqrt((current_pos_longitude - destination.Data[destination.destNr].longitude)
@@ -327,7 +326,6 @@ rtx_message("increased skip index to %d",skipperflags.skip_index_dest_call);
                                     *(current_pos_latitude - destination.Data[destination.destNr].latitude))) > 2.2*dest_dist)
                     {
 			skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
-skipperflags.skip_index_dest_call ++;
                         skipperFlagData.t_writefrom(skipperflags);
                     }
 
