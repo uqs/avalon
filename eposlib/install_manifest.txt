@@ -1,5 +1,5 @@
-/usr/local/include/can/can.h
-/usr/local/include/can/can_serial.h
-/usr/local/lib/libcan-serial.so
-/usr/local/include/can/epos.h
-/usr/local/lib/libepos.so
+/home/kruckema/avalon/include/can/can.h
+/home/kruckema/avalon/include/can/can_serial.h
+/home/kruckema/avalon/lib/libcan-serial.so
+/home/kruckema/avalon/include/can/epos.h
+/home/kruckema/avalon/lib/libepos.so

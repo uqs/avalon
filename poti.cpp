@@ -10,7 +10,7 @@
 
 // Specific Things
 #include "can/can.h"
-#include "epos/epos.h"
+#include "can/epos.h"
 
 int
 main (int argc, char * argv[])
