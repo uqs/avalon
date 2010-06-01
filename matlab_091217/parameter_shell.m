@@ -75,10 +75,10 @@ A_rudder    = 0.085;               % [m²] Area of one rudder (=0.17*0.5)
 
 % current
 v_current       = 0.5;                  % [m/s] current velocity
-d_current       = deg2rad(1);         % [rad] current direction, 180�: current from behind the ship
+d_current       = 1*pi/180;         % [rad] current direction, 180�: current from behind the ship
 
 % waves
-d_waves         = deg2rad(1);           % [rad] wave direction (180�: waves coming from behind
+d_waves         = 1*pi/180;           % [rad] wave direction (180�: waves coming from behind
 h               = 0.5;                        % [m] wave height
 T               = 50;                         % [s] wave period, MUST BE LONGER, THEN THE SHIP LENGTH -> unstable otherwise
 

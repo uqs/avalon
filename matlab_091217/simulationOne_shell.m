@@ -69,21 +69,21 @@ while (t < T_sim)
     end
     vel(1,1)            = cleanimu.velocity.x*0.5144; % knots into [m/s]
     vel(2,1)            = -cleanimu.velocity.y*0.5144;% [m/s]
-    vel(3,1)            = deg2rad(imu.gyro.z);
+    vel(3,1)            = imu.gyro.z*pi/180;
     
 %     torque_des          = rudder.torque_des;
-    des_heading         = deg2rad(desiredheading.heading);
+    des_heading         = pi/180*desiredheading.heading;
     
     pose                = ll2xy(imu.position.longitude,imu.position.latitude);
-    pose(3)             = reminderRad(deg2rad(imu.attitude.yaw));
+    pose(3)             = reminderRad(imu.attitude.yaw*pi/180);
     
-    aoa_sail_des        = reminderRad(deg2rad(sail.degrees));          % sailTarget
-    alpha_rudder_l_des  = reminderRad(deg2rad(-rudder.degrees_left));  % rudderTarget
-    alpha_rudder_r_des  = reminderRad(deg2rad(-rudder.degrees_right));       
+    aoa_sail_des        = reminderRad(pi/180*(sail.degrees));          % sailTarget
+    alpha_rudder_l_des  = reminderRad(pi/180*(-rudder.degrees_left));  % rudderTarget
+    alpha_rudder_r_des  = reminderRad(pi/180*(-rudder.degrees_right));       
     
-    aoa_sail            = reminderRad(sailUpdate(aoa_sail_des, aoa_sail, delta_t, deg2rad(15))); 
-    alpha_rudder_l      = rudderUpdate(alpha_rudder_l_des, alpha_rudder_l, delta_t, deg2rad(30));  %35 for delta_t = 0.2
-    alpha_rudder_r      = rudderUpdate(alpha_rudder_r_des, alpha_rudder_r, delta_t, deg2rad(30));
+    aoa_sail            = reminderRad(sailUpdate(aoa_sail_des, aoa_sail, delta_t, pi/180*(15))); 
+    alpha_rudder_l      = rudderUpdate(alpha_rudder_l_des, alpha_rudder_l, delta_t, pi/180*(30));  %35 for delta_t = 0.2
+    alpha_rudder_r      = rudderUpdate(alpha_rudder_r_des, alpha_rudder_r, delta_t, pi/180*(30));
 %     alpha_rudder_hist(n)      = rad2deg(alpha_rudder_r);
 %     rudder_pos_des(n)=(rudder.degrees_left);
 %     des_head(n)=des_heading;
@@ -246,7 +246,7 @@ while (t < T_sim)
 %         t_min=NaN;
 %         curr_min_dist=NaN;
 %     end
-    imu.attitude.yaw                                = rad2deg(pose(3));
+    imu.attitude.yaw                                = 180/pi*(pose(3));
     
     imu.velocity.x                      = vel(1,1)/0.5144;
     imu.velocity.y                      = -vel(2,1)/0.5144;
