@@ -402,7 +402,7 @@ count++;
                         {
 // #ifdef DEBUG_SKIPPER
                             rtx_message("normalnavi: switching to newcalculation state; reason:");
-			    if(fabs(cleanedwind.global_direction_real_long - waypoints.Data[current_wyp].winddirection) > 40.0)
+			    if(fabs(cleanedwind.global_direction_real_long - waypoints.Data[current_wyp].winddirection) > 10.0)
                             {
                                 rtx_message("wind has changed\n");
                             }
@@ -416,7 +416,7 @@ count++;
 //                             }
 			    if ((waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END) && (dist_curr_wyp < 80.0))
 			    {
-				rtx_message("reached last waypoint");
+				rtx_message("reached last waypoint\n");
 			    }
 
                             if (dist_solltrajectory > 100.0)
@@ -431,8 +431,6 @@ count++;
                             dataNaviFlags.t_writefrom(naviflags);
                             last_state = AV_FLAGS_NAVI_NORMALNAVIGATION;
                         }
-// desiredHeading.heading = heading_to_wyp*180.0/AV_PI;
-// headingData.t_writefrom(desiredHeading);
 
                     never_again = 0;
 
