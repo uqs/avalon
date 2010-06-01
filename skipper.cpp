@@ -143,7 +143,6 @@ void * translation_thread(void * dummy)
     double heading_to_wyp;
     double heading_to_next_wyp;
     double dist_curr_wyp;
-    double headingHistory[30], heading_average;
     double current_pos_longitude, current_pos_latitude; //already transformed and in meters
     //the four vectors to be needed are:
     double vec_dist_wyp_x,vec_dist_wyp_y;
@@ -168,11 +167,17 @@ void * translation_thread(void * dummy)
     unsigned long old_navi_index = 0;
     unsigned long last_skip_index = 0;
 
-    int count=0;
     int p;
     double vec_prev_to_next_wyp_x, vec_prev_to_next_wyp_y;
     double heading_curr_to_next_wyp;
     double heading_prev_to_next_wyp;
+
+    dataBoat.t_readto(boatData,0,0);
+    std::vector<double> headingHistory(30,boatData.attitude.yaw);
+    double heading_average;
+    dataWindClean.t_readto(cleanedwind,0,0);
+    std::vector<double> dir_wind_hist(30,cleanedwind.global_direction_real_long);
+    double dir_wind_mean;
 
     //initializing the call index
     dataNaviFlags.t_readto(naviflags,0,0);
@@ -192,15 +197,21 @@ void * translation_thread(void * dummy)
             headingData.t_readto(desiredHeading,0,0);
             //dataRcFlags.t_readto(rcflags,0,0);
 
-count++;
-            //fill the last heading into headingHistory and average it:
-            headingHistory[29]= boatData.attitude.yaw;
-
-
-            heading_average = 0;
-            for (int u=0; u<30; u++)
+	    // compute the mean of the heading and the winddirection
+	    heading_average = 0;
+	    headingHistory.insert(headingHistory.begin(),boatData.attitude.yaw);
+	    headingHistory.resize(30);
+	    for (int u=0; u<headingHistory.size(); u++)
             {
-                heading_average += 1.0/30.0 * headingHistory[u];
+                heading_average += 1.0/headingHistory.size() * headingHistory[u];
+            }
+	    
+	    dir_wind_mean = 0;
+	    dir_wind_hist.insert(dir_wind_hist.begin(),cleanedwind.global_direction_real_long);
+	    dir_wind_hist.resize(30);
+	    for (int u=0; u<dir_wind_hist.size(); u++)
+            {
+                dir_wind_mean += 1.0/dir_wind_hist.size() * dir_wind_hist[u];
             }
 
             if(!generalflags.autonom_navigation)
@@ -349,11 +360,7 @@ count++;
                     break;
                     /////////////////////////////////////////////////////////////////////////
                 case AV_FLAGS_NAVI_NORMALNAVIGATION:
-// if(count==50)
-// {
-// count=0;
-// rtx_message("dist_traj = %f",dist_solltrajectory);
-// }
+
 #ifdef DEBUG_SKIPPER
                     rtx_message("normalnavi: dist to next trajectory: %f meters\n", dist_next_trajectory);
                     rtx_message("normalnavi: dist to curr wyp: %f meters\n", dist_curr_wyp);
@@ -393,7 +400,7 @@ count++;
 				    heading_to_next_wyp*180/AV_PI,heading_prev_to_next_wyp*180/AV_PI);
 #endif
                     // DO A NEWCALCULATION -> GO INTO NEWCALC MODE
-                    if(((fabs(cleanedwind.global_direction_real_long - waypoints.Data[current_wyp].winddirection) > 10.0)
+                    if(((fabs(dir_wind_mean - waypoints.Data[current_wyp].winddirection) > 10.0)
 			    /*|| ((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3) 
 			    && (dist_next_trajectory > 100.0))*/ || (fabs(dist_solltrajectory) > 100.0) 
 			    /*|| (generalflags.global_locator == AV_FLAGS_GLOBALSK_AVOIDANCE)*/)/* && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END ) */
@@ -419,7 +426,7 @@ count++;
 				rtx_message("reached last waypoint\n");
 			    }
 
-                            if (dist_solltrajectory > 100.0)
+                            if (fabs(dist_solltrajectory) > 100.0)
                             {
                                 rtx_message("dist_solltrajectory too bigi (%f meters) \n",dist_solltrajectory);
                             }

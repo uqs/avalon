@@ -39,6 +39,8 @@ save_length             = 180; % the parameters are stored every save_length sec
 ind=1;
 data_size=round(save_length/delta_t)+1;
 delta_head=zeros(1,data_size);
+des_head=zeros(1,data_size);
+heading=zeros(1,data_size);
 delta_rudder=zeros(1,data_size);
 rudder_pos=zeros(1,data_size);
 rudder_pos_des=zeros(1,data_size);%     pose3_p(n)                             = pose(3);
@@ -84,7 +86,9 @@ while (t < T_sim)
     alpha_rudder_r      = rudderUpdate(alpha_rudder_r_des, alpha_rudder_r, delta_t, deg2rad(30));
 %     alpha_rudder_hist(n)      = rad2deg(alpha_rudder_r);
 %     rudder_pos_des(n)=(rudder.degrees_left);
-%     delta_head(n)=rad2deg(des_heading-pose(3));
+    des_head(n)=des_heading;
+    heading(n)=pose(3);
+    delta_head(n)=rad2deg(des_heading-pose(3));
     
     flags_state                         = flags.state;
     rcflags_sailorstate_requested       = rcflags.sailorstate_requested;
@@ -299,13 +303,14 @@ V_wind=sqrt((V_wind_x)^2+(V_wind_y)^2);
     ddx_write_shell( avalon, wind, rudder, rcflags, sailstate, rudderstateright, rudderstateleft, imu, aisData)
     t = t + delta_t;
     if(n==data_size)
+        
+        toc
         file = ['Simulation_data/data', num2str(ind)];
-        save(file, 'traj', 'dest_x', 'dest_y', 'wp_x_loc', 'wp_y_loc','destinationx','destinationy','k' )
+        save(file, 'traj', 'dest_x', 'dest_y', 'wp_x_loc', 'wp_y_loc','destinationx','destinationy','k','delta_head','des_head','heading','delta_t' )
         save('Simulation_data/ind', 'ind');
         ind=ind+1;
         traj=zeros(data_size,3);
         n=0;
-        toc
         tic
         t
     end

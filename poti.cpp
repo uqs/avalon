@@ -19,8 +19,8 @@ main (int argc, char * argv[])
 
   while(1) {
     can_read_message();
-    if (epos_read.node[0].msg_id != 0)
-      printf("Received 0x%X", epos_read.node[0].msg_id);
+//     if (epos_read.node[0].msg_id != 0)
+//       printf("Received 0x%X", epos_read.node[0].msg_id);
   }
 
   can_close();
