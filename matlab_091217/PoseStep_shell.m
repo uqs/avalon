@@ -145,7 +145,7 @@ d_wind_r = d_wind - pose(3); %g_r-pi;
 d_wind_r = reminderRad(d_wind_r);
 
 % [aoa d_wind_r];
-d2aoa = reminderRad((-d_wind_r+aoa));
+d2aoa = reminderRad((-d_wind_r+aoa))
 % [aoa d2aoa d_wind_r];
     if abs(d2aoa) <= 2*pi/180             % Hysteresis around "dead into the wind"
         c_sail_lift = 0;
