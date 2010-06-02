@@ -60,17 +60,21 @@ traj=zeros(data_size,3);
 % wypx                    = []
 while (t < T_sim)
     %% read DDX Store vari5ables
-%toc
-%tic
-    [rudder, sail, flags, rcflags, desiredheading, imu, cleanimu, destStruct, destData, aisData, wypStruct, wypData] = ddx_read_shell( avalon );
-
+a(7)=toc;
+tic    
     if(mod(round(t*1000)/1000,1800)==0)
         d_wind=reminderRad(d_wind+10*pi/180);
         sprintf('wind angle increased to %f degrees',d_wind*180/pi)
-	toc
-	tic
-	t
+%         a()=toc
+%         tic
+        format short
+        a
+        t;
     end
+a(1)=toc;
+    [rudder, sail, flags, rcflags, desiredheading, imu, cleanimu, destStruct, destData, aisData, wypStruct, wypData] = ddx_read_shell( avalon );
+
+a(2)=toc;
     vel(1,1)            = cleanimu.velocity.x*0.5144; % knots into [m/s]
     vel(2,1)            = -cleanimu.velocity.y*0.5144;% [m/s]
     vel(3,1)            = imu.gyro.z*pi/180;
@@ -163,12 +167,12 @@ while (t < T_sim)
 %         dist_boat                         =[sqrt((pose(1)-boat_x).^2+(pose(2)-boat_y).^2) zeros(1,5-num_boats)];
 %         dist_min                          = min(sqrt((pose(1)-boat_x).^2+(pose(2)-boat_y).^2));
     end
-
+a(3)=toc;
     [pose, vel_p, vel, X, Y, N, X_p, Y_p, N_p, X_drag, Y_drag, X_waves, Y_waves, N_waves, X_sail, Y_sail, N_sail, N_rudder, N_damping, V_wind, g_r] = PoseStep_shell(t, delta_t, pose, vel, X_p, Y_p, N_p, X_drag, Y_drag,vel_p, m, aoa_sail, A_sail, A_hull, A_rudder, alpha_rudder_r, alpha_rudder_l, C_d, C_hat, I, v_current, d_current, v_wind, d_wind, d_waves, T, h, depth, length, width, sail_factor);
 %     ax_lim=[-local_size/2+pose(2)-p2_0 local_size/2+pose(2)-p2_0
 %     -local_size/2+pose(1)-p1_0 local_size/2+pose(1)-p1_0];
     
-    
+a(4)=toc;    
     
 %     num_boats_temp = str2double(get(handles.num_boats,'String'));
 %     if num_boats_temp>num_boats
@@ -304,6 +308,7 @@ V_wind=sqrt((V_wind_x)^2+(V_wind_y)^2);
     rcflags.sailorstate_requested       = rcflags_sailorstate_requested;
     rcflags.man_in_charge               = 1; % = AV_FLAGS_MIC_SAILOR
     rcflags.autonom_navigation          = 1;
+    a(5)=toc;
     ddx_write_shell( avalon, wind, rudder, rcflags, sailstate, rudderstateright, rudderstateleft, imu, aisData)
     t = t + delta_t;
 %     if(n==data_size)
@@ -324,6 +329,7 @@ V_wind=sqrt((V_wind_x)^2+(V_wind_y)^2);
    %     break;
     %end
     n=n+1;
+    a(6)=toc;
 %     save data;
 %     save data traj;
 end
