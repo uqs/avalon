@@ -12,11 +12,11 @@ if isempty(robot_variable)
     JOYSTICK_MSG         = 'struct { int nb; int na; int axes[12]; int buttons[12];} joystick';
     RUDDERTARGET_MSG     = 'struct { double torque_des; double degrees_left; double degrees_right; int resetleft_request; int resetright_request;} rudderTarget';
     SAILTARGET_MSG       = 'struct { double degrees; int reset_request;} sailTarget';
-    FLAGS_MSG            = 'struct { int man_in_charge; int state; int state_requested; int sail_direction; int sailor_no_tack_or_jibe; int navi_state; long navi_index_call; long navi_index_answer; int autonom_navigation; int global_locator; int joystick_timeout; int error_state; } Flags';
+    FLAGS_MSG            = 'struct { int man_in_charge; int state; int state_requested; int sail_direction; int sailor_no_tack_or_jibe; int navi_state; unsigend long navi_index_call; unsigned long navi_index_answer; unsigned int skip_index_dest_call; int autonom_navigation; int global_locator; int joystick_timeout; int error_state; } Flags';
     RCFLAGS_MSG          = 'struct { int emergency_stop; int motion_stop; int joystick_timeout; int sailorstate_requested; int man_in_charge; int autonom_navigation; } rcFlags';
     SAILORFLAGS_MSG      = 'struct { int state; int no_tack_or_jibe; int sail_direction; } sailorFlags';
-    NAVIFLAGS_MSG        = 'struct { int navi_state; long navi_index_call; long navi_index_answer; } NaviFlags';
-    SKIPPERFLAGS_MSG     = 'struct { int global_locator; } SkipperFlags';
+    NAVIFLAGS_MSG        = 'struct { int navi_state; unsigned long navi_index_call; unsigned long navi_index_answer; } NaviFlags';
+    SKIPPERFLAGS_MSG     = 'struct { int global_locator; unsigned int skip_index_dest_call} SkipperFlags';
     SAILSTATE_MSG        = 'struct { float degrees_sail; float ref_sail; } Sailstate';
     RUDDERSTATERIGHT_MSG = 'struct { float degrees_rudder; float ref_rudder; } Rudderstate';
     RUDDERSTATELEFT_MSG  = 'struct { float degrees_rudder; float ref_rudder; } Rudderstate';
