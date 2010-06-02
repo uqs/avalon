@@ -60,12 +60,16 @@ traj=zeros(data_size,3);
 % wypx                    = []
 while (t < T_sim)
     %% read DDX Store vari5ables
-
+%toc
+%tic
     [rudder, sail, flags, rcflags, desiredheading, imu, cleanimu, destStruct, destData, aisData, wypStruct, wypData] = ddx_read_shell( avalon );
 
     if(mod(round(t*1000)/1000,1800)==0)
         d_wind=reminderRad(d_wind+10*pi/180);
         sprintf('wind angle increased to %f degrees',d_wind*180/pi)
+	toc
+	tic
+	t
     end
     vel(1,1)            = cleanimu.velocity.x*0.5144; % knots into [m/s]
     vel(2,1)            = -cleanimu.velocity.y*0.5144;% [m/s]
@@ -250,12 +254,12 @@ while (t < T_sim)
     
     imu.velocity.x                      = vel(1,1)/0.5144;
     imu.velocity.y                      = -vel(2,1)/0.5144;
-    imu.gyro.z                          = rad2deg(vel(3,1));
+    imu.gyro.z                          = 180/pi*(vel(3,1));
     
     
-    sailstate.degrees_sail              = rad2deg(reminderRad( aoa_sail ));
-    rudderstateleft.degrees_rudder      = rad2deg(reminderRad(-alpha_rudder_l));
-    rudderstateright.degrees_rudder     = rad2deg(reminderRad(-alpha_rudder_r));
+    sailstate.degrees_sail              = 180/pi*(reminderRad( aoa_sail ));
+    rudderstateleft.degrees_rudder      = 180/pi*(reminderRad(-alpha_rudder_l));
+    rudderstateright.degrees_rudder     = 180/pi*(reminderRad(-alpha_rudder_r));
 
     
     V_wind_x=(v_wind*cos(d_wind-pose(3))+vel(1));
@@ -263,7 +267,7 @@ V_wind_y=(v_wind*sin(d_wind-pose(3))+vel(2));
 V_wind=sqrt((V_wind_x)^2+(V_wind_y)^2);
 
     wind.speed                          = V_wind/0.5144;                 % v_wind                                        % [kn]
-    wind.direction                      = rad2deg(atan2(V_wind_y,V_wind_x)-aoa_sail);%rad2deg(reminderRad(d_wind - pose(3) - aoa_sail));   % rad2deg(g_r - aoa_sail -pi)the windsensor is mounted on the mast, so the rot position has to be concidered
+    wind.direction                      = 180/pi*(atan2(V_wind_y,V_wind_x)-aoa_sail);%rad2deg(reminderRad(d_wind - pose(3) - aoa_sail));   % rad2deg(g_r - aoa_sail -pi)the windsensor is mounted on the mast, so the rot position has to be concidered
     wind.voltage                        = 12;                                           % randomly set to 12 Volt
     wind.temperature                    = 20;                                           % constant temp of 20°
     wind.uptodate                       = 2;                                            % wind Temp/Voltage up to date? -> 0:no,  else:yes
@@ -314,11 +318,11 @@ V_wind=sqrt((V_wind_x)^2+(V_wind_y)^2);
 %         tic
 %         t
 %     end
-    dist_dest=sqrt((pose(1)-dest_x(end)-p1_0)^2+(pose(2)-dest_y(end)-p2_0)^2);
-    if (dist_dest<200)
-        dist_dest
-        break;
-    end
+%    dist_dest=sqrt((pose(1)-dest_x(end)-p1_0)^2+(pose(2)-dest_y(end)-p2_0)^2);
+ %   if (dist_dest<200)
+  %      dist_dest
+   %     break;
+    %end
     n=n+1;
 %     save data;
 %     save data traj;

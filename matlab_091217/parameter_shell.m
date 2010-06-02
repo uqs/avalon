@@ -12,7 +12,7 @@
 %  simulation variables
 %  -------------------------------------------------------------------------
 T_sim                   = 7*24*3600;
-delta_t                 = 0.075;% [s] iteration time step (smallest time step of sensor reading)
+delta_t                 = 0.04;% [s] iteration time step (smallest time step of sensor reading)i
 local_size              = 1000;
 world_size              = 8000;          % [m] size of the part we are looking at
 disp_forces             = 1;            % display forces; 0 or 1
@@ -75,10 +75,18 @@ A_rudder    = 0.085;               % [m²] Area of one rudder (=0.17*0.5)
 
 % current
 v_current       = 0.5;                  % [m/s] current velocity
+
+d_current       = pi/180*(1);         % [rad] current direction, 180�: current from behind the ship
+
 d_current       = 1*pi/180;         % [rad] current direction, 180�: current from behind the ship
 
+
 % waves
+
+d_waves         = pi/180*(1);           % [rad] wave direction (180�: waves coming from behind
+
 d_waves         = 1*pi/180;           % [rad] wave direction (180�: waves coming from behind
+
 h               = 0.5;                        % [m] wave height
 T               = 50;                         % [s] wave period, MUST BE LONGER, THEN THE SHIP LENGTH -> unstable otherwise
 
