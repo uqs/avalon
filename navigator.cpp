@@ -156,6 +156,7 @@ void * translation_thread(void * dummy)
 	bool time_initializer = false;
 	unsigned int last_calc_index = 1234567; //TODO change to some decent number
 	unsigned int last_skip_index = 0;
+	unsigned int max_num_wyp = 0;
 
 	//initializing the answer index: 
 	dataNaviFlags.t_readto(naviflags,0,0);
@@ -394,7 +395,7 @@ void * translation_thread(void * dummy)
 				last_wyp_data.heading = headingTable16[mapTheta_start_correct]; 
 				arrayPointer = 0;
 // int coun=-1;
-
+printf("theta start: %f     current heading: %f\n",last_wyp_data.heading*180/AV_PI,boatData.attitude.yaw);
 				for (it=path.begin();it!=path.end();it++) {
 #ifdef DEBUG_NAVIGATOR
 					printf("x and y (%d,%d) at curr(%d) position, heading = %f \n",it->x,it->y,arrayPointer,
@@ -454,7 +455,10 @@ void * translation_thread(void * dummy)
 					last_wyp_data = wyp_data;
 				}
 
-
+// 				if (arrayPointer < max_num_wyp)
+// 				{
+// 				    for (q=arrayPointer;q<max_num_wyp;q++) {
+// 					
 				waypoints.Data[arrayPointer].longitude = last_wyp_data.longitude;
 				waypoints.Data[arrayPointer].latitude = last_wyp_data.latitude;
 				waypoints.Data[arrayPointer].heading = last_wyp_data.heading;

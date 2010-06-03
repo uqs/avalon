@@ -222,15 +222,15 @@ a(4)=toc;
 
 %     boat_x      = boat_x + boat_speed.*cos(boat_heading)*delta_t;
 %     boat_y      = boat_y + boat_speed.*sin(boat_heading)*delta_t;
-%     pose_plot=point2boat([pose(2) pose(1) pose(3)],50);
+    pose_plot=point2boat([pose(2) pose(1) pose(3)],50);
 %     destpoint_i                         = [(destinationx-p1_0) (destinationy-p2_0)];
 %     ax_lim=[-local_size/2+pose(2)-p2_0 local_size/2+pose(2)-p2_0 -local_size/2+pose(1)-p1_0 local_size/2+pose(1)-p1_0];
 %     wind_p    = [ones(1,5)*ax_lim(3)+local_size/20; ones(1,5)*ax_lim(1)+local_size/20] + ([0,-local_size/20, +local_size/20, -local_size/20, 0; 0, local_size/40, 0, -local_size/40, 0]'*[cos(d_wind+pi) sin(d_wind+pi); -sin(d_wind+pi) cos(d_wind+pi)])';
 %     
-%     plot(pose_plot(:,1)-p2_0,pose_plot(:,2)-p1_0,'b',pose(2)-p2_0,pose(1)-p1_0,'b',wp_y_loc,wp_x_loc,'ko-',wp_y_loc(k),wp_x_loc(k),'ks',dest_y,dest_x,'or', destpoint_i(2), destpoint_i(1),'sr',wind_p(2,:),wind_p(1,:),'g')
+    plot(pose_plot(:,1)-p2_0,pose_plot(:,2)-p1_0,'b',pose(2)-p2_0,pose(1)-p1_0,'b')%,wp_y_loc,wp_x_loc,'ko-',wp_y_loc(k),wp_x_loc(k),'ks',dest_y,dest_x,'or', destpoint_i(2), destpoint_i(1),'sr',wind_p(2,:),wind_p(1,:),'g')
 %     axis(ax_lim)
-%     axis('equal')
-%     drawnow;
+    axis('equal')
+    drawnow;
     %% set speed (along current orientation) in the gui
     
 %     avalon_speed_ms = sqrt(vel(1,1)^2 + vel(2,1)^2)    % [m/s]
