@@ -326,9 +326,14 @@ void * translation_thread(void * dummy)
 				mapTheta_start_correct = 30; //more than it can ever be possible
 				for(q=0; q<16; q++)
 				{
-					if (fabs(remainder((headingTable16[q] - boatData.attitude.yaw*AV_PI/180),2*AV_PI)) < difference_start)
+// 					if (fabs(remainder((headingTable16[q] - boatData.attitude.yaw*AV_PI/180),2*AV_PI)) < difference_start)
+// 					{
+// 						difference_start = fabs(remainder((headingTable16[q] - boatData.attitude.yaw*AV_PI/180),2*AV_PI));
+// 						mapTheta_start_correct = q;
+// 					}
+					if (fabs(remainder((headingTable16[q] + boatData.attitude.yaw*AV_PI/180-AV_PI/2),2*AV_PI)) < difference_start)
 					{
-						difference_start = fabs(remainder((headingTable16[q] - boatData.attitude.yaw*AV_PI/180),2*AV_PI));
+						difference_start = fabs(remainder((headingTable16[q] + boatData.attitude.yaw*AV_PI/180-AV_PI/2),2*AV_PI));
 						mapTheta_start_correct = q;
 					}
 				}
