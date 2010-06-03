@@ -12,7 +12,8 @@
 
 
 function [pose, vel_p, vel, X, Y, N, X_p, Y_p, N_p, X_drag, Y_drag, X_waves, Y_waves, N_waves, X_sail, Y_sail, N_sail, N_rudder, N_damping, V_wind, g_r] = PoseStep(t, delta_t, pose, vel, X_p, Y_p, N_p, X_drag, Y_drag,vel_p, m, aoa_sail, A_sail, A_hull, A_rudder, alpha_rudder_r, alpha_rudder_l, C_d, C_hat, I, v_current, d_current, v_wind, d_wind, d_waves, T, h, depth, length, width, sail_factor)
-
+%global a
+%a(4)=toc;
 % unchangeable variables
 % -------------------------------------------------------------------------
 
@@ -103,6 +104,7 @@ g_r=reminderRad(atan2(V_wind_y,V_wind_x)-aoa_sail);
 X_wind = 0; % 0.6
 Y_wind = 0;
 N_wind = 0;
+%a(5)=toc;
 %    waves
 %    ---------------------------------------------------------------------
 % d_waves = reminderRad(d_waves);
@@ -145,7 +147,7 @@ d_wind_r = d_wind - pose(3); %g_r-pi;
 d_wind_r = reminderRad(d_wind_r);
 
 % [aoa d_wind_r];
-d2aoa = reminderRad((-d_wind_r+aoa))
+d2aoa = reminderRad((-d_wind_r+aoa));
 % [aoa d2aoa d_wind_r];
     if abs(d2aoa) <= 2*pi/180             % Hysteresis around "dead into the wind"
         c_sail_lift = 0;
@@ -180,7 +182,7 @@ elseif abs(aoa) > 120*pi/180 && abs(aoa) <= 150*pi/180
 elseif abs(aoa) > 150*pi/180 && abs(aoa) <= pi
     x_to_sail_coa = 0; y_to_sail_coa = 0;
 end
-
+%a(6)=toc;
 X_sail = F_lift_V_w*sin(abs(d_wind_r)) - F_drag_V_w*cos(d_wind_r);
 Y_sail = (F_lift_V_w*cos(d_wind_r) + F_drag_V_w*sin(abs(d_wind_r)))*sign(-vorzeichen);
 N_sail = X_sail*x_to_sail_coa*sign(aoa) + Y_sail*y_to_sail_coa;
@@ -226,7 +228,7 @@ if incid_angle > 0
 else
     vorzeichenR = -1;
 end
-    
+%a(8)=toc;
 F_lift_v_right = 1/2*dens_water*c_rudder_lift*v_r_tot^2*A_rudder*cos(incid_angle);
 F_drag_v_right = 1/2*dens_water*c_rudder_drag*v_r_tot^2*A_rudder*sin(incid_angle)*sign(vorzeichenR);
 
@@ -276,7 +278,7 @@ vel_new(3,1)    = delta_t/I(3)*N+vel(3,1);
 vel_new(2,1)    = 1/(1+vel_new(3,1)*delta_t^2)*(Y/m*delta_t+vel(2,1)-delta_t^2*X/m);
 vel_new(1,1)    = delta_t*(X/m+vel_new(2,1)*vel_new(3,1))+vel(1,1);
 vel             = vel_new;
-vel_p           = [vel_p vel];
+vel_p           = [vel];
 
 pose(3)         = reminderRad(pose(3));
 psi             = pose(3);
@@ -284,5 +286,6 @@ R               = [cos(psi) -sin(psi) 0; sin(psi) cos(psi) 0; 0 0 1];
 
 pose            = pose + (R*vel)*delta_t;
 % [vel(3) N alpha_rudder*180/pi];
+%a(9)=toc;
 end
 
