@@ -338,7 +338,7 @@ void * translation_thread(void * dummy)
 					}
 				}
 				//-----> theta at the start is mapTheta_start_correct!!
-rtx_message("head_curr = %f  start_theta = %d head_table = %f\n",boatData.attitude.yaw, mapTheta_start_correct, headingTable16[mapTheta_start_correct]*180/AV_PI);
+// rtx_message("head_curr = %f  start_theta = %d head_table = %f\n",boatData.attitude.yaw, mapTheta_start_correct, headingTable16[mapTheta_start_correct]*180/AV_PI);
 #ifdef DEBUG_NAVIGATOR
 				rtx_message("start_theta = %d \n",mapTheta_start_correct);
 #endif

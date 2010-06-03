@@ -11,21 +11,21 @@ if isempty(robot_variable)
     GPSDATA_MSG          = 'struct { struct {double longitude; double latitude; double altitude;} position; double speed_kmph; double speed_kn; double course; short dgpsage; short dgpsref; float HDOP; short gpsFIX; int sat; } gpsData';
     JOYSTICK_MSG         = 'struct { int nb; int na; int axes[12]; int buttons[12];} joystick';
     RUDDERTARGET_MSG     = 'struct { double torque_des; double degrees_left; double degrees_right; int resetleft_request; int resetright_request;} rudderTarget';
-    SAILTARGET_MSG       = 'struct { double degrees; int reset_request;} sailTarget';
-    FLAGS_MSG            = 'struct { int man_in_charge; int state; int state_requested; int sail_direction; int sailor_no_tack_or_jibe; int navi_state; unsigend long navi_index_call; unsigned long navi_index_answer; unsigned int skip_index_dest_call; int autonom_navigation; int global_locator; int joystick_timeout; int error_state; } Flags';
+        SAILTARGET_MSG       = 'struct { double degrees; int reset_request;} sailTarget';
+        FLAGS_MSG            = 'struct { int man_in_charge; int state; int state_requested; int sail_direction; int sailor_no_tack_or_jibe; int navi_state; long navi_index_call; long navi_index_answer; int skip_index_dest_call; int autonom_navigation; int global_locator; int joystick_timeout; int error_state; } Flags';
     RCFLAGS_MSG          = 'struct { int emergency_stop; int motion_stop; int joystick_timeout; int sailorstate_requested; int man_in_charge; int autonom_navigation; } rcFlags';
     SAILORFLAGS_MSG      = 'struct { int state; int no_tack_or_jibe; int sail_direction; } sailorFlags';
-    NAVIFLAGS_MSG        = 'struct { int navi_state; unsigned long navi_index_call; unsigned long navi_index_answer; } NaviFlags';
-    SKIPPERFLAGS_MSG     = 'struct { int global_locator; unsigned int skip_index_dest_call} SkipperFlags';
+    NAVIFLAGS_MSG        = 'struct { int navi_state; long navi_index_call; long navi_index_answer; } NaviFlags';
+    SKIPPERFLAGS_MSG     = 'struct { int global_locator; int skip_index_dest_call; } SkipperFlags';
     SAILSTATE_MSG        = 'struct { float degrees_sail; float ref_sail; } Sailstate';
     RUDDERSTATERIGHT_MSG = 'struct { float degrees_rudder; float ref_rudder; } Rudderstate';
     RUDDERSTATELEFT_MSG  = 'struct { float degrees_rudder; float ref_rudder; } Rudderstate';
-    DESIREDHEADING_MSG   = 'struct { double heading; } DesiredHeading';
+         DESIREDHEADING_MSG   = 'struct { double heading; } DesiredHeading';
     IMU_MSG              = 'struct { double speed; double theta_star; struct{ double longitude; double latitude; double altitude;} position; struct{ double roll; double pitch; double yaw;} attitude; struct{ double x; double y; double z;} velocity; struct{ double x; double y; double z;} acceleration; struct{ double x; double y; double z;} gyro; double temperature; } imuData';
     IMUCLEANDATA_MSG     = 'struct { struct { double roll; } attitude; struct { double x; double y; double z; double drift; } velocity; } imuCleanData';
-    AISSTRUCT_MSG        = 'struct { unsigned long mmsi; unsigned int navigational_status; double rate_of_turn; unsigned int speed_over_ground; unsigned int position_accuracy; double longitude; double latitude; double course_over_ground; double heading; char destination[21]; double time_of_arrival; double timestamp;} AisStruct ';
+    AISSTRUCT_MSG        = 'struct { long mmsi; int navigational_status; double rate_of_turn; int speed_over_ground; int position_accuracy; double longitude; double latitude; double course_over_ground; double heading; char destination[21]; double time_of_arrival; double timestamp;} AisStruct ';
     AISDATA_MSG          = 'struct { int number_of_ships; AisStruct Ship[15]; } AisData';
-    
+%     
     DESTINATIONSTRUCT_MSG   = 'struct { double longitude; double latitude; int passed; int type; } DestinationStruct';
     DESTINATIONDATA_MSG     = 'struct { DestinationStruct Data[1000]; double longitude; double latitude; int destNr; } DestinationData';
     WAYPOINTSTRUCT_MSG      = 'struct { double heading; int longitude; int latitude; int wyp_type; int passed; double windspeed; double winddirection; } WaypointStruct';
@@ -87,8 +87,8 @@ if isempty(robot_variable)
         RegisterVariable( out.store, 'aisData', 'AisData' );
         RegisterVariable( out.store, 'destStruct', 'DestinationStruct' );
         RegisterVariable( out.store, 'destData', 'DestinationData' );
-       RegisterVariable( out.store, 'wypStruct', 'WaypointStruct' );
-       RegisterVariable( out.store, 'wypData', 'WaypointData' );
+        RegisterVariable( out.store, 'wypStruct', 'WaypointStruct' );
+        RegisterVariable( out.store, 'wypData', 'WaypointData' );
         
         out.localization     = Variable( out.store, 'localization' );
         out.control          = Variable( out.store, 'control' );
