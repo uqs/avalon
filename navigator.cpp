@@ -333,7 +333,7 @@ void * translation_thread(void * dummy)
 					}
 				}
 				//-----> theta at the start is mapTheta_start_correct!!
-// rtx_message("start_theta = %d \n",mapTheta_start_correct);
+rtx_message("head_curr = %f  start_theta = %d head_table = %f\n",boatData.attitude.yaw, mapTheta_start_correct, headingTable16[mapTheta_start_correct]*180/AV_PI);
 #ifdef DEBUG_NAVIGATOR
 				rtx_message("start_theta = %d \n",mapTheta_start_correct);
 #endif
@@ -395,7 +395,7 @@ void * translation_thread(void * dummy)
 				last_wyp_data.heading = headingTable16[mapTheta_start_correct]; 
 				arrayPointer = 0;
 // int coun=-1;
-printf("theta start: %f     current heading: %f\n",last_wyp_data.heading*180/AV_PI,boatData.attitude.yaw);
+// printf("theta start: %f     current heading: %f\n",last_wyp_data.heading*180/AV_PI,boatData.attitude.yaw);
 				for (it=path.begin();it!=path.end();it++) {
 #ifdef DEBUG_NAVIGATOR
 					printf("x and y (%d,%d) at curr(%d) position, heading = %f \n",it->x,it->y,arrayPointer,
