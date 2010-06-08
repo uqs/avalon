@@ -143,7 +143,7 @@ void * translation_thread(void * dummy)
     double heading_to_wyp;
     double heading_to_next_wyp;
     double dist_curr_wyp;
-    double current_pos_longitude, current_pos_latitude; //already transformed and in meters
+    double current_pos_x, current_pos_y; //already transformed and in meters
     //the four vectors to be needed are:
     double vec_dist_wyp_x,vec_dist_wyp_y;
     double vec_dist_wyp2_x,vec_dist_wyp2_y;
@@ -237,8 +237,8 @@ void * translation_thread(void * dummy)
             }
 	    
 #ifdef DEBUG_SKIPPER
-	    rtx_message("next WP: x= %lf, y= %lf head= %f",waypoints.Data[current_wyp].longitude+4.380225573914934e+06,
-			    waypoints.Data[current_wyp].latitude-1.111949403453934e+06, waypoints.Data[current_wyp].heading);
+	    rtx_message("next WP: x= %lf, y= %lf head= %f",waypoints.Data[current_wyp].x,
+			    waypoints.Data[current_wyp].y, waypoints.Data[current_wyp].heading);
 #endif
 
             //write the current desired heading to store:
@@ -251,31 +251,39 @@ void * translation_thread(void * dummy)
             
             //calculate all the distances and vectors:
 
-            current_pos_longitude =double (AV_EARTHRADIUS 
-                *cos((boatData.position.latitude * AV_PI/180))*(AV_PI/180)
-                *boatData.position.longitude);
-            current_pos_latitude =double (AV_EARTHRADIUS
-                *(AV_PI/180)*boatData.position.latitude);
+//             current_pos_longitude =double (AV_EARTHRADIUS 
+//                 *cos((boatData.position.latitude * AV_PI/180))*(AV_PI/180)
+//                 *boatData.position.longitude);
+//             current_pos_latitude =double (AV_EARTHRADIUS
+//                 *(AV_PI/180)*boatData.position.latitude);
+            current_pos_x =double (AV_EARTHRADIUS * (AV_PI/180)
+                *(boatData.position.latitude - destination.latitude));
+            current_pos_y =double (AV_EARTHRADIUS 
+                *cos((destination.latitude * AV_PI/180))*(AV_PI/180)
+                *(boatData.position.longitude - destination.longitude));
 
 
             ///////
-            vec_dist_wyp_x = waypoints.Data[current_wyp].longitude - current_pos_longitude; //everything already in meters
-            vec_dist_wyp_y = waypoints.Data[current_wyp].latitude - current_pos_latitude; //everything already in meters
+            vec_dist_wyp_x = waypoints.Data[current_wyp].x - current_pos_x; //everything already in meters
+            vec_dist_wyp_y = waypoints.Data[current_wyp].y - current_pos_y; //everything already in meters
             ///////
-            vec_dist_wyp2_x = waypoints.Data[current_wyp+1].longitude - current_pos_longitude; //everything already in meters
-            vec_dist_wyp2_y = waypoints.Data[current_wyp+1].latitude - current_pos_latitude; //everything already in meters
+            vec_dist_wyp2_x = waypoints.Data[current_wyp+1].x - current_pos_y; //everything already in meters
+            vec_dist_wyp2_y = waypoints.Data[current_wyp+1].x - current_pos_x; //everything already in meters
             ///////
-            vec_fix_next_x = waypoints.Data[current_wyp+1].longitude - waypoints.Data[current_wyp].longitude;
-            vec_fix_next_y = waypoints.Data[current_wyp+1].latitude - waypoints.Data[current_wyp].latitude;
+            vec_fix_next_x = waypoints.Data[current_wyp+1].x - waypoints.Data[current_wyp].x;
+            vec_fix_next_y = waypoints.Data[current_wyp+1].y - waypoints.Data[current_wyp].y;
             ///////
-            vec_fix_curr_x = waypoints.Data[current_wyp].longitude - waypoints.Data[current_wyp-1].longitude;
-            vec_fix_curr_y = waypoints.Data[current_wyp].latitude - waypoints.Data[current_wyp-1].latitude;
+            vec_fix_curr_x = waypoints.Data[current_wyp].x - waypoints.Data[current_wyp-1].x;
+            vec_fix_curr_y = waypoints.Data[current_wyp].y - waypoints.Data[current_wyp-1].y;
             ///////
-            vec_dist_buoy_x = destination.Data[current_buoy].longitude - current_pos_longitude;
-            vec_dist_buoy_y = destination.Data[current_buoy].latitude - current_pos_latitude;
+//             vec_dist_buoy_x = destination.Data[current_buoy].longitude - current_pos_longitude;
+//             vec_dist_buoy_y = destination.Data[current_buoy].latitude - current_pos_latitude;
+	    vec_dist_buoy_x = AV_EARTHRADIUS*AV_PI/180*(destination.Data[current_buoy].latitude - destination.latitude) - current_pos_x;
+            vec_dist_buoy_y = AV_EARTHRADIUS*cos(destination.latitude * AV_PI/180)*AV_PI/180
+                *(destination.Data[current_buoy].longitude - destination.longitude) - current_pos_y;
             ////////
-            vec_prev_to_next_wyp_x =waypoints.Data[current_wyp+1].longitude - waypoints.Data[current_wyp-1].longitude;
-            vec_prev_to_next_wyp_y =waypoints.Data[current_wyp+1].latitude - waypoints.Data[current_wyp-1].latitude;
+            vec_prev_to_next_wyp_x =waypoints.Data[current_wyp+1].x - waypoints.Data[current_wyp-1].x;
+            vec_prev_to_next_wyp_y =waypoints.Data[current_wyp+1].y - waypoints.Data[current_wyp-1].y;
             ///////
             dist_curr_wyp = sqrt((vec_dist_wyp_x * vec_dist_wyp_x) + (vec_dist_wyp_y * vec_dist_wyp_y));
             heading_to_wyp = remainder((-atan2(vec_dist_wyp_y,vec_dist_wyp_x) + AV_PI/2),2*AV_PI); //schon richtig genullt, nicht mehr mathematisch!
@@ -289,7 +297,7 @@ void * translation_thread(void * dummy)
 			    (sqrt((double) (vec_fix_next_x * vec_fix_next_x) + (double) (vec_fix_next_y * vec_fix_next_y))));
             dist_buoy = sqrt((vec_dist_buoy_x*vec_dist_buoy_x) + (vec_dist_buoy_y*vec_dist_buoy_y));
             ///////
-// rtx_message("heading to lWP: %f\n",heading_to_wyp*180/AV_PI);
+// rtx_message("dist to soll trajectory: %f next trajectory: %f current WP: %f\n", dist_solltrajectory, dist_next_trajectory, dist_curr_wyp);
 #ifdef DEBUG_SKIPPER
 	    rtx_message("dist to next trajectory: %f \n", dist_next_trajectory);
             rtx_message("current_wyp = %d, desired heading = %f \n",current_wyp,desiredHeading.heading);
@@ -365,8 +373,8 @@ void * translation_thread(void * dummy)
                     rtx_message("normalnavi: dist to next trajectory: %f meters\n", dist_next_trajectory);
                     rtx_message("normalnavi: dist to curr wyp: %f meters\n", dist_curr_wyp);
 		    rtx_message("current_wyp = %d, dist = %f  dx = %f dy = %f \n",current_wyp,dist_curr_wyp, 
-				    waypoints.Data[current_wyp].longitude - current_pos_longitude, 
-				    waypoints.Data[current_wyp].latitude - current_pos_latitude);
+				    waypoints.Data[current_wyp].x - current_pos_x, 
+				    waypoints.Data[current_wyp].y - current_pos_y);
 #endif
                     //go through all the conditions and take measures:
                     //
@@ -382,8 +390,8 @@ void * translation_thread(void * dummy)
 
                     //HEAD TO THE NEXT WAYPOINT
                     if(((dist_next_trajectory < 40.0) || (dist_curr_wyp < 40.0) 
-                                || ((sign((remainder(heading_curr_to_next_wyp - heading_to_next_wyp,2*AV_PI)))
-                                        *sign(remainder(heading_curr_to_next_wyp - heading_prev_to_next_wyp,2*AV_PI))) == -1))
+                                /*|| ((sign((remainder(heading_curr_to_next_wyp - heading_to_next_wyp,2*AV_PI)))
+                                        *sign(remainder(heading_curr_to_next_wyp - heading_prev_to_next_wyp,2*AV_PI))) == -1)*/)
                             && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END)
                     {
                         waypoints.Data[current_wyp].passed = 1;

@@ -30,7 +30,7 @@
 #include "destination.h"
 
 
-#define DEBUG_DEST_CONVERT
+// #define DEBUG_DEST_CONVERT
 
 /**
  * Global variable for all DDX object
@@ -119,15 +119,21 @@ void * translation_thread(void * dummy)
 #ifdef DEBUG_DEST_CONVERT
                     rtx_message("destination longitude = %f, latitude = %f, \n",longitude,latitude);
 #endif
-                    destination.Data[0].longitude = double (AV_EARTHRADIUS 
-                        *cos((latitude * AV_PI/180))*(AV_PI/180)
-                        *longitude);
-                    destination.Data[0].latitude =double (AV_EARTHRADIUS
-                        *(AV_PI/180)*latitude);
+//                     destination.Data[0].longitude = double (AV_EARTHRADIUS 
+//                         *cos((latitude * AV_PI/180))*(AV_PI/180)
+//                         *longitude);
+//                     destination.Data[0].latitude =double (AV_EARTHRADIUS
+//                         *(AV_PI/180)*latitude);
+		    destination.Data[0].longitude = double (longitude);
+                    destination.Data[0].latitude =double (latitude);
 
                     destination.Data[0].passed = 0;
                     destination.Data[0].type = AV_DEST_TYPE_END;
                     destination.Data[1].type = AV_DEST_TYPE_NOMORE;
+
+		    // set the first destination point to the current one
+		    destination.longitude = destination.Data[0].longitude;
+		    destination.latitude = destination.Data[0].latitude;
                     //bring to store:
 
                     destinationData.t_writefrom(destination);
@@ -151,10 +157,13 @@ void * translation_thread(void * dummy)
                         rtx_message("destination longitude = %f, latitude = %f, curent_destpoint = %d \n",longitude,latitude, current_destpoint);
 #endif
 
-                        destination.Data[current_destpoint].longitude = (AV_EARTHRADIUS 
-                            *cos((latitude * AV_PI/180))*(AV_PI/180) *longitude);
-                        destination.Data[current_destpoint].latitude = (AV_EARTHRADIUS
-                            *(AV_PI/180)*latitude);
+//                         destination.Data[current_destpoint].longitude = (AV_EARTHRADIUS 
+//                             *cos((latitude * AV_PI/180))*(AV_PI/180) *longitude);
+//                         destination.Data[current_destpoint].latitude = (AV_EARTHRADIUS
+//                             *(AV_PI/180)*latitude);
+
+			destination.Data[current_destpoint].longitude = double (longitude);
+                        destination.Data[current_destpoint].latitude = double (latitude);
 
                         destination.Data[current_destpoint].passed = 0;
                         destination.Data[current_destpoint].type = AV_DEST_TYPE_OCEANWYP;
@@ -167,7 +176,11 @@ void * translation_thread(void * dummy)
                         current_destpoint ++;
 
                     }
-                    
+
+     		    // set the second destination point to the current one
+		    destination.longitude = destination.Data[1].longitude;
+		    destination.latitude = destination.Data[1].latitude;
+
                     destination.Data[current_destpoint-1].type = AV_DEST_TYPE_END;
                     destination.Data[current_destpoint].type = AV_DEST_TYPE_NOMORE;
 

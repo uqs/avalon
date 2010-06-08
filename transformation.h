@@ -17,20 +17,20 @@
 DDX_STORE_TYPE(LakeTransformation,
 		struct {
        
-        double longitude_start;     //in degrees
-        double latitude_start;      //in degrees
-        double longitude_start_transf; //in meters
-        double latitude_start_transf;  //in meters
+        double longitude_start; //in degrees
+        double latitude_start;  //in degrees
+        double x_start_transf; 	//in meters
+        double y_start_transf;  //in meters
 
         //endpoint
-        double longitude_end;           //in degrees
-        double latitude_end;            //in degrees
-        double longitude_end_transf;    //in meters
-        double latitude_end_transf;     //in meters
+        double longitude_end;   //in degrees
+        double latitude_end;    //in degrees
+        double x_end_transf;  	//in meters
+        double y_end_transf;    //in meters
 
         // offsets so we dont have to start at 0/0 ...
-        int x_offset;
-        int y_offset;
+        int x_iter_offset;
+        int y_iter_offset;
 
         //length in map-coordinates:
         int x_length;
@@ -45,8 +45,8 @@ DDX_STORE_TYPE(LakeTransformation,
         
         // real position offset, to afterwards calculate the real waypoint
         // positions
-        int latitude_offset;
-        int longitude_offset;
+        int x_offset;
+        int y_offset;
 
 		}
 );

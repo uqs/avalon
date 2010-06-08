@@ -322,7 +322,7 @@ void * translation_thread(void * dummy)
 				    imu.attitude.yaw = 0;
 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
 			    }
-			    theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading.heading, 0);
+			    theta_dot_des = rtx_pid_eval(thetapid, remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0);
                            
                             // theta_dot_des = imu.theta_star;
                             torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
@@ -402,7 +402,7 @@ void * translation_thread(void * dummy)
 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
 			    }
                             
-                            theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading.heading, 0) ;
+                            theta_dot_des = rtx_pid_eval(thetapid, remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0) ;
                             //theta_dot_des = imu.theta_star;
                             torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
                             rudder.torque_des = torque_des;      
@@ -476,7 +476,7 @@ void * translation_thread(void * dummy)
 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
 			    }
 
-			    theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading.heading, 0) ;
+			    theta_dot_des = rtx_pid_eval(thetapid, remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0) ;
                             torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
                             rudder.torque_des = torque_des;                            
 			 
@@ -509,10 +509,18 @@ void * translation_thread(void * dummy)
 				    myparamstream = rtx_param_open("sailor_pid_torque.txt", 0, NULL); //NULL = errorfunction
 				    mypid = rtx_pid_init(mypid, myparamstream, "torque", 0.01, 0); //0.01=dt
 				    desired_heading_after_tack =
+// 					    wind_clean.global_direction_real - 45.0 *
+// 							    sign(remainder(imu.attitude.yaw -
+// 									    wind_clean.global_direction_real,360.0));
 					    remainder(wind_clean.global_direction_real - 45.0 *
 							    sign(remainder(imu.attitude.yaw -
 									    wind_clean.global_direction_real,360.0)),360.0);
 				    sign_wanted_sail_angle_after_tack = -sign(wind_clean.bearing_app);
+// if (fabs(imu.attitude.yaw-desired_heading_after_tack) > 180)
+// {
+//     desired_heading_after_tack += sign(imu.attitude.yaw)*360;
+// }
+//if (sign(imu.attitude.yaw
 			    }
 			    /* Torque: */
 			    if(last_state != flags.state) // initialize only when newly in this state
@@ -546,7 +554,7 @@ void * translation_thread(void * dummy)
 			    {
 				    sail.degrees = sign_wanted_sail_angle_after_tack * AV_SAILOR_UPWIND_MIN_SAIL_DEGREES;
 			    }
-
+rtx_message("des_head after: %f",desired_heading_after_tack);
 			    /* Rudder: */
 			    //u = sign_wanted_sail_angle * 45.0 * sign(imu.velocity.x);
 
@@ -558,7 +566,7 @@ void * translation_thread(void * dummy)
 			    // Attention: if() mit e is missing(see normal sailing...) probably not needed though !!!!!!!!
 			    // u = rtx_pid_eval(mypid, imu.attitude.yaw, desired_heading_after_tack, 0) * sign(imu.velocity.x);
 
-			    theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading_after_tack, 0) ;
+			    theta_dot_des = rtx_pid_eval(thetapid,remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0) ;
                             torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t                            
                             rudder.torque_des = torque_des;
                              
@@ -653,7 +661,7 @@ void * translation_thread(void * dummy)
 
 			    }
 
-                            theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading.heading, 0) ;
+                            theta_dot_des = rtx_pid_eval(thetapid,remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0) ;
                             torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
                             rudder.torque_des = torque_des;          
 
@@ -751,7 +759,7 @@ void * translation_thread(void * dummy)
 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
 			    }
 
-                            theta_dot_des = rtx_pid_eval(thetapid, imu.attitude.yaw, desired_heading.heading, 0) ;
+                            theta_dot_des = rtx_pid_eval(thetapid, remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0) ;
 
                             torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t                          
                             rudder.torque_des = torque_des;                            
@@ -770,7 +778,9 @@ void * translation_thread(void * dummy)
 			    last_state = 0;
 			    break;
 	    }
-
+// theta_dot_des = rtx_pid_eval(thetapid, remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0) ;
+rtx_message("theta_dot_des: %f    delta_head: %f  torque_des: %f  state: %d",theta_dot_des, remainder(imu.attitude.yaw-desired_heading.heading,360.), torque_des, flags.state);
+// rtx_message("rudder degrees: %f",u*AV_PI/180.0);
 	    fclose(thetafile);
             // Bring to store
 

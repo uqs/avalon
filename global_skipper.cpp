@@ -113,14 +113,15 @@ void * translation_thread(void * dummy)
     Flags generalflags;
     DestinationData destination; //actual array!!
     SkipperFlags skipperflags;
-    NaviFlags naviflags;
+//     NaviFlags naviflags;
     AisDestData ais_dest;
 
     double dest_dist = 3500;
     double closest_distance;
     int i,p;
-    bool first=true;
+//     bool first=true;
     unsigned int ais_dest_index_last=0;
+    double distance_arr[1000];
     double distance;
 
     //initializing the call index
@@ -130,7 +131,8 @@ void * translation_thread(void * dummy)
     skipperFlagData.t_writefrom(skipperflags);
             
 
-    double current_pos_longitude, current_pos_latitude; //already transformed and in meters
+    double current_pos_x, current_pos_y; //already transformed and in meters
+
 
 
     while (1) {
@@ -143,6 +145,7 @@ void * translation_thread(void * dummy)
 	    aisDestData.t_readto(ais_dest,0,0);
             //calculate all the distances and vectors:
 // rtx_message("index: %d      last: %d",ais_dest.ais_dest_index,ais_dest_index_last);
+
 if (ais_dest.ais_dest_index != ais_dest_index_last)
   {
 rtx_message("listen to ais     index_last= %d\n", ais_dest_index_last);
@@ -163,11 +166,11 @@ if (generalflags.global_locator == ais_dest.global_skipper_flag)
 {
 ais_dest_index_last=ais_dest.ais_dest_index;
 }
-            current_pos_longitude =double (AV_EARTHRADIUS 
+            current_pos_x =double (AV_EARTHRADIUS 
                     *cos((boatData.position.latitude * AV_PI/180))*(AV_PI/180)
-                    *boatData.position.longitude);
-            current_pos_latitude =double (AV_EARTHRADIUS
-                    *(AV_PI/180)*boatData.position.latitude);
+                    *(boatData.position.longitude-destination.longitude));
+            current_pos_y =double (AV_EARTHRADIUS
+                    *(AV_PI/180)*(boatData.position.latitude-destination.latitude));
 
 #ifdef DEBUG_GLOBSKIPPER
             rtx_message("the current global destpoint is number %d flags.global_locator = %d \n", destination.destNr, generalflags.global_locator);
@@ -177,12 +180,15 @@ ais_dest_index_last=ais_dest.ais_dest_index;
             switch(generalflags.global_locator)
             {
                 case AV_FLAGS_GLOBALSK_LOCATOR:
+// 		    destination_x = 
 
                     //check what wyp we are closest    
-                    closest_distance = sqrt((current_pos_longitude - destination.Data[0].longitude)
-                            *(current_pos_longitude - destination.Data[0].longitude)
-                            + (current_pos_latitude - destination.Data[0].latitude)
-                            *(current_pos_latitude - destination.Data[0].latitude));
+//                     closest_distance = sqrt((current_pos_longitude - destination.Data[0].longitude)
+//                             *(current_pos_longitude - destination.Data[0].longitude)
+//                             + (current_pos_latitude - destination.Data[0].latitude)
+//                             *(current_pos_latitude - destination.Data[0].latitude));
+		    closest_distance = AV_EARTHRADIUS*AV_PI/180.0*sqrt(pow(boatData.position.latitude - destination.latitude,2)
+					+ pow(cos(destination.latitude*AV_PI/180.0)*(boatData.position.longitude - destination.longitude),2));
                     i = 0;
                     destination.destNr = 0;
 
@@ -199,15 +205,16 @@ ais_dest_index_last=ais_dest.ais_dest_index;
                                         *(current_pos_latitude - destination.Data[i].latitude))));
 #endif
 
-                        if ( closest_distance > sqrt((current_pos_longitude - destination.Data[i].longitude)
-                                    *(current_pos_longitude - destination.Data[i].longitude)
-                                    + (current_pos_latitude - destination.Data[i].latitude)
-                                    *(current_pos_latitude - destination.Data[i].latitude)))
+//                         if ( closest_distance > sqrt((current_pos_longitude - destination.Data[i].longitude)
+//                                     *(current_pos_longitude - destination.Data[i].longitude)
+//                                     + (current_pos_latitude - destination.Data[i].latitude)
+//                                     *(current_pos_latitude - destination.Data[i].latitude)))
+			
+			distance_arr[i] =   AV_EARTHRADIUS*AV_PI/180.0*sqrt(pow(boatData.position.latitude - destination.Data[i].latitude,2)
+					+ pow(cos(destination.latitude*AV_PI/180.0)*(boatData.position.longitude - destination.Data[i].longitude),2));
+			if ( closest_distance > distance_arr[i])
                         {
-                            closest_distance = sqrt((current_pos_longitude - destination.Data[i].longitude)
-                                    *(current_pos_longitude - destination.Data[i].longitude)
-                                    + (current_pos_latitude - destination.Data[i].latitude)
-                                    *(current_pos_latitude - destination.Data[i].latitude));
+                            closest_distance = distance_arr[i];
 
                             destination.destNr = i;
 
@@ -218,15 +225,12 @@ ais_dest_index_last=ais_dest.ais_dest_index;
 
                         i++;
                     }
-                    assert((destination.destNr < 1000) && (destination.destNr>=0));
+                    assert((destination.destNr < 1001) && (destination.destNr>=0));
 
                     for (p = 0; p < 3; p++)
                     {
-                        if (((sqrt((current_pos_longitude - destination.Data[destination.destNr+2-p].longitude)
-                                            *(current_pos_longitude - destination.Data[destination.destNr+2-p].longitude)
-                                            + (current_pos_latitude - destination.Data[destination.destNr+2-p].latitude)
-                                            *(current_pos_latitude - destination.Data[destination.destNr+2-p].latitude))) 
-                                    < 2.1*dest_dist)
+			
+                        if ((distance_arr[destination.destNr +2 -p]  < 2.1*dest_dist)
                                 && ((destination.Data[destination.destNr +2 -p].type == AV_DEST_TYPE_OCEANWYP)
                                     || (destination.Data[destination.destNr +2 -p].type == AV_DEST_TYPE_END)))
                         {
@@ -260,17 +264,15 @@ ais_dest_index_last=ais_dest.ais_dest_index;
                     /////////////////////////////////////////////////////////////////////////7    
                 case AV_FLAGS_GLOBALSK_CLOSING:
 
-                    distance = (sqrt((current_pos_longitude - destination.longitude)
-                                *(current_pos_longitude - destination.longitude)
-                                + (current_pos_latitude - destination.latitude)
-                                *(current_pos_latitude - destination.latitude)));
+                    distance = AV_EARTHRADIUS*AV_PI/180.0*sqrt(pow(boatData.position.latitude - destination.latitude,2)
+					+ pow(cos(destination.latitude*AV_PI/180.0)*(boatData.position.longitude - destination.longitude),2));
 #ifdef DEBUG_GLOBSKIPPER
             rtx_message("closing: closest distance = %f \n", distance);
 #endif
                     if(distance > 2.1*dest_dist)
                     {
-                        destination.longitude = current_pos_longitude + 0.5 * (destination.longitude - current_pos_longitude);
-                        destination.latitude = current_pos_latitude + 0.5 * (destination.latitude - current_pos_latitude);
+                        destination.longitude = boatData.position.longitude + 0.5 * (destination.longitude - boatData.position.longitude);
+                        destination.latitude = boatData.position.latitude + 0.5 * (destination.latitude - boatData.position.latitude);
                         destinationData.t_writefrom(destination);
 			skipperflags.skip_index_dest_call ++;
 			skipperFlagData.t_writefrom(skipperflags);
@@ -301,12 +303,10 @@ ais_dest_index_last=ais_dest.ais_dest_index;
 //                                     *(current_pos_longitude - destination.Data[destination.destNr].longitude)
 //                                     + (current_pos_latitude - destination.Data[destination.destNr].latitude)
 //                                     *(current_pos_latitude - destination.Data[destination.destNr].latitude))));
-                    if(((sqrt((current_pos_longitude - destination.Data[destination.destNr].longitude)
-                                        *(current_pos_longitude - destination.Data[destination.destNr].longitude)
-                                        + (current_pos_latitude - destination.Data[destination.destNr].latitude)
-                                        *(current_pos_latitude - destination.Data[destination.destNr].latitude)))
-                                < 0.1*dest_dist)
-                            && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
+		    distance = AV_EARTHRADIUS*AV_PI/180.0*sqrt(pow(boatData.position.latitude - destination.latitude,2)
+					+ pow(cos(destination.latitude*AV_PI/180.0)*(boatData.position.longitude - destination.longitude),2));
+
+                    if((distance < 0.1*dest_dist) && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
                     {
                         destination.destNr += 1;
                         assert((destination.destNr < 1000) && (destination.destNr>=0));
@@ -320,10 +320,7 @@ ais_dest_index_last=ais_dest.ais_dest_index;
 // #endif
                     }   
 
-                    if((sqrt((current_pos_longitude - destination.Data[destination.destNr].longitude)
-                                    *(current_pos_longitude - destination.Data[destination.destNr].longitude)
-                                    + (current_pos_latitude - destination.Data[destination.destNr].latitude)
-                                    *(current_pos_latitude - destination.Data[destination.destNr].latitude))) > 2.2*dest_dist)
+                    if(distance > 2.2*dest_dist)
                     {
 			skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
                         skipperFlagData.t_writefrom(skipperflags);
@@ -333,10 +330,8 @@ ais_dest_index_last=ais_dest.ais_dest_index;
                     /////////////////////////////////////////////////////////////////////////7    
                 case AV_FLAGS_GLOBALSK_AVOIDANCE:
 
-                    distance = (sqrt((current_pos_longitude - destination.longitude)
-                                *(current_pos_longitude - destination.longitude)
-                                + (current_pos_latitude - destination.latitude)
-                                *(current_pos_latitude - destination.latitude)));
+                    distance = AV_EARTHRADIUS*AV_PI/180.0*sqrt(pow(boatData.position.latitude - destination.latitude,2)
+					+ pow(cos(destination.latitude*AV_PI/180.0)*(boatData.position.longitude - destination.longitude),2));
 #ifdef DEBUG_GLOBSKIPPER
             rtx_message("Collision: collision distance = %f \n", distance);
 #endif
@@ -358,10 +353,8 @@ ais_dest_index_last=ais_dest.ais_dest_index;
                     ////////////////////////////////////////////////////////////////////////////
 		case AV_FLAGS_GLOBALSK_SURVIVE:
 
-                    distance = (sqrt((current_pos_longitude - destination.longitude)
-                                *(current_pos_longitude - destination.longitude)
-                                + (current_pos_latitude - destination.latitude)
-                                *(current_pos_latitude - destination.latitude)));
+                    distance = AV_EARTHRADIUS*AV_PI/180.0*sqrt(pow(boatData.position.latitude - destination.latitude,2)
+					+ pow(cos(destination.latitude*AV_PI/180.0)*(boatData.position.longitude - destination.longitude),2));
 #ifdef DEBUG_GLOBSKIPPER
             rtx_message("Collision: collision distance = %f \n", distance);
 #endif

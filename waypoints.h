@@ -29,8 +29,8 @@ DDX_STORE_TYPE(WaypointStruct,
         
         //coordinates:
 
-        int longitude; //meters
-        int latitude; //meters
+        int x; 	//meters
+        int y; //meters
 
         //info to the type of waypoint:
         

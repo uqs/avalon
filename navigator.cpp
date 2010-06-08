@@ -43,7 +43,7 @@
 #include "aisEval.h"
 
 //#define DEBUG_ISLAND
-// #define DEBUG_NAVIGATOR
+#define DEBUG_NAVIGATOR
 
 /**
  * Global variable for all DDX object
@@ -198,53 +198,68 @@ void * translation_thread(void * dummy)
 
 				//transformation into meter-coordinates:
 
-				transformation.longitude_start_transf = AV_EARTHRADIUS 
-					*cos((transformation.latitude_start * AV_PI/180))*(AV_PI/180)
-					*transformation.longitude_start;
+// 				transformation.longitude_start_transf = AV_EARTHRADIUS 
+// 					*cos((transformation.latitude_start * AV_PI/180))*(AV_PI/180)
+// 					*transformation.longitude_start;
+// 
+// 				transformation.latitude_start_transf = AV_EARTHRADIUS
+// 					*(AV_PI/180)*transformation.latitude_start;
 
-				transformation.latitude_start_transf = AV_EARTHRADIUS
-					*(AV_PI/180)*transformation.latitude_start;
+				// for the Djikstra, x and y are interchanged
+				
+				transformation.x_start_transf = AV_EARTHRADIUS 
+					*cos((destination.latitude * AV_PI/180))*(AV_PI/180)
+					*(transformation.longitude_start - destination.longitude);
+
+				transformation.y_start_transf = AV_EARTHRADIUS * (AV_PI/180)
+					*(transformation.latitude_start - destination.latitude);
+
+				transformation.x_end_transf = 0;
+				transformation.y_end_transf = 0;
+
 
 
 				//calculating the offsets:
-				transformation.x_offset = 5; //to be modified!
-				transformation.y_offset = 5;
+				transformation.x_iter_offset = 5; //to be modified!
+				transformation.y_iter_offset = 5;
 #ifdef DEBUG_NAVIGATOR
-				rtx_message("start: %f %f m; end: %f %f m \n",transformation.longitude_start_transf, transformation.latitude_start_transf,
-						destination.longitude, destination.latitude);
+				rtx_message("start: %f %f m; end: %f %f m \n",transformation.x_start_transf, transformation.y_start_transf,
+						transformation.x_end_transf, transformation.y_end_transf);
 #endif 
 				// rtx_message("start: %f %f m; end: %f %f m \n",transformation.longitude_start_transf+4.380225573914934e+06, transformation.latitude_start_transf-1.111949403453934e+06,
 				//                         destination.longitude+4.380225573914934e+06, destination.latitude-1.111949403453934e+06);
 
-				if ((destination.longitude - transformation.longitude_start_transf)>0)
+// 				if ((destination.longitude - transformation.longitude_start_transf)>0)
+				if (transformation.x_start_transf < 0)
 				{
-					transformation.longitude_offset = (int)(transformation.longitude_start_transf) - transformation.x_offset*AV_NAVI_GRID_SIZE;
-					transformation.x_start = transformation.x_offset;
-					transformation.x_end = (int)((destination.longitude - (double)(transformation.longitude_offset)) / (double)AV_NAVI_GRID_SIZE);
+					transformation.x_offset = (int)(transformation.x_start_transf) - transformation.x_iter_offset*AV_NAVI_GRID_SIZE;
+					transformation.x_start = transformation.x_iter_offset;
+					transformation.x_end = (int)((transformation.x_end_transf - (double)(transformation.x_offset)) / (double)AV_NAVI_GRID_SIZE);
 				}
 				else
 				{
-					transformation.longitude_offset = destination.longitude - transformation.x_offset*AV_NAVI_GRID_SIZE;
-					transformation.x_end = transformation.x_offset;
-					transformation.x_start = (transformation.longitude_start_transf - transformation.longitude_offset) / AV_NAVI_GRID_SIZE;
+					transformation.x_offset = transformation.x_end_transf - transformation.x_iter_offset*AV_NAVI_GRID_SIZE;
+					transformation.x_end = transformation.x_iter_offset;
+					transformation.x_start = (transformation.x_start_transf - transformation.x_offset) / AV_NAVI_GRID_SIZE;
 				}
 
 				//the same procedure for the y-coordinates:
-				if ((destination.latitude - transformation.latitude_start_transf)>0)
+// 				if ((destination.latitude - transformation.latitude_start_transf)>0)
+				if (transformation.y_start_transf < 0)
 				{
-					transformation.latitude_offset = transformation.latitude_start_transf - transformation.y_offset*AV_NAVI_GRID_SIZE;
-					transformation.y_start = transformation.y_offset;
-					transformation.y_end = (destination.latitude - transformation.latitude_offset) / AV_NAVI_GRID_SIZE;
+					transformation.y_offset = transformation.y_start_transf - transformation.y_iter_offset*AV_NAVI_GRID_SIZE;
+					transformation.y_start = transformation.y_iter_offset;
+					transformation.y_end = (transformation.y_end_transf - transformation.y_offset) / AV_NAVI_GRID_SIZE;
 				}
 				else
 				{
-					transformation.latitude_offset = destination.latitude - transformation.y_offset*AV_NAVI_GRID_SIZE;
-					transformation.y_end = transformation.y_offset;
-					transformation.y_start = (transformation.latitude_start_transf - transformation.latitude_offset) / AV_NAVI_GRID_SIZE;
+					transformation.y_offset = transformation.y_end_transf - transformation.y_iter_offset*AV_NAVI_GRID_SIZE;
+					transformation.y_end = transformation.y_iter_offset;
+					transformation.y_start = (transformation.y_start_transf - transformation.y_offset) / AV_NAVI_GRID_SIZE;
 				}
 
-				xSize = (2*transformation.x_offset + abs(transformation.x_end - transformation.x_start));
-				ySize = (2*transformation.y_offset + abs(transformation.y_end - transformation.y_start));    
+				xSize = (2*transformation.x_iter_offset + abs(transformation.x_end - transformation.x_start));
+				ySize = (2*transformation.y_iter_offset + abs(transformation.y_end - transformation.y_start));    
 
 				if(transformation.x_start == transformation.x_end && transformation.y_start == transformation.y_end)
 				{
@@ -410,8 +425,8 @@ void * translation_thread(void * dummy)
 #endif
 					if(arrayPointer >= 100) break;
 // coun++;
-					wyp_data.longitude = ((it->x)*AV_NAVI_GRID_SIZE+transformation.longitude_offset);
-					wyp_data.latitude = ((it->y)*AV_NAVI_GRID_SIZE+transformation.latitude_offset);
+					wyp_data.y = ((it->x)*AV_NAVI_GRID_SIZE+transformation.x_offset);
+					wyp_data.x = ((it->y)*AV_NAVI_GRID_SIZE+transformation.y_offset);
 					wyp_data.heading =remainder((-(headingTable16[(it->theta)]*180/AV_PI)+90),360.0);
 					wyp_data.wyp_type = AV_WYP_TYPE_PASSBY;
 					wyp_data.windspeed = windSpeed;
@@ -421,10 +436,10 @@ void * translation_thread(void * dummy)
 
 					if(arrayPointer == 0)
 					{
-						waypoints.Data[arrayPointer].longitude = wyp_data.longitude;
-						waypoints.Data[arrayPointer].latitude = wyp_data.latitude;
+						waypoints.Data[arrayPointer].x = wyp_data.x;
+						waypoints.Data[arrayPointer].y = wyp_data.y;
 
-						fprintf(pathfile,"%d %d %f\n",wyp_data.longitude,wyp_data.latitude, wyp_data.heading);/**//**/
+						fprintf(pathfile,"%d %d %f\n",wyp_data.x,wyp_data.y, wyp_data.heading);/**//**/
 // rtx_message("count: %d",coun);
 						waypoints.Data[arrayPointer].heading = wyp_data.heading;
 						waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_PASSBY;
@@ -434,19 +449,19 @@ void * translation_thread(void * dummy)
 
 						arrayPointer = 1;
 					} else if((fabs(remainder(wyp_data.heading - last_wyp_data.heading, 360.)) > 1e-2) 
-							&& ((waypoints.Data[arrayPointer-1].longitude != wyp_data.longitude)
-								|| (waypoints.Data[arrayPointer - 1].latitude != wyp_data.latitude))
-							&& ((waypoints.Data[0].longitude != last_wyp_data.longitude)	//because we always had the first wyp twice
-								|| (waypoints.Data[0].latitude != last_wyp_data.latitude)))
+							&& ((waypoints.Data[arrayPointer-1].x != wyp_data.x)
+								|| (waypoints.Data[arrayPointer - 1].y != wyp_data.y))
+							&& ((waypoints.Data[0].x != last_wyp_data.x)	//because we always had the first wyp twice
+								|| (waypoints.Data[0].y != last_wyp_data.y)))
 					{
 #ifdef DEBUG_NAVIGATOR
 						printf("inserted into store: last wyp \n");
 #endif
-						waypoints.Data[arrayPointer].longitude = last_wyp_data.longitude;
-						waypoints.Data[arrayPointer].latitude = last_wyp_data.latitude;
+						waypoints.Data[arrayPointer].x = last_wyp_data.x;
+						waypoints.Data[arrayPointer].y = last_wyp_data.y;
 // rtx_message("count: %d",coun);
 // rtx_message("diff head: %f, head_curr: %f  head_last: %f",fabs(remainder(wyp_data.heading - last_wyp_data.heading, 360.)), wyp_data.heading,last_wyp_data.heading );
-						fprintf(pathfile,"%d %d %f\n",last_wyp_data.longitude,last_wyp_data.latitude, last_wyp_data.heading);
+						fprintf(pathfile,"%d %d %f\n",last_wyp_data.x,last_wyp_data.y, last_wyp_data.heading);
 
 						waypoints.Data[arrayPointer].heading = last_wyp_data.heading;
 						waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_PASSBY;
@@ -464,12 +479,12 @@ void * translation_thread(void * dummy)
 // 				{
 // 				    for (q=arrayPointer;q<max_num_wyp;q++) {
 // 					
-				waypoints.Data[arrayPointer].longitude = last_wyp_data.longitude;
-				waypoints.Data[arrayPointer].latitude = last_wyp_data.latitude;
+				waypoints.Data[arrayPointer].x = last_wyp_data.x;
+				waypoints.Data[arrayPointer].y = last_wyp_data.y;
 				waypoints.Data[arrayPointer].heading = last_wyp_data.heading;
 
 
-				fprintf(pathfile,"%d %d %f\n",last_wyp_data.longitude,last_wyp_data.latitude, last_wyp_data.heading);
+				fprintf(pathfile,"%d %d %f\n",last_wyp_data.x,last_wyp_data.y, last_wyp_data.heading);
 				waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_END;
 				waypoints.Data[arrayPointer].passed = 0;
 				waypoints.Data[arrayPointer].windspeed = windSpeed;
@@ -557,9 +572,9 @@ void setAisObstacles(ShipData ship, UISpace & map, LakeTransformation transforma
 		{
 			for(shiplat = -500; shiplat < 530; shiplat += AV_NAVI_GRID_SIZE)
 			{
-				dangerpoint_x = int (rint((ship.Data[shipiterator].longitude + shiplong - transformation.longitude_offset) 
+				dangerpoint_x = int (rint((ship.Data[shipiterator].longitude + shiplong - transformation.y_offset) 
 							/ AV_NAVI_GRID_SIZE));
-				dangerpoint_y = int (rint((ship.Data[shipiterator].latitude + shiplat - transformation.latitude_offset) 
+				dangerpoint_y = int (rint((ship.Data[shipiterator].latitude + shiplat - transformation.x_offset) 
 							/ AV_NAVI_GRID_SIZE));
 
 				if(map.contains(dangerpoint_x,dangerpoint_y,0))
@@ -609,8 +624,8 @@ void setIsland(const char *islandFile, UISpace & map, LakeTransformation transfo
 			printf("longitude = %f; latitude = %f \n",longitude_curr,latitude_curr);
 #endif
 
-			newX = int (rint((longitude_curr_old - transformation.longitude_offset) / AV_NAVI_GRID_SIZE));
-			newY = int (rint((latitude_curr_old - transformation.latitude_offset) / AV_NAVI_GRID_SIZE));
+			newX = int (rint((longitude_curr_old - transformation.y_offset) / AV_NAVI_GRID_SIZE));
+			newY = int (rint((latitude_curr_old - transformation.y_offset) / AV_NAVI_GRID_SIZE));
 
 			for( m = 0; m < 1000; m++)
 			{

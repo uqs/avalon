@@ -22,7 +22,7 @@
 DDX_STORE_TYPE(DestinationStruct,
 		struct {
       
-        double longitude; //everything in meters, already transformed by dest_transf
+        double longitude; //everything in GPS-Coordinates, already transformed by dest_transf
         double latitude;
 
         int passed;         //if 0 -> not yet passed, if 1 already passed!

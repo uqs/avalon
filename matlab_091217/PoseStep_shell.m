@@ -257,8 +257,8 @@ X = X_sail + X_current + X_wind + X_waves + X_rudder - X_damping;
 Y = Y_sail + Y_current + Y_wind + Y_waves + Y_rudder - Y_damping;
 N = N_sail + N_current + N_wind + N_waves + N_rudder - N_damping;% -N_rudder
 % [aoa d_wind_r N_sail];
-% [N N_damping N_sail N_rudder];
-
+[N N_damping N_sail N_rudder];
+[X X_damping X_sail X_rudder];
 0;
 % N = 0.9*N;                                                              % 0.6 correction term by FJ   waves must be additive
 
