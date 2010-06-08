@@ -187,7 +187,7 @@ void * translation_thread(void * dummy)
                     //bring to store:
 
                     destinationData.t_writefrom(destination);
-             rtx_message("it should end here"); 
+             rtx_message("it should end here, %d destinations written", current_destpoint); 
                     //abort programm:
                     destfile.close();
                     rtx_main_signal_shutdown();
