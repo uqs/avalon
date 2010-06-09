@@ -65,6 +65,7 @@ while (t < T_sim)
 %a(13)=toc;
 %tic    
     if(mod(round(t*1000)/1000,3600)==0)
+   % if(mod(round(n),1000)==0)
        d_wind=reminderRad(d_wind+10*pi/180);
        sprintf('wind angle increased to %f degrees',d_wind*180/pi)
 %         a()=toc
@@ -99,6 +100,8 @@ while (t < T_sim)
     aoa_sail            = reminderRad(sailUpdate(aoa_sail_des, aoa_sail, delta_t, pi/180*(15))); 
     alpha_rudder_l      = rudderUpdate(alpha_rudder_l_des, alpha_rudder_l, delta_t, pi/180*(30));  %35 for delta_t = 0.2
     alpha_rudder_r      = rudderUpdate(alpha_rudder_r_des, alpha_rudder_r, delta_t, pi/180*(30));
+%alpha_rudder_l = alpha_rudder_l_des;
+%alpha_rudder_r = alpha_rudder_r_des;
 %     alpha_rudder_hist(n)      = rad2deg(alpha_rudder_r);
 %     rudder_pos_des(n)=(rudder.degrees_left);
 %     des_head(n)=des_heading;
@@ -179,10 +182,10 @@ while (t < T_sim)
 %         dist_boat                         =[sqrt((pose(1)-boat_x).^2+(pose(2)-boat_y).^2) zeros(1,5-num_boats)];
 %         dist_min                          = min(sqrt((pose(1)-boat_x).^2+(pose(2)-boat_y).^2));
     end
-    for i=1:20
-    dest_y(i) = r_earth*cos(destData.latitude*pi/180)*pi/180*(destData.Data(i).longitude-destData.longitude);
-    dest_x(i) = r_earth*pi/180*(destData.Data(i).latitude-destData.latitude);
-    end
+    %for i=1:20
+    %dest_y(i) = r_earth*cos(destData.latitude*pi/180)*pi/180*(destData.Data(i).longitude-destData.longitude);
+    %dest_x(i) = r_earth*pi/180*(destData.Data(i).latitude-destData.latitude);
+    %end
     pose(2) = r_earth*cos(destData.latitude*pi/180)*pi/180*(imu.position.longitude-destData.longitude);
     pose(1) = r_earth*pi/180*(imu.position.latitude-destData.latitude);
 %a(3)=toc;

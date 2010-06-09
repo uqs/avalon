@@ -6,7 +6,7 @@ function ddx_write_shell( robot, wind, rudder, rcflags, sailstate, rudderstateri
 %  DDXWrite( robot.cleanwind, cleanwind );
 %  DDXWrite( robot.gps, gps);
 %   DDXWrite( robot.joystick, joystick );
- DDXWrite( robot.rudder, rudder );
+% DDXWrite( robot.rudder, rudder );
  % DDXWrite( robot.sail, sail );
  % DDXWrite( robot.flags, flags );
  DDXWrite( robot.rcflags, rcflags );
