@@ -19,7 +19,7 @@ addpath '.'
 double d_wind;
 double v_wind;
 v_wind=15;
-d_wind=130.0*pi/180.0;
+d_wind=-pi/2;
 avalon = ddx_init();
 
 parameter_shell;

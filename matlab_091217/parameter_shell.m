@@ -19,7 +19,7 @@ disp_forces             = 1;            % display forces; 0 or 1
 disp_measurements       = 0;            % display measurements; 0 or 1
 rcflags_emergency_stop  = 0;
 ais_sim                 = 0;            % 1: simulate other boats and detect them with AIS sensor          
-
+r_earth			= 6371000.785;
 
 t = 0;
 n = 1;                              % for AIS, for Plots
