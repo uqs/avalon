@@ -19,7 +19,7 @@ addpath '.'
 double d_wind;
 double v_wind;
 v_wind=15;
-d_wind=-pi/3;
+d_wind=130.0*pi/180.0;
 avalon = ddx_init();
 
 parameter_shell;
@@ -72,13 +72,13 @@ while (t < T_sim)
         tic
 	t_elaps_old=0;
         %a_tot(end+1,:)=a;
-        t;
+        t
     end
 %a(1)=toc;
-t_elaps_s=toc;
-while (t_elaps_s-t_elaps_old)<(delta_t-0.005)
-	t_elaps_s=toc;
-end
+%t_elaps_s=toc;
+%while (t_elaps_s-t_elaps_old)<(delta_t-0.005)
+%	t_elaps_s=toc;
+%end
     [rudder, sail, flags, rcflags] = ddx_read_shell( avalon );
 
 %a(2)=toc;
