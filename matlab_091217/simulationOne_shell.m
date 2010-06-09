@@ -79,7 +79,7 @@ while (t < T_sim)
 %while (t_elaps_s-t_elaps_old)<(delta_t-0.005)
 %	t_elaps_s=toc;
 %end
-    [rudder, sail, flags, rcflags] = ddx_read_shell( avalon );
+    [rudder, sail, flags, rcflags, destData] = ddx_read_shell( avalon );
 
 %a(2)=toc;
     %vel(1,1)            = cleanimu.velocity.x*0.5144; % knots into [m/s]
@@ -165,6 +165,8 @@ while (t < T_sim)
 	vel(3,1)			  = 0.1;
         i=1;
 	t_elaps_old=0;
+    imu.position.latitude               = destData.Data(1).latitude;
+    imu.position.longitude              = destData.Data(1).longitude;
 %         while destData.Data(i).latitude~=0
 %             dest_x(i)=destData.Data(i).latitude-p1_0;
 %             dest_y(i)=destData.Data(i).longitude-p2_0;
@@ -177,6 +179,12 @@ while (t < T_sim)
 %         dist_boat                         =[sqrt((pose(1)-boat_x).^2+(pose(2)-boat_y).^2) zeros(1,5-num_boats)];
 %         dist_min                          = min(sqrt((pose(1)-boat_x).^2+(pose(2)-boat_y).^2));
     end
+    for i=1:20
+    dest_y(i) = r_earth*cos(destData.latitude*pi/180)*pi/180*(destData.Data(i).longitude-destData.longitude);
+    dest_x(i) = r_earth*pi/180*(destData.Data(i).latitude-destData.latitude);
+    end
+    pose(2) = r_earth*cos(destData.latitude*pi/180)*pi/180*(imu.position.longitude-destData.longitude);
+    pose(1) = r_earth*pi/180*(imu.position.latitude-destData.latitude);
 %a(3)=toc;
 %vel
 %pose
@@ -245,7 +253,7 @@ while (t < T_sim)
     
     %% write variables to DDX Store
     
-    [imu.position.longitude, imu.position.latitude] = xy2ll(pose);
+%     [imu.position.longitude, imu.position.latitude] = xy2ll(pose);
 %     if (~isempty(boat_x))
 %         dist_boat(n,:)=[sqrt((pose(1)-boat_x).^2+(pose(2)-boat_y).^2) zeros(1,5-num_boats)];
 %         
@@ -268,6 +276,8 @@ while (t < T_sim)
 %         t_min=NaN;
 %         curr_min_dist=NaN;
 %     end
+    imu.position.latitude               = destData.latitude + 180/(r_earth*pi)*pose(1);
+    imu.position.longitude              = destData.longitude + 180/(r_earth*pi*cos(destData.latitude*pi/180))*pose(2);
     imu.attitude.yaw                                = 180/pi*(pose(3));
     
     imu.velocity.x                      = vel(1,1)/0.5144;
