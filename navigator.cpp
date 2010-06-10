@@ -155,8 +155,7 @@ void * translation_thread(void * dummy)
 	double timedif=10.0;
 	bool time_initializer = false;
 	unsigned int last_calc_index = 1234567; //TODO change to some decent number
-	unsigned int last_skip_index = 0;
-	unsigned int max_num_wyp = 0;
+	unsigned int last_dest_index = 1234567;
 
 	//initializing the answer index: 
 	dataNaviFlags.t_readto(naviflags,0,0);
@@ -168,7 +167,6 @@ void * translation_thread(void * dummy)
 		// Read the next data available, or wait at most 5 seconds
 		if (dataBoat.t_readto(boatData,10,1))
 		{
-			//             naviData.t_readto(boatData,0,0); //not necessary, isn't it?
 			waypointData.t_readto(waypoints,0,0);
 			dataFlags.t_readto(generalflags,0,0);
 			dataNaviFlags.t_readto(naviflags,0,0);
@@ -184,29 +182,20 @@ void * translation_thread(void * dummy)
 				timedif = difftime(end,start_time);
 			}
 			// rtx_message("last_calc_ind: %d    navi_call_ind: %d\n",last_calc_index,generalflags.navi_index_call);
-			if(((last_calc_index != generalflags.navi_index_call) || (last_skip_index != generalflags.skip_index_dest_call))
+			if(((last_calc_index != generalflags.navi_index_call) || (last_dest_index != destination.skipper_index_call))
 					&& (generalflags.autonom_navigation)) 
 				//&& (timedif > 7.0))  //if this is 1, then do the waypoint-calculation
 			{
 				time_initializer = true;
+#ifdef DEBUG_NAVIGATOR
 				rtx_message("new_path_calc!!!\n");
-
+#endif
 				//converting the current and end-state into a meter-coordinates:
 				transformation.longitude_start = boatData.position.longitude;
 				transformation.latitude_start = boatData.position.latitude;
 
-
 				//transformation into meter-coordinates:
-
-// 				transformation.longitude_start_transf = AV_EARTHRADIUS 
-// 					*cos((transformation.latitude_start * AV_PI/180))*(AV_PI/180)
-// 					*transformation.longitude_start;
-// 
-// 				transformation.latitude_start_transf = AV_EARTHRADIUS
-// 					*(AV_PI/180)*transformation.latitude_start;
-
-				// for the Djikstra, x and y are interchanged
-				
+				// for the Djikstra, x and y are interchanged				
 				transformation.x_start_transf = AV_EARTHRADIUS 
 					*cos((destination.latitude * AV_PI/180))*(AV_PI/180)
 					*(transformation.longitude_start - destination.longitude);
@@ -218,7 +207,6 @@ void * translation_thread(void * dummy)
 				transformation.y_end_transf = 0;
 
 
-
 				//calculating the offsets:
 				transformation.x_iter_offset = 5; //to be modified!
 				transformation.y_iter_offset = 5;
@@ -226,10 +214,7 @@ void * translation_thread(void * dummy)
 				rtx_message("start: %f %f m; end: %f %f m \n",transformation.x_start_transf, transformation.y_start_transf,
 						transformation.x_end_transf, transformation.y_end_transf);
 #endif 
-				// rtx_message("start: %f %f m; end: %f %f m \n",transformation.longitude_start_transf+4.380225573914934e+06, transformation.latitude_start_transf-1.111949403453934e+06,
-				//                         destination.longitude+4.380225573914934e+06, destination.latitude-1.111949403453934e+06);
-
-// 				if ((destination.longitude - transformation.longitude_start_transf)>0)
+				// define the grid for the x-coodrinates
 				if (transformation.x_start_transf < 0)
 				{
 					transformation.x_offset = (int)(transformation.x_start_transf) - transformation.x_iter_offset*AV_NAVI_GRID_SIZE;
@@ -244,7 +229,6 @@ void * translation_thread(void * dummy)
 				}
 
 				//the same procedure for the y-coordinates:
-// 				if ((destination.latitude - transformation.latitude_start_transf)>0)
 				if (transformation.y_start_transf < 0)
 				{
 					transformation.y_offset = transformation.y_start_transf - transformation.y_iter_offset*AV_NAVI_GRID_SIZE;
@@ -291,9 +275,9 @@ void * translation_thread(void * dummy)
 				windDirection = remainder(((-(cleanedWind.global_direction_real_long - 90))*(AV_PI / 180.0)),2*AV_PI);  //in rad and mathematically correct!!
 				windSpeed = cleanedWind.speed_long;    	//in knots
 
-				#ifdef DEBUG_NAVIGATOR
+#ifdef DEBUG_NAVIGATOR
 				rtx_message("windspeed = %f, winddirection = %f\n",windSpeed,windDirection);
-				#endif
+#endif
 
 				///////////////////////////////////////////////////////////////////////////////////////////
 				//initialize some things:
@@ -341,11 +325,6 @@ void * translation_thread(void * dummy)
 				mapTheta_start_correct = 30; //more than it can ever be possible
 				for(q=0; q<16; q++)
 				{
-// 					if (fabs(remainder((headingTable16[q] - boatData.attitude.yaw*AV_PI/180),2*AV_PI)) < difference_start)
-// 					{
-// 						difference_start = fabs(remainder((headingTable16[q] - boatData.attitude.yaw*AV_PI/180),2*AV_PI));
-// 						mapTheta_start_correct = q;
-// 					}
 					if (fabs(remainder((headingTable16[q] + boatData.attitude.yaw*AV_PI/180-AV_PI/2),2*AV_PI)) < difference_start)
 					{
 						difference_start = fabs(remainder((headingTable16[q] + boatData.attitude.yaw*AV_PI/180-AV_PI/2),2*AV_PI));
@@ -353,7 +332,6 @@ void * translation_thread(void * dummy)
 					}
 				}
 				//-----> theta at the start is mapTheta_start_correct!!
-// rtx_message("head_curr = %f  start_theta = %d head_table = %f\n",boatData.attitude.yaw, mapTheta_start_correct, headingTable16[mapTheta_start_correct]*180/AV_PI);
 #ifdef DEBUG_NAVIGATOR
 				rtx_message("start_theta = %d \n",mapTheta_start_correct);
 #endif
@@ -414,8 +392,7 @@ void * translation_thread(void * dummy)
 
 				last_wyp_data.heading = headingTable16[mapTheta_start_correct]; 
 				arrayPointer = 0;
-// int coun=-1;
-// printf("theta start: %f     current heading: %f\n",last_wyp_data.heading*180/AV_PI,boatData.attitude.yaw);
+
 				for (it=path.begin();it!=path.end();it++) {
 #ifdef DEBUG_NAVIGATOR
 					printf("x and y (%d,%d) at curr(%d) position, heading = %f \n",it->x,it->y,arrayPointer,
@@ -424,7 +401,7 @@ void * translation_thread(void * dummy)
 							(last_wyp_data.heading - (remainder((-(headingTable16[(it->theta)]*180/AV_PI)+90.0),360.0))));
 #endif
 					if(arrayPointer >= 100) break;
-// coun++;
+
 					wyp_data.y = ((it->x)*AV_NAVI_GRID_SIZE+transformation.x_offset);
 					wyp_data.x = ((it->y)*AV_NAVI_GRID_SIZE+transformation.y_offset);
 					wyp_data.heading =remainder((-(headingTable16[(it->theta)]*180/AV_PI)+90),360.0);
@@ -439,8 +416,7 @@ void * translation_thread(void * dummy)
 						waypoints.Data[arrayPointer].x = wyp_data.x;
 						waypoints.Data[arrayPointer].y = wyp_data.y;
 
-						fprintf(pathfile,"%d %d %f\n",wyp_data.x,wyp_data.y, wyp_data.heading);/**//**/
-// rtx_message("count: %d",coun);
+						fprintf(pathfile,"%d %d %f\n",wyp_data.x,wyp_data.y, wyp_data.heading);
 						waypoints.Data[arrayPointer].heading = wyp_data.heading;
 						waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_PASSBY;
 						waypoints.Data[arrayPointer].passed = 1;
@@ -459,8 +435,7 @@ void * translation_thread(void * dummy)
 #endif
 						waypoints.Data[arrayPointer].x = last_wyp_data.x;
 						waypoints.Data[arrayPointer].y = last_wyp_data.y;
-// rtx_message("count: %d",coun);
-// rtx_message("diff head: %f, head_curr: %f  head_last: %f",fabs(remainder(wyp_data.heading - last_wyp_data.heading, 360.)), wyp_data.heading,last_wyp_data.heading );
+
 						fprintf(pathfile,"%d %d %f\n",last_wyp_data.x,last_wyp_data.y, last_wyp_data.heading);
 
 						waypoints.Data[arrayPointer].heading = last_wyp_data.heading;
@@ -474,15 +449,10 @@ void * translation_thread(void * dummy)
 
 					last_wyp_data = wyp_data;
 				}
-
-// 				if (arrayPointer < max_num_wyp)
-// 				{
-// 				    for (q=arrayPointer;q<max_num_wyp;q++) {
-// 					
+ 					
 				waypoints.Data[arrayPointer].x = last_wyp_data.x;
 				waypoints.Data[arrayPointer].y = last_wyp_data.y;
 				waypoints.Data[arrayPointer].heading = last_wyp_data.heading;
-
 
 				fprintf(pathfile,"%d %d %f\n",last_wyp_data.x,last_wyp_data.y, last_wyp_data.heading);
 				waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_END;
@@ -490,19 +460,20 @@ void * translation_thread(void * dummy)
 				waypoints.Data[arrayPointer].windspeed = windSpeed;
 				waypoints.Data[arrayPointer].winddirection = remainder(-(windDirection - AV_PI/2),2*AV_PI)*180/AV_PI;
 
-
 				fclose(pathfile);
 				calculation_iterator++;
 				//finished with that string
 
 				last_calc_index = generalflags.navi_index_call;
-				last_skip_index = generalflags.skip_index_dest_call;
+				last_dest_index = destination.skipper_index_call;
 				naviflags.navi_index_answer = generalflags.navi_index_call;
 				dataNaviFlags.t_writefrom(naviflags);
 				transformationData.t_writefrom(transformation);
 				waypointData.t_writefrom(waypoints);
 				time(&start_time);
-rtx_message("path calc done");
+#ifdef DEBUG_NAVIGATOR
+				rtx_message("path calc done");
+#endif
 			}
 
 		} else if (dataWindClean.hasTimedOut()) {

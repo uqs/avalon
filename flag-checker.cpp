@@ -234,9 +234,7 @@ void * translation_thread(void * dummy)
                     flags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
             }
 
-	    //write the skipperflags.indexes to flags:
-            
-            flags.skip_index_dest_call = skipperflags.skip_index_dest_call;
+
 #if 0
             switch(errorflags.state)
             {

@@ -131,15 +131,10 @@ void * translation_thread(void * dummy)
     WaypointData waypoints;
     Flags generalflags;
     NaviFlags naviflags;
-    //rcFlags rcflags;
-    //Destination destinationCoord; 
     DestinationData destination; //actual array!!
     DesiredHeading desiredHeading; //course that goes to HE
 
     //for skipper purposes:
-
-    //double degreeDeviation;
-    //double courseDeviation;
     double heading_to_wyp;
     double heading_to_next_wyp;
     double dist_curr_wyp;
@@ -154,7 +149,6 @@ void * translation_thread(void * dummy)
 
     //double area_soll, area_next;
     int current_wyp; // = 1;        //keeps track of which wyp we are navigating to!
-    // double last_timestamp = 0.0;
     double entry_timestamp = 0.0;
     int last_state;
     int never_again = 0;
@@ -165,7 +159,6 @@ void * translation_thread(void * dummy)
     double vec_dist_buoy_y;
     double dist_buoy;
     unsigned long old_navi_index = 0;
-    unsigned long last_skip_index = 0;
 
     int p;
     double vec_prev_to_next_wyp_x, vec_prev_to_next_wyp_y;
@@ -195,13 +188,12 @@ void * translation_thread(void * dummy)
             destinationData.t_readto(destination,0,0);
             dataWindClean.t_readto(cleanedwind,0,0);
             headingData.t_readto(desiredHeading,0,0);
-            //dataRcFlags.t_readto(rcflags,0,0);
 
 	    // compute the mean of the heading and the winddirection
 	    heading_average = 0;
 	    headingHistory.insert(headingHistory.begin(),boatData.attitude.yaw);
 	    headingHistory.resize(30);
-	    for (int u=0; u<headingHistory.size(); u++)
+	    for (unsigned int u=0; u<headingHistory.size(); u++)
             {
                 heading_average += 1.0/headingHistory.size() * headingHistory[u];
             }
@@ -209,7 +201,7 @@ void * translation_thread(void * dummy)
 	    dir_wind_mean = 0;
 	    dir_wind_hist.insert(dir_wind_hist.begin(),cleanedwind.global_direction_real_long);
 	    dir_wind_hist.resize(30);
-	    for (int u=0; u<dir_wind_hist.size(); u++)
+	    for (unsigned int u=0; u<dir_wind_hist.size(); u++)
             {
                 dir_wind_mean += 1.0/dir_wind_hist.size() * dir_wind_hist[u];
             }
@@ -250,12 +242,6 @@ void * translation_thread(void * dummy)
             dist_next_trajectory2 = dist_next_trajectory;
             
             //calculate all the distances and vectors:
-
-//             current_pos_longitude =double (AV_EARTHRADIUS 
-//                 *cos((boatData.position.latitude * AV_PI/180))*(AV_PI/180)
-//                 *boatData.position.longitude);
-//             current_pos_latitude =double (AV_EARTHRADIUS
-//                 *(AV_PI/180)*boatData.position.latitude);
             current_pos_x =double (AV_EARTHRADIUS * (AV_PI/180)
                 *(boatData.position.latitude - destination.latitude));
             current_pos_y =double (AV_EARTHRADIUS 
@@ -276,11 +262,9 @@ void * translation_thread(void * dummy)
             vec_fix_curr_x = waypoints.Data[current_wyp].x - waypoints.Data[current_wyp-1].x;
             vec_fix_curr_y = waypoints.Data[current_wyp].y - waypoints.Data[current_wyp-1].y;
             ///////
-//             vec_dist_buoy_x = destination.Data[current_buoy].longitude - current_pos_longitude;
-//             vec_dist_buoy_y = destination.Data[current_buoy].latitude - current_pos_latitude;
 	    vec_dist_buoy_x = AV_EARTHRADIUS*AV_PI/180*(destination.Data[current_buoy].latitude - destination.latitude) - current_pos_x;
             vec_dist_buoy_y = AV_EARTHRADIUS*cos(destination.latitude * AV_PI/180)*AV_PI/180
-                *(destination.Data[current_buoy].longitude - destination.longitude) - current_pos_y;
+			      *(destination.Data[current_buoy].longitude - destination.longitude) - current_pos_y;
             ////////
             vec_prev_to_next_wyp_x =waypoints.Data[current_wyp+1].x - waypoints.Data[current_wyp-1].x;
             vec_prev_to_next_wyp_y =waypoints.Data[current_wyp+1].y - waypoints.Data[current_wyp-1].y;
@@ -297,12 +281,12 @@ void * translation_thread(void * dummy)
 			    (sqrt((double) (vec_fix_next_x * vec_fix_next_x) + (double) (vec_fix_next_y * vec_fix_next_y))));
             dist_buoy = sqrt((vec_dist_buoy_x*vec_dist_buoy_x) + (vec_dist_buoy_y*vec_dist_buoy_y));
             ///////
-// rtx_message("dist to soll trajectory: %f next trajectory: %f current WP: %f\n", dist_solltrajectory, dist_next_trajectory, dist_curr_wyp);
+
 #ifdef DEBUG_SKIPPER
 	    rtx_message("dist to next trajectory: %f \n", dist_next_trajectory);
             rtx_message("current_wyp = %d, desired heading = %f \n",current_wyp,desiredHeading.heading);
 #endif
-// rtx_message("dist to next wp (%d)= %f", current_wyp,dist_curr_wyp);
+
             //begin statemachine:
 
             switch(generalflags.navi_state)
@@ -410,10 +394,8 @@ void * translation_thread(void * dummy)
                     // DO A NEWCALCULATION -> GO INTO NEWCALC MODE
                     if(((fabs(dir_wind_mean - waypoints.Data[current_wyp].winddirection) > 10.0)
 			    /*|| ((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3) 
-			    && (dist_next_trajectory > 100.0))*/ || (fabs(dist_solltrajectory) > 100.0) 
-			    /*|| (generalflags.global_locator == AV_FLAGS_GLOBALSK_AVOIDANCE)*/)/* && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END ) */
-			    || ((waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END) && (dist_curr_wyp < 80.0))
-			    /*|| (last_skip_index != generalflags.skip_index_dest_call)*/)
+			    && (dist_next_trajectory > 100.0))*/ || (fabs(dist_solltrajectory) > 100.0))
+			    /*|| ((waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END) && (dist_curr_wyp < 80.0))*/)
                         {
 // #ifdef DEBUG_SKIPPER
                             rtx_message("normalnavi: switching to newcalculation state; reason:");
@@ -421,14 +403,7 @@ void * translation_thread(void * dummy)
                             {
                                 rtx_message("wind has changed\n");
                             }
-                            //if(((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3)  
-				//	    && (dist_next_trajectory > 100.0)))
-
-                           
-//                             if(((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3)  && (dist_next_trajectory > 100.0)))
-//                             {
-//                                 rtx_message("dist_next_trajectory is increasing \n");
-//                             }
+ 
 			    if ((waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END) && (dist_curr_wyp < 80.0))
 			    {
 				rtx_message("reached last waypoint\n");
@@ -438,9 +413,7 @@ void * translation_thread(void * dummy)
                             {
                                 rtx_message("dist_solltrajectory too bigi (%f meters) \n",dist_solltrajectory);
                             }
-			   
 // #endif
-// 			    last_skip_index = generalflags.skip_index_dest_call;
                             naviflags.navi_state = AV_FLAGS_NAVI_NEWCALCULATION;
                             naviflags.navi_index_call ++;
                             dataNaviFlags.t_writefrom(naviflags);
@@ -466,14 +439,7 @@ void * translation_thread(void * dummy)
                     headingData.t_writefrom(desiredHeading);
                     last_state = AV_FLAGS_NAVI_GOAL_APPROACH;
                     break;
-
             }
-
-            
-            // flags will be written to store:
-            //headingData.t_writefrom(desiredHeading);
-
-            //has to be modified:
         }
 
         else if (dataWindClean.hasTimedOut()) {

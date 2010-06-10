@@ -113,20 +113,17 @@ void * translation_thread(void * dummy)
     Flags generalflags;
     DestinationData destination; //actual array!!
     SkipperFlags skipperflags;
-//     NaviFlags naviflags;
     AisDestData ais_dest;
 
     double dest_dist = 3500;
-    double closest_distance;
     int i,p;
-//     bool first=true;
     unsigned int ais_dest_index_last=0;
     double distance_arr[1000];
-    double distance;
+    double distance_boat_dest;
+    double closest_distance;
 
     //initializing the call index
     skipperFlagData.t_readto(skipperflags,0,0);
-    skipperflags.skip_index_dest_call = 0;
     skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
     skipperFlagData.t_writefrom(skipperflags);
             
@@ -143,258 +140,212 @@ void * translation_thread(void * dummy)
             destinationData.t_readto(destination,0,0);
             skipperFlagData.t_readto(skipperflags,0,0);
 	    aisDestData.t_readto(ais_dest,0,0);
-            //calculate all the distances and vectors:
-// rtx_message("index: %d      last: %d",ais_dest.ais_dest_index,ais_dest_index_last);
 
-if (ais_dest.ais_dest_index != ais_dest_index_last)
-  {
-rtx_message("listen to ais     index_last= %d\n", ais_dest_index_last);
-destination.longitude = ais_dest.new_dest_long;
-destination.latitude = ais_dest.new_dest_lat;
-destinationData.t_writefrom(destination);
-skipperflags.global_locator = ais_dest.global_skipper_flag;
-skipperflags.skip_index_dest_call ++;
-skipperFlagData.t_writefrom(skipperflags);
-// while(generalflags.global_locator != ais_dest.global_skipper_flag)
-// {
-// skipperflags.global_locator = ais_dest.global_skipper_flag;
-// skipperFlagData.t_writefrom(skipperflags);
-// }
-      
-  }
-if (generalflags.global_locator == ais_dest.global_skipper_flag)
-{
-ais_dest_index_last=ais_dest.ais_dest_index;
-}
-            current_pos_x =double (AV_EARTHRADIUS 
-                    *cos((boatData.position.latitude * AV_PI/180))*(AV_PI/180)
-                    *(boatData.position.longitude-destination.longitude));
-            current_pos_y =double (AV_EARTHRADIUS
-                    *(AV_PI/180)*(boatData.position.latitude-destination.latitude));
+	// if we are on collision course, ais tells us the new destination point
+	if (ais_dest.ais_dest_index != ais_dest_index_last)
+	{
+	    rtx_message("listen to ais     index_last= %d\n", ais_dest_index_last);
+	    destination.longitude = ais_dest.new_dest_long;
+	    destination.latitude = ais_dest.new_dest_lat;
+	    destination.skipper_index_call ++;
+	    destinationData.t_writefrom(destination);
+	    skipperflags.global_locator = ais_dest.global_skipper_flag;
+	    skipperFlagData.t_writefrom(skipperflags);
+	}
+	if (generalflags.global_locator == ais_dest.global_skipper_flag)
+	{
+	    ais_dest_index_last=ais_dest.ais_dest_index;
+	}
+
+	// convert imu data to local map
+	current_pos_x =AV_EARTHRADIUS * cos((destination.latitude * AV_PI/180)) * (AV_PI/180)
+			      *(boatData.position.longitude-destination.longitude);
+	current_pos_y =AV_EARTHRADIUS * (AV_PI/180) * (boatData.position.latitude-destination.latitude);
 
 #ifdef DEBUG_GLOBSKIPPER
             rtx_message("the current global destpoint is number %d flags.global_locator = %d \n", destination.destNr, generalflags.global_locator);
 #endif
-// rtx_message("the current global destpoint is number %d flags.global_locator = %d \n", destination.destNr, generalflags.global_locator);
-            //begin statemachine: /////////////////////////////////////////////////
-            switch(generalflags.global_locator)
-            {
-                case AV_FLAGS_GLOBALSK_LOCATOR:
-// 		    destination_x = 
 
-                    //check what wyp we are closest    
-//                     closest_distance = sqrt((current_pos_longitude - destination.Data[0].longitude)
-//                             *(current_pos_longitude - destination.Data[0].longitude)
-//                             + (current_pos_latitude - destination.Data[0].latitude)
-//                             *(current_pos_latitude - destination.Data[0].latitude));
-		    closest_distance = AV_EARTHRADIUS*AV_PI/180.0*sqrt(pow(boatData.position.latitude - destination.latitude,2)
-					+ pow(cos(destination.latitude*AV_PI/180.0)*(boatData.position.longitude - destination.longitude),2));
-                    i = 0;
-                    destination.destNr = 0;
+	distance_boat_dest = sqrt(pow(current_pos_x,2) + pow(current_pos_y,2)); //because the destination is always in (0,0)!
+	//begin statemachine: /////////////////////////////////////////////////
+	switch(generalflags.global_locator)
+	{
+	    case AV_FLAGS_GLOBALSK_LOCATOR:
 
-#ifdef DEBUG_GLOBSKIPPER
-                    rtx_message("locator: closest distance = %f \n", closest_distance);
-#endif
-                    while((i<1000) && (destination.Data[i].type != AV_DEST_TYPE_NOMORE ))
-                    {
-
-#ifdef DEBUG_GLOBSKIPPER
-                        rtx_message("destNr zähler = %d, distanz zum bood = %f \n", i, (sqrt((current_pos_longitude - destination.Data[i].longitude)
-                                        *(current_pos_longitude - destination.Data[i].longitude)
-                                        + (current_pos_latitude - destination.Data[i].latitude)
-                                        *(current_pos_latitude - destination.Data[i].latitude))));
-#endif
-
-//                         if ( closest_distance > sqrt((current_pos_longitude - destination.Data[i].longitude)
-//                                     *(current_pos_longitude - destination.Data[i].longitude)
-//                                     + (current_pos_latitude - destination.Data[i].latitude)
-//                                     *(current_pos_latitude - destination.Data[i].latitude)))
-			
-			distance_arr[i] =   AV_EARTHRADIUS*AV_PI/180.0*sqrt(pow(boatData.position.latitude - destination.Data[i].latitude,2)
-					+ pow(cos(destination.latitude*AV_PI/180.0)*(boatData.position.longitude - destination.Data[i].longitude),2));
-			if ( closest_distance > distance_arr[i])
-                        {
-                            closest_distance = distance_arr[i];
-
-                            destination.destNr = i;
-
-#ifdef DEBUG_GLOBSKIPPER
-                            rtx_message("destNr definitiv = %d \n", destination.destNr);
-#endif
-                        } 
-
-                        i++;
-                    }
-                    assert((destination.destNr < 1001) && (destination.destNr>=0));
-
-                    for (p = 0; p < 3; p++)
-                    {
-			
-                        if ((distance_arr[destination.destNr +2 -p]  < 2.1*dest_dist)
-                                && ((destination.Data[destination.destNr +2 -p].type == AV_DEST_TYPE_OCEANWYP)
-                                    || (destination.Data[destination.destNr +2 -p].type == AV_DEST_TYPE_END)))
-                        {
-
-                            destination.longitude = destination.Data[destination.destNr +2 -p].longitude;
-                            destination.latitude = destination.Data[destination.destNr +2 -p].latitude;
-                            destination.destNr = (destination.destNr +2 -p);
-                            destinationData.t_writefrom(destination);
-
-			    skipperflags.skip_index_dest_call ++;
-#ifdef DEBUG_GLOBSKIPPER
-			    rtx_message("increased skip index to %d",skipperflags.skip_index_dest_call);
-#endif
-                            skipperflags.global_locator = AV_FLAGS_GLOBALSK_TRACKER;
-                            skipperFlagData.t_writefrom(skipperflags);
-                            break;
-                        }
-                        else if (p==2)
-                        {
-                            destination.longitude = destination.Data[destination.destNr].longitude;
-                            destination.latitude = destination.Data[destination.destNr].latitude;
-                            destinationData.t_writefrom(destination);
-			    skipperflags.skip_index_dest_call ++;
-                            skipperflags.global_locator = AV_FLAGS_GLOBALSK_CLOSING;
-                            skipperFlagData.t_writefrom(skipperflags);
-                        }
-                    }
-
-
-                    break;
-                    /////////////////////////////////////////////////////////////////////////7    
-                case AV_FLAGS_GLOBALSK_CLOSING:
-
-                    distance = AV_EARTHRADIUS*AV_PI/180.0*sqrt(pow(boatData.position.latitude - destination.latitude,2)
-					+ pow(cos(destination.latitude*AV_PI/180.0)*(boatData.position.longitude - destination.longitude),2));
-#ifdef DEBUG_GLOBSKIPPER
-            rtx_message("closing: closest distance = %f \n", distance);
-#endif
-                    if(distance > 2.1*dest_dist)
-                    {
-                        destination.longitude = boatData.position.longitude + 0.5 * (destination.longitude - boatData.position.longitude);
-                        destination.latitude = boatData.position.latitude + 0.5 * (destination.latitude - boatData.position.latitude);
-                        destinationData.t_writefrom(destination);
-			skipperflags.skip_index_dest_call ++;
-			skipperFlagData.t_writefrom(skipperflags);
-#ifdef DEBUG_GLOBSKIPPER
-			rtx_message("increased skip index to %d",skipperflags.skip_index_dest_call);
-#endif
-                    }
-
-                    if(distance < dest_dist)
-                    {
-                        skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
-                        skipperFlagData.t_writefrom(skipperflags);
-                    }
-
-                    break;
-                    ////////////////////////////////////////////////////////////////////////////
-                case AV_FLAGS_GLOBALSK_TRACKER:
-
-#ifdef DEBUG_GLOBSKIPPER
-                    rtx_message("distance to next destination = %f \n",  (sqrt((current_pos_longitude - destination.Data[destination.destNr].longitude)
-                                    *(current_pos_longitude - destination.Data[destination.destNr].longitude)
-                                    + (current_pos_latitude - destination.Data[destination.destNr].latitude)
-                                    *(current_pos_latitude - destination.Data[destination.destNr].latitude))));
-
-                    rtx_message("destinationtype = %d  \n", destination.Data[destination.destNr].type);
-#endif
-// rtx_message("distance to next destination = %f \n",  (sqrt((current_pos_longitude - destination.Data[destination.destNr].longitude)
-//                                     *(current_pos_longitude - destination.Data[destination.destNr].longitude)
-//                                     + (current_pos_latitude - destination.Data[destination.destNr].latitude)
-//                                     *(current_pos_latitude - destination.Data[destination.destNr].latitude))));
-		    distance = AV_EARTHRADIUS*AV_PI/180.0*sqrt(pow(boatData.position.latitude - destination.latitude,2)
-					+ pow(cos(destination.latitude*AV_PI/180.0)*(boatData.position.longitude - destination.longitude),2));
-
-                    if((distance < 0.1*dest_dist) && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
-                    {
-                        destination.destNr += 1;
-                        assert((destination.destNr < 1000) && (destination.destNr>=0));
-                        destination.longitude = destination.Data[destination.destNr].longitude;
-                        destination.latitude = destination.Data[destination.destNr].latitude;
-                        destinationData.t_writefrom(destination);
-			skipperflags.skip_index_dest_call ++;
-			skipperFlagData.t_writefrom(skipperflags);
-// #ifdef DEBUG_GLOBSKIPPER
-			rtx_message("increased skip index to %d",skipperflags.skip_index_dest_call);
-// #endif
-                    }   
-
-                    if(distance > 2.2*dest_dist)
-                    {
-			skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
-                        skipperFlagData.t_writefrom(skipperflags);
-                    }
-
-                    break;
-                    /////////////////////////////////////////////////////////////////////////7    
-                case AV_FLAGS_GLOBALSK_AVOIDANCE:
-
-                    distance = AV_EARTHRADIUS*AV_PI/180.0*sqrt(pow(boatData.position.latitude - destination.latitude,2)
-					+ pow(cos(destination.latitude*AV_PI/180.0)*(boatData.position.longitude - destination.longitude),2));
-#ifdef DEBUG_GLOBSKIPPER
-            rtx_message("Collision: collision distance = %f \n", distance);
-#endif
-// 		    if(first)
-// 		    {
-// 			skipperflags.skip_index_dest_call ++;
-// skipperFlagData.t_writefrom(skipperflags);
-// rtx_message("increased skip index to %d",skipperflags.skip_index_dest_call);
-// 			first=false;
-// 		    }
-                    if((distance < 200/*.2*dest_dist*/) || (distance > 2*dest_dist))
-                    {
-                        skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
-                        skipperFlagData.t_writefrom(skipperflags);
-// 			first=true;
-                    }
-
-                    break;
-                    ////////////////////////////////////////////////////////////////////////////
-		case AV_FLAGS_GLOBALSK_SURVIVE:
-
-                    distance = AV_EARTHRADIUS*AV_PI/180.0*sqrt(pow(boatData.position.latitude - destination.latitude,2)
-					+ pow(cos(destination.latitude*AV_PI/180.0)*(boatData.position.longitude - destination.longitude),2));
-#ifdef DEBUG_GLOBSKIPPER
-            rtx_message("Collision: collision distance = %f \n", distance);
-#endif
-
-                    if((distance < 200/*.2*dest_dist*/) || (distance > 600))
-                    {
-                        skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
-                        skipperFlagData.t_writefrom(skipperflags);
-                    }
-
-                    break;
-                    ////////////////////////////////////////////////////////////////////////////
-
-            }
-
-
-
-            //has to be modified:
-        }
-#if 0
-        else if (dataWindClean.hasTimedOut()) {
-            // Timeout. Probably no joystick connected.
-
-            rtx_message("Timeout while reading dataWindClean \n");}
-#endif
-		else if (dataBoat.hasTimedOut()) {
-			// Timeout. Probably no joystick connected.
-
-			rtx_message("Timeout while reading IMU-Data \n");}
-
-		else
+		//check what wyp we are closest
+		i = 0;
+		destination.destNr = 0;
+		closest_distance = distance_boat_dest;
+		while((i<1000) && (destination.Data[i].type != AV_DEST_TYPE_NOMORE ))
 		{
-			// Something strange happend. Critical Error.
-			rtx_error("Critical error while reading data");
-			// Emergency-Stop
-			rtx_main_signal_shutdown();
+
+#ifdef DEBUG_GLOBSKIPPER
+		    rtx_message("destNr zähler = %d, distanz zum bood = %f \n", i, AV_EARTHRADIUS*AV_PI/180.0
+				    *sqrt(pow(destination.Data[i].latitude - destination.latitude,2)
+				    + pow(cos(destination.latitude*AV_PI/180.0)*(destination.Data[i].longitude - destination.longitude),2));;
+#endif
+		    
+		    distance_arr[i] =   AV_EARTHRADIUS*AV_PI/180.0*sqrt(pow(boatData.position.latitude - destination.Data[i].latitude,2)
+				    + pow(cos(destination.latitude*AV_PI/180.0)*(boatData.position.longitude - destination.Data[i].longitude),2));
+		    if ( closest_distance > distance_arr[i])
+		    {
+			closest_distance = distance_arr[i];
+
+			destination.destNr = i;
+
+#ifdef DEBUG_GLOBSKIPPER
+			rtx_message("destNr definitiv = %d \n", destination.destNr);
+#endif
+		    } 
+
+		    i++;
 		}
-        rtx_timer_sleep(0.1);
+		assert((destination.destNr < 1001) && (destination.destNr>=0));
+
+		for (p = 0; p < 3; p++)
+		{
+		    
+		    if ((distance_arr[destination.destNr +2 -p]  < 2.1*dest_dist)
+			    && ((destination.Data[destination.destNr +2 -p].type == AV_DEST_TYPE_OCEANWYP)
+				|| (destination.Data[destination.destNr +2 -p].type == AV_DEST_TYPE_END)))
+		    {
+
+			destination.longitude = destination.Data[destination.destNr +2 -p].longitude;
+			destination.latitude = destination.Data[destination.destNr +2 -p].latitude;
+			destination.destNr = (destination.destNr +2 -p);
+			destination.skipper_index_call ++;
+			destinationData.t_writefrom(destination);
+
+#ifdef DEBUG_GLOBSKIPPER
+			rtx_message("locater: increased destination index to %d",destination.skipper_index_call);
+#endif
+			skipperflags.global_locator = AV_FLAGS_GLOBALSK_TRACKER;
+			skipperFlagData.t_writefrom(skipperflags);
+			break;
+		    }
+		    else if (p==2)
+		    {
+			destination.longitude = destination.Data[destination.destNr].longitude;
+			destination.latitude = destination.Data[destination.destNr].latitude;
+			destination.skipper_index_call ++;
+			destinationData.t_writefrom(destination);
+			skipperflags.global_locator = AV_FLAGS_GLOBALSK_CLOSING;
+			skipperFlagData.t_writefrom(skipperflags);
+		    }
+		}
+
+
+		break;
+		/////////////////////////////////////////////////////////////////////////7    
+	    case AV_FLAGS_GLOBALSK_CLOSING:
+
+#ifdef DEBUG_GLOBSKIPPER
+		rtx_message("closing: distance to destination = %f \n", distance_boat_dest);
+#endif
+		if(distance_boat_dest > 2.1*dest_dist)
+		{
+		    destination.longitude = boatData.position.longitude + 0.5 * (destination.longitude - boatData.position.longitude);
+		    destination.latitude = boatData.position.latitude + 0.5 * (destination.latitude - boatData.position.latitude);
+		    destination.skipper_index_call ++;
+		    destinationData.t_writefrom(destination);
+
+#ifdef DEBUG_GLOBSKIPPER
+		    rtx_message("closing: increased destination index to %d",destination.skipper_index_call);
+#endif
+		}
+
+		if(distance_boat_dest < dest_dist)
+		{
+		    skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
+		    skipperFlagData.t_writefrom(skipperflags);
+		}
+
+		break;
+		////////////////////////////////////////////////////////////////////////////
+	    case AV_FLAGS_GLOBALSK_TRACKER:
+
+#ifdef DEBUG_GLOBSKIPPER
+		rtx_message("tracker: distance to destination = %f \n",  distance_boat_dest);
+
+		rtx_message("destinationtype = %d  \n", destination.Data[destination.destNr].type);
+#endif
+		if((distance_boat_dest < 0.1*dest_dist) && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
+		{
+		    destination.destNr += 1;
+		    assert((destination.destNr < 1000) && (destination.destNr>=0));
+		    destination.longitude = destination.Data[destination.destNr].longitude;
+		    destination.latitude = destination.Data[destination.destNr].latitude;
+		    destination.skipper_index_call ++;
+		    destinationData.t_writefrom(destination);
+
+// #ifdef DEBUG_GLOBSKIPPER
+		    rtx_message("tracker: increased destination index to %d",destination.skipper_index_call);
+// #endif
+		}   
+
+		if(distance_boat_dest > 2.2*dest_dist)
+		{
+		    skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
+		    skipperFlagData.t_writefrom(skipperflags);
+		}
+
+		break;
+		/////////////////////////////////////////////////////////////////////////7    
+	    case AV_FLAGS_GLOBALSK_AVOIDANCE:
+
+#ifdef DEBUG_GLOBSKIPPER
+	rtx_message("avoidance: distance to destination = %f \n", distance_boat_dest);
+#endif
+		if((distance_boat_dest < 200) || (distance_boat_dest > 2*dest_dist))
+		{
+		    skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
+		    skipperFlagData.t_writefrom(skipperflags);
+		}
+
+		break;
+		////////////////////////////////////////////////////////////////////////////
+	    case AV_FLAGS_GLOBALSK_SURVIVE:
+
+#ifdef DEBUG_GLOBSKIPPER
+	rtx_message("survive: distance to destination = %f \n", distance_boat_dest);
+#endif
+
+		if((distance_boat_dest < 200) || (distance_boat_dest > 600))
+		{
+		    skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
+		    skipperFlagData.t_writefrom(skipperflags);
+		}
+
+		break;
+		////////////////////////////////////////////////////////////////////////////
+
 	}
-	return NULL;
+
+
+
+	//has to be modified:
+    }
+#if 0
+    else if (dataWindClean.hasTimedOut()) {
+	// Timeout. Probably no joystick connected.
+
+	rtx_message("Timeout while reading dataWindClean \n");}
+#endif
+	    else if (dataBoat.hasTimedOut()) {
+		    // Timeout. Probably no joystick connected.
+
+		    rtx_message("Timeout while reading IMU-Data \n");}
+
+	    else
+	    {
+		    // Something strange happend. Critical Error.
+		    rtx_error("Critical error while reading data");
+		    // Emergency-Stop
+		    rtx_main_signal_shutdown();
+	    }
+    rtx_timer_sleep(0.1);
+    }
+    return NULL;
 }
 
 // Error handling for C functions (return 0 on success)

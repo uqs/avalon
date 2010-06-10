@@ -94,8 +94,9 @@ void * translation_thread(void * dummy)
             std::ifstream destfile ("destination.txt");
             int navigation_type;    // if 1: normal destination-approach, if 2 -> buoy approach!
             float longitude,latitude;
-
             char currentLine[10000], *ptr;
+	    destination.skipper_index_call = 0;
+
             if (destfile.is_open())
             {
                     
