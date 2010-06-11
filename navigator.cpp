@@ -543,10 +543,10 @@ void setAisObstacles(ShipData ship, UISpace & map, LakeTransformation transforma
 		{
 			for(shiplat = -500; shiplat < 530; shiplat += AV_NAVI_GRID_SIZE)
 			{
-				dangerpoint_x = int (rint((ship.Data[shipiterator].longitude + shiplong - transformation.y_offset) 
-							/ AV_NAVI_GRID_SIZE));
-				dangerpoint_y = int (rint((ship.Data[shipiterator].latitude + shiplat - transformation.x_offset) 
-							/ AV_NAVI_GRID_SIZE));
+// 				dangerpoint_x = int (rint((ship.Data[shipiterator].longitude + shiplong - transformation.y_offset) 
+// 							/ AV_NAVI_GRID_SIZE));
+// 				dangerpoint_y = int (rint((ship.Data[shipiterator].latitude + shiplat - transformation.x_offset) 
+// 							/ AV_NAVI_GRID_SIZE));
 
 				if(map.contains(dangerpoint_x,dangerpoint_y,0))
 				{

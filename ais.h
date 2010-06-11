@@ -51,8 +51,8 @@ DDX_STORE_TYPE(Obstacle,
         double dist;		// distance from current position to obstacle
 	double t_crit;
 	
-	double longitude;	// Position of the obstacle
-	double latitude;
+	double x;		// Position of the obstacle in meters
+	double y;
 
         }
 
@@ -61,7 +61,7 @@ DDX_STORE_TYPE(Obstacle,
 DDX_STORE_TYPE(AisDestData,
         struct {
 
-        double new_dest_long;
+        double new_dest_long;	// new destination in GPS coordinates
 	double new_dest_lat;
 
 	unsigned int ais_dest_index;

@@ -20,8 +20,8 @@ DDX_STORE_TYPE(ShipStruct,
         unsigned long mmsi;
         double timestamp;
 
-        double longitude; //everything in meters, middle point of (expected impact)
-        double latitude;
+        double x; //everything in meters
+        double y;
 
         }
 );

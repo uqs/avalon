@@ -138,11 +138,8 @@ void * translation_thread(void * dummy)
     int p, k, i, n, interchange;
     unsigned int l;
     double ship_pos_x, ship_pos_y;
-    RtxTime time_now;
-    double time_now_d;
     double distance;
     double heading_ship;
-    bool inserted;
     bool collision;
     
     double heading_avalon;
@@ -158,10 +155,8 @@ void * translation_thread(void * dummy)
     double threshold_radius;
     double radius_relativ;
     double dist_avalon_ship;
-    double angle_tang_rear;
-    double angle_tang_front;
-    double angle_crit_min;
-    double angle_crit_max;
+    double angle_tang_rear, angle_tang_front;
+    double angle_crit_min, angle_crit_max;
     double angle_safe;
     double safe_destpoint_x, safe_destpoint_y;
     double ship_length;
@@ -332,7 +327,7 @@ void * translation_thread(void * dummy)
 rtx_message("Collision course!! check for new destination\n");
 	    obst_p_end.clear();
 	    obst_p_start.clear();
-#if 0
+
 	    // find the collision points with every ship in the vicinity
 	    for (i = 0; i < ais.number_of_ships; i++)
 	    {
@@ -346,7 +341,7 @@ rtx_message("Collision course!! check for new destination\n");
                 rtx_message("distance avalon to ship number %d is %f meters\n",i,distance);
                 rtx_message("ship's position (x,y) = (%f,%f) \n",ship_pos_x, ship_pos_y);
 #endif
-		if ((distance_static < dist_of_sight) && (ais.Ship[i].speed_over_ground != 0.0)
+		if ((distance < dist_of_sight) && (ais.Ship[i].speed_over_ground != 0.0)
 			&& ((ais.Ship[i].course_over_ground != 0.0) || (ais.Ship[i].heading != 0.0)))
 		{
 		    obst_p.clear();
@@ -402,8 +397,6 @@ rtx_message("Collision course!! check for new destination\n");
 // rtx_message("avalon is slower\n"); 
 			angle_crit_min = remainder((AV_PI+heading_ship - asin(speed_avalon_to_dest/speed_ship)),2*AV_PI);
 			angle_crit_max = remainder((AV_PI+heading_ship + asin(speed_avalon_to_dest/speed_ship)),2*AV_PI);
-// 			angle_crit_min = remainder((AV_PI+heading_ship - asin(speed_avalon_to_dest/speed_ship)),2*AV_PI);
-// 			angle_crit_max = remainder((AV_PI+heading_ship + asin(speed_avalon_to_dest/speed_ship)),2*AV_PI);
 
 			if ((remainder((angle_crit_min-angle_tang_rear),2*AV_PI) < 0)
 			  && (remainder((angle_crit_max-angle_tang_rear),2*AV_PI) > 0))
@@ -412,25 +405,25 @@ rtx_message("Collision course!! check for new destination\n");
 rtx_message("two obstacles at rear\n");  
 			    obst_p[num_obstP].angle 	= remainder((angle_tang_rear
 							  -asin(speed_avalon_to_dest/speed_ship*sin(AV_PI+heading_ship-angle_tang_rear))),2*AV_PI);
-			    obst_p[num_obstP].t_crit	= ((current_pos_longitude-ship_pos_longitude)*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))
-							  +(current_pos_latitude-ship_pos_latitude)*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)))
-							  /((vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))
-							  +(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle))*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)));
-			    obst_p[num_obstP].dist	= speed_avalon_to_dest * obst_p[num_obstP].t_crit + add_dist_safe;
-			    obst_p[num_obstP].longitude	= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_longitude;
-			    obst_p[num_obstP].latitude	= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_latitude;
+			    obst_p[num_obstP].t_crit	= ((current_pos_y-ship_pos_y)*(vel_ship_y - speed_avalon_to_dest*sin(obst_p[num_obstP].angle))
+							  + (current_pos_x-ship_pos_x)*(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle)))
+							  /(pow(vel_ship_y - speed_avalon_to_dest*sin(obst_p[num_obstP].angle),2)
+							  +pow(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle),2));
+			    obst_p[num_obstP].dist	= speed_avalon_to_dest * obst_p[num_obstP].t_crit;  // + add_dist_safe;
+			    obst_p[num_obstP].x		= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_x;
+			    obst_p[num_obstP].y		= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_y;
 			    num_obstP ++;
 
 
 			    obst_p[num_obstP].angle 	= remainder((angle_tang_rear
 							  +asin(speed_avalon_to_dest/speed_ship*sin(AV_PI+heading_ship-angle_tang_rear))-AV_PI),2*AV_PI);
-			    obst_p[num_obstP].t_crit	= ((current_pos_longitude-ship_pos_longitude)*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))
-							  +(current_pos_latitude-ship_pos_latitude)*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)))
-							  /((vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))
-							  +(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle))*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)));
-			    obst_p[num_obstP].dist	= speed_avalon_to_dest * obst_p[num_obstP].t_crit + add_dist_safe;
-			    obst_p[num_obstP].longitude	= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_longitude;
-			    obst_p[num_obstP].latitude	= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_latitude;
+			    obst_p[num_obstP].t_crit	= ((current_pos_y-ship_pos_y)*(vel_ship_y - speed_avalon_to_dest*sin(obst_p[num_obstP].angle))
+							  + (current_pos_x-ship_pos_x)*(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle)))
+							  /(pow(vel_ship_y - speed_avalon_to_dest*sin(obst_p[num_obstP].angle),2)
+							  +pow(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle),2));
+			    obst_p[num_obstP].dist	= speed_avalon_to_dest * obst_p[num_obstP].t_crit;  // + add_dist_safe;
+			    obst_p[num_obstP].x		= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_x;
+			    obst_p[num_obstP].y		= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_y;
 			    num_obstP ++;
 
 			}
@@ -442,25 +435,25 @@ rtx_message("two obstacles at front\n");
 
 			    obst_p[num_obstP].angle 	= remainder((angle_tang_front
 							  -asin(speed_avalon_to_dest/speed_ship*sin(AV_PI+heading_ship-angle_tang_front))),2*AV_PI);
-			    obst_p[num_obstP].t_crit	= ((current_pos_longitude-ship_pos_longitude)*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))
-							  +(current_pos_latitude-ship_pos_latitude)*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)))
-							  /((vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))
-							  +(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle))*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)));
-			    obst_p[num_obstP].dist	= speed_avalon_to_dest * obst_p[num_obstP].t_crit + add_dist_safe;
-			    obst_p[num_obstP].longitude	= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_longitude;
-			    obst_p[num_obstP].latitude	= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_latitude;
+			    obst_p[num_obstP].t_crit	= ((current_pos_y-ship_pos_y)*(vel_ship_y - speed_avalon_to_dest*sin(obst_p[num_obstP].angle))
+							  + (current_pos_x-ship_pos_x)*(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle)))
+							  /(pow(vel_ship_y - speed_avalon_to_dest*sin(obst_p[num_obstP].angle),2)
+							  +pow(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle),2));
+			    obst_p[num_obstP].dist	= speed_avalon_to_dest * obst_p[num_obstP].t_crit;  // + add_dist_safe;
+			    obst_p[num_obstP].x		= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_x;
+			    obst_p[num_obstP].y		= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_y;
 			    num_obstP ++;
 			    
 
 			    obst_p[num_obstP].angle 	= remainder((angle_tang_front
 							  +asin(speed_avalon_to_dest/speed_ship*sin(AV_PI+heading_ship-angle_tang_front))-AV_PI),2*AV_PI);
-			    obst_p[num_obstP].t_crit	= ((current_pos_longitude-ship_pos_longitude)*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle)) 
-							  +(current_pos_latitude-ship_pos_latitude)*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)))
-							  /((vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))
-							  +(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle))*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)));
-			    obst_p[num_obstP].dist	= speed_avalon_to_dest * obst_p[num_obstP].t_crit + add_dist_safe;
-			    obst_p[num_obstP].longitude	= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_longitude;
-			    obst_p[num_obstP].latitude	= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_latitude;
+			    obst_p[num_obstP].t_crit	= ((current_pos_y-ship_pos_y)*(vel_ship_y - speed_avalon_to_dest*sin(obst_p[num_obstP].angle))
+							  + (current_pos_x-ship_pos_x)*(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle)))
+							  /(pow(vel_ship_y - speed_avalon_to_dest*sin(obst_p[num_obstP].angle),2)
+							  +pow(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle),2));
+			    obst_p[num_obstP].dist	= speed_avalon_to_dest * obst_p[num_obstP].t_crit;  // + add_dist_safe;
+			    obst_p[num_obstP].x		= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_x;
+			    obst_p[num_obstP].y		= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_y;
 			    num_obstP ++;
 			}
 		    }
@@ -471,25 +464,25 @@ rtx_message("avalon is faster\n");
 
 			obst_p[num_obstP].angle 	= remainder((angle_tang_rear 
 							  -asin(speed_avalon_to_dest/speed_ship*sin(AV_PI+heading_ship-angle_tang_rear))),2*AV_PI);
-			obst_p[num_obstP].t_crit	= ((current_pos_longitude-ship_pos_longitude)*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle)) 
-							  +(current_pos_latitude-ship_pos_latitude)*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle))) 
-							  /((vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle)) 
-							  +(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle))*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)));
-			obst_p[num_obstP].dist		= speed_avalon_to_dest * obst_p[num_obstP].t_crit + add_dist_safe;
-			obst_p[num_obstP].longitude	= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_longitude;
-			obst_p[num_obstP].latitude	= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_latitude;
+			obst_p[num_obstP].t_crit	= ((current_pos_y-ship_pos_y)*(vel_ship_y - speed_avalon_to_dest*sin(obst_p[num_obstP].angle))
+							  + (current_pos_x-ship_pos_x)*(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle)))
+							  /(pow(vel_ship_y - speed_avalon_to_dest*sin(obst_p[num_obstP].angle),2)
+							  +pow(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle),2));
+			obst_p[num_obstP].dist		= speed_avalon_to_dest * obst_p[num_obstP].t_crit;  // + add_dist_safe;
+			obst_p[num_obstP].x		= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_x;
+			obst_p[num_obstP].y		= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_y;
 			num_obstP ++;
 			  
 			
 			obst_p[num_obstP].angle 	= remainder((angle_tang_front 
 							  -asin(speed_avalon_to_dest/speed_ship*sin(AV_PI+heading_ship-angle_tang_front))-AV_PI),2*AV_PI);
-			obst_p[num_obstP].t_crit	= ((current_pos_longitude-ship_pos_longitude)*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))
-							  +(current_pos_latitude-ship_pos_latitude)*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle))) 
-							  /((vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))*(vel_ship_long - vel_avalon_long*sin(obst_p[num_obstP].angle))
-							  +(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle))*(vel_ship_lat - vel_avalon_lat*cos(obst_p[num_obstP].angle)));
-			obst_p[num_obstP].dist		= speed_avalon_to_dest * obst_p[num_obstP].t_crit + add_dist_safe;
-			obst_p[num_obstP].longitude	= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_longitude;
-			obst_p[num_obstP].latitude	= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_latitude;
+			obst_p[num_obstP].t_crit	= ((current_pos_y-ship_pos_y)*(vel_ship_y - speed_avalon_to_dest*sin(obst_p[num_obstP].angle))
+							  + (current_pos_x-ship_pos_x)*(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle)))
+							  /(pow(vel_ship_y - speed_avalon_to_dest*sin(obst_p[num_obstP].angle),2)
+							  +pow(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle),2));
+			obst_p[num_obstP].dist		= speed_avalon_to_dest * obst_p[num_obstP].t_crit;  // + add_dist_safe;
+			obst_p[num_obstP].x		= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_x;
+			obst_p[num_obstP].y		= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_y;
 			num_obstP ++;
 		    }
 
@@ -515,8 +508,8 @@ rtx_message("avalon is faster\n");
 		    // define if collision points are starts or ends of an obstacles
 		    if(num_obstP>0)
 		    {
-			check_angle = atan2(speed_avalon_to_dest*sin((obst_p[0].angle + obst_p[1].angle)/2)-vel_ship_long,
-					    speed_avalon_to_dest*cos((obst_p[0].angle + obst_p[1].angle)/2)-vel_ship_lat);
+			check_angle = atan2(speed_avalon_to_dest*sin((obst_p[0].angle + obst_p[1].angle)/2)-vel_ship_y,
+					    speed_avalon_to_dest*cos((obst_p[0].angle + obst_p[1].angle)/2)-vel_ship_x);
 			if ((remainder((check_angle - angle_tang_rear),2*AV_PI)<=0) 
 			  || (remainder((check_angle - angle_tang_front),2*AV_PI)>=0))
 			{
@@ -531,8 +524,7 @@ rtx_message("avalon is faster\n");
 rtx_message("num_obst: %d    obst_p: %d\n",num_obstP,obst_p.size());
  
 			// if an obstacle is too far away, we don't care about it
-			dist_dest = sqrt(pow(current_pos_longitude - destination.longitude,2)
-					+pow(current_pos_latitude - destination.latitude,2));
+			//dist_dest = sqrt(pow(current_pos_x,2)+pow(current_pos_latitude,2));
 			dist_limit = 2000;//2*dist_dest;
 			for ( p = 0; p < num_obstP-1; p=p+2)
 			{
@@ -541,8 +533,6 @@ rtx_message("num_obst: %d    obst_p: %d\n",num_obstP,obst_p.size());
 			    {
 				obst_p_start.push_back(obst_p[p]);
 				obst_p_end.push_back(obst_p[p+1]);
-rtx_message("obst_start: x:%lf y:%lf\n", obst_p_start[0].longitude+4.380225573914934e+06 ,obst_p_start[0].latitude-1.111949403453934e+06);
-rtx_message("obst_end: x:%lf y:%lf\n", obst_p_end[0].longitude+4.380225573914934e+06 ,obst_p_end[0].latitude-1.111949403453934e+06);
 			    }
 			}
 		    }
@@ -578,44 +568,36 @@ rtx_message("numbers of obstacles: %d\n",obst_p_start.size());
 		
   
 	    // set new Waypoint
-	    safe_waypoint_long	= obst_p_start[0].longitude; 
-	    safe_waypoint_lat	= obst_p_start[0].latitude;
-	    dist_min		= obst_p_start[0].dist + sqrt(pow(obst_p_start[0].longitude-destination.longitude,2)
-							+pow(obst_p_start[0].latitude-destination.latitude,2));
+	    safe_destpoint_x	= obst_p_start[0].x; 
+	    safe_destpoint_y	= obst_p_start[0].y;
+	    dist_min		= obst_p_start[0].dist + sqrt(pow(obst_p_start[0].x,2) + pow(obst_p_start[0].y,2));
 	    for (l=1;l<obst_p_start.size();l++)
 	    {
-		dist_test 	= obst_p_start[l].dist + sqrt(pow(obst_p_start[l].longitude-destination.longitude,2)
-							+pow(obst_p_start[l].latitude-destination.latitude,2));
+		dist_test 	= obst_p_start[l].dist + sqrt(pow(obst_p_start[l].x,2) + pow(obst_p_start[l].y,2));
 		if(dist_min>dist_test)
 		{
 		    dist_min=dist_test;
-		    safe_waypoint_long	= obst_p_start[l].longitude; 
-		    safe_waypoint_lat	= obst_p_start[l].latitude;
+		    safe_destpoint_x	= obst_p_start[l].x; 
+		    safe_destpoint_y	= obst_p_start[l].y;
 		}
 	    }
 	    for (l=0;l<obst_p_end.size();l++)
 	    {
-		dist_test  	= obst_p_end[l].dist + sqrt(pow(obst_p_end[l].longitude-destination.longitude,2)
-						      +pow(obst_p_end[l].latitude-destination.latitude,2));
+		dist_test  	= obst_p_end[l].dist + sqrt(pow(obst_p_end[l].x,2) + pow(obst_p_end[l].y,2));
 		if(dist_min>dist_test)
 		{
 		    dist_min=dist_test;
-		    safe_waypoint_long	= obst_p_end[l].longitude; 
-		    safe_waypoint_lat	= obst_p_end[l].latitude;
+		    safe_destpoint_x	= obst_p_end[l].x; 
+		    safe_destpoint_y	= obst_p_end[l].y;
 		}
 	    }
 
-	    ais_dest.new_dest_long = safe_waypoint_long;
-	    ais_dest.new_dest_lat = safe_waypoint_lat;
+	    ais_dest.new_dest_long = destination.longitude+safe_destpoint_y*180/(AV_PI*AV_EARTHRADIUS*destination.latitude*AV_PI/180.0);
+	    ais_dest.new_dest_lat = destination.latitude+safe_destpoint_x*180.0/(AV_PI*AV_EARTHRADIUS);
 	    ais_dest.ais_dest_index ++;
 	    ais_dest.global_skipper_flag = AV_FLAGS_GLOBALSK_AVOIDANCE;
 	    aisDestData.t_writefrom(ais_dest);
-// 	    destination.longitude = safe_waypoint_long;
-// 	    destination.latitude  = safe_waypoint_lat;
-// 	    destinationData.t_writefrom(destination);
-// 			skipperflags.global_locator  = AV_FLAGS_GLOBALSK_AVOIDANCE;
-// 			skipperFlagData.t_writefrom(skipperflags);
-#endif
+
 	}
     }
 

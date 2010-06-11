@@ -100,8 +100,8 @@ while (t < T_sim && ~Stop && ~rcflags_emergency_stop)
     rudder_pos_des(end+1)=(rudder.degrees_left);
     flags_state                         = flags.state;
     rcflags_sailorstate_requested       = rcflags.sailorstate_requested;
-    i=1;
-    while destData.Data(i).latitude~=0
+    
+    for i=1:10
         dest_x(i)=destData.Data(i).latitude-p1_0;
         dest_y(i)=destData.Data(i).longitude-p2_0;
         i=i+1;
@@ -121,15 +121,15 @@ while (t < T_sim && ~Stop && ~rcflags_emergency_stop)
 %     end
 i=1;
 clear wp_x_loc wp_y_loc wp_x_glo wp_y_glo wp_head
-wypData.Data(i).wyp_type;
-k;
-wp_x_glo(i)=wypData.Data(i).latitude;
-        wp_y_glo(i)=wypData.Data(i).longitude;
+% wypData.Data(i).wyp_type;
+% k;
+wp_x_glo(i)=wypData.Data(i).x;
+        wp_y_glo(i)=wypData.Data(i).y;
         wp_head(i)=wypData.Data(i).heading;
         i=2;
 while (wypData.Data(i-1).wyp_type ~= 1)
-        wp_x_glo(i)=wypData.Data(i).latitude;
-        wp_y_glo(i)=wypData.Data(i).longitude;
+        wp_x_glo(i)=wypData.Data(i).x;
+        wp_y_glo(i)=wypData.Data(i).y;
         wp_head(i)=wypData.Data(i).heading;
         i=i+1;
         if i>100
@@ -137,20 +137,20 @@ while (wypData.Data(i-1).wyp_type ~= 1)
         end
 end
 
-    wp_x_loc=wp_x_glo-p1_0;
-    wp_y_loc=wp_y_glo-p2_0;
-    wp_head;
+%     wp_x_loc=wp_x_glo-p1_0;
+%     wp_y_loc=wp_y_glo-p2_0;
+%     wp_head;
 %     wp_x=[wp_x_temp(1);nonzeros(wp_x_temp(2:end))]-p1_0;
 %     wp_y=[wp_y_temp(1);nonzeros(wp_y_temp(2:end))]-p2_0;
 %     wp_head=nonzeros(wp_head);
-    destinationx                        = destData.latitude;
-    destinationy                        = destData.longitude;
+%     destinationx                        = destData.latitude;
+%     destinationy                        = destData.longitude;
     
     
     %% set sail state pop-up menu in GUI
     flags_state_string = {'IDLE     ';'DOCK     ';'NORMAL   ';'TACK     ';'JIBE     ';'UPWIND   ';'DOWNWIND ';'MAXENERGY';'HEADING C'};
     set(handles.SailStatePopupmenu,'String',flags_state_string(flags_state));
-    [flags_state_string(flags_state) desiredheading.heading];
+%     [flags_state_string(flags_state) desiredheading.heading];
     %% control parameters with joystick
     
     joy_control = get(handles.manInChargeRadiobutton,'Value');
@@ -339,16 +339,30 @@ end
     
     if t == 0
         rcflags_sailorstate_requested     = 3;          % = AV_FLAGS_ST_NORMALSAILING
-        pose(1,1)                         =  1.111949403453934e+06;
-        pose(2,1)                         = -4.380225573914934e+06;
-        vel(1,1)                          = 1.5;
+%         pose(1,1)                         =  1.111949403453934e+06;
+%         pose(2,1)                         = -4.380225573914934e+06;
+        vel(1,1)                          = 5;
+        vel(2,1)			  = 0;
+        vel(3,1)			  = 0.1;
+        i=1;
+% 	t_elaps_old=0;
+    imu.position.latitude               = destData.Data(1).latitude;
+    imu.position.longitude              = destData.Data(1).longitude;
         dist_boat                         =[sqrt((pose(1)-boat_x).^2+(pose(2)-boat_y).^2) zeros(1,5-num_boats)];
         dist_min                          = min(sqrt((pose(1)-boat_x).^2+(pose(2)-boat_y).^2));
     end
     
+    for i=1:10
+        dest_y(i) = r_earth*cos(destData.latitude*pi/180)*pi/180*(destData.Data(i).longitude-destData.longitude);
+        dest_x(i) = r_earth*pi/180*(destData.Data(i).latitude-destData.latitude);
+    end
+    pose(2) = r_earth*cos(destData.latitude*pi/180)*pi/180*(imu.position.longitude-destData.longitude);
+    pose(1) = r_earth*pi/180*(imu.position.latitude-destData.latitude)
+    
     [pose, vel_p, vel, X, Y, N, X_p, Y_p, N_p, X_drag, Y_drag, X_waves, Y_waves, N_waves, X_sail, Y_sail, N_sail, N_rudder, N_damping, V_wind, g_r] = PoseStep(t, delta_t, pose, vel, X_p, Y_p, N_p, X_drag, Y_drag,vel_p, m, aoa_sail, A_sail, A_hull, A_rudder, alpha_rudder_r, alpha_rudder_l, C_d, C_hat, I, v_current, d_current, v_wind, d_wind, d_waves, T, h, depth, length, width, sail_factor);
     ax_lim=[-local_size/2+pose(2)-p2_0 local_size/2+pose(2)-p2_0 -local_size/2+pose(1)-p1_0 local_size/2+pose(1)-p1_0];
-    
+    pose
+    11
     
     
     
@@ -384,9 +398,9 @@ end
     
     
     pose3_p                             = [pose3_p pose(3)];
-    destpoint_i                         = [(destinationx-p1_0) (destinationy-p2_0)];
     
-    dist_dest=sqrt((pose(2)-destinationy)^2+(pose(1)-destinationx)^2);
+    
+    dist_dest=sqrt((pose(2))^2+(pose(1))^2);
     set(handles.dist_dest,'String',num2str(round(dist_dest)));
     
     wind_p    = [ones(1,5)*ax_lim(3)+local_size/20; ones(1,5)*ax_lim(1)+local_size/20] + ([0,-local_size/20, +local_size/20, -local_size/20, 0; 0, local_size/40, 0, -local_size/40, 0]'*[cos(d_wind+pi) sin(d_wind+pi); -sin(d_wind+pi) cos(d_wind+pi)])';
@@ -407,10 +421,11 @@ end
     if round(t)==100
         2324;
     end
-    save data;
-    plot(handles.AxesTrajectory, traj(:,2),traj(:,1), pose_plot(:,1)-p2_0,pose_plot(:,2)-p1_0,'b',wp_y_loc,wp_x_loc,'ko',wp_y_loc(k),wp_x_loc(k),'ks',dest_y,dest_x,'or', destpoint_i(2), destpoint_i(1),'sr',boat_plot_x-p2_0,boat_plot_y-p1_0,'r');%,wp_x,wp_y,'kx');%,wind(2,:),wind(1,:),'g');
+    wp_x_loc=wp_x_glo+dest_x(destData.destNr+1);
+    wp_y_loc=wp_y_glo+dest_y(destData.destNr+1);
+    plot(handles.AxesTrajectory, pose_plot(:,1),pose_plot(:,2),'b',wp_y_loc,wp_x_loc,'ko',wp_y_loc(k),wp_x_loc(k),'ks',dest_y,dest_x,'or', dest_y(destData.destNr+1), dest_x(destData.destNr+1),'sr',boat_plot_x,boat_plot_y,'r');%,wp_x,wp_y,'kx');%,wind(2,:),wind(1,:),'g');
     axis(handles.AxesTrajectory,[-world_size/2 world_size/2 -world_size/2 world_size/2])
-    plot(handles.AxesLocal, pose_plot(:,1)-p2_0,pose_plot(:,2)-p1_0,'b',pose(2)-p2_0,pose(1)-p1_0,'b',boat_plot_x-p2_0,boat_plot_y-p1_0,'r',wp_y_loc,wp_x_loc,'ko-',wp_y_loc(k),wp_x_loc(k),'ks',dest_y,dest_x,'or', destpoint_i(2), destpoint_i(1),'sr',wind_p(2,:),wind_p(1,:),'g')
+    plot(handles.AxesLocal, pose_plot(:,1),pose_plot(:,2),'b',pose(2),pose(1),'b',boat_plot_x,boat_plot_y,'r',wp_y_loc,wp_x_loc,'ko-',wp_y_loc(k),wp_x_loc(k),'ks',dest_y,dest_x,'or', dest_y(destData.destNr+1), dest_x(destData.destNr+1),'sr',wind_p(2,:),wind_p(1,:),'g')
     axis(handles.AxesLocal,ax_lim)
     %% plot desired heading on compass
     
