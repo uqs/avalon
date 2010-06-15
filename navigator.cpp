@@ -188,7 +188,7 @@ void * translation_thread(void * dummy)
 				//&& (timedif > 7.0))  //if this is 1, then do the waypoint-calculation
 			{
 				time_initializer = true;
-				rtx_message("new_path_calc!!!\n");
+				rtx_message("new_path_calc!!!");
 
 				//converting the current and end-state into a meter-coordinates:
 				transformation.longitude_start = boatData.position.longitude;
@@ -543,7 +543,7 @@ double alpha = atan2(cos(destination.latitude*AV_PI/180)*(destination.Data[next_
 				transformationData.t_writefrom(transformation);
 				waypointData.t_writefrom(waypoints);
 				time(&start_time);
-				rtx_message("path calc done");
+				rtx_message("path calc done\n");
 
 			}
 
