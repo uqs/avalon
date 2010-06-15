@@ -148,6 +148,7 @@ void * translation_thread(void * dummy)
 	    destination.longitude = ais_dest.new_dest_long;
 	    destination.latitude = ais_dest.new_dest_lat;
 	    destination.skipper_index_call ++;
+	    destination.not_in_list = 1;
 	    destinationData.t_writefrom(destination);
 	    skipperflags.global_locator = ais_dest.global_skipper_flag;
 	    skipperFlagData.t_writefrom(skipperflags);
@@ -213,6 +214,7 @@ void * translation_thread(void * dummy)
 			destination.longitude = destination.Data[destination.destNr +2 -p].longitude;
 			destination.latitude = destination.Data[destination.destNr +2 -p].latitude;
 			destination.destNr = (destination.destNr +2 -p);
+			destination.not_in_list = 0;
 			destination.skipper_index_call ++;
 			destinationData.t_writefrom(destination);
 
@@ -228,6 +230,7 @@ void * translation_thread(void * dummy)
 			destination.longitude = destination.Data[destination.destNr].longitude;
 			destination.latitude = destination.Data[destination.destNr].latitude;
 			destination.skipper_index_call ++;
+			destination.not_in_list = 0;
 			destinationData.t_writefrom(destination);
 			skipperflags.global_locator = AV_FLAGS_GLOBALSK_CLOSING;
 			skipperFlagData.t_writefrom(skipperflags);
@@ -247,6 +250,7 @@ void * translation_thread(void * dummy)
 		    destination.longitude = boatData.position.longitude + 0.5 * (destination.longitude - boatData.position.longitude);
 		    destination.latitude = boatData.position.latitude + 0.5 * (destination.latitude - boatData.position.latitude);
 		    destination.skipper_index_call ++;
+		    destination.not_in_list = 1;
 		    destinationData.t_writefrom(destination);
 
 #ifdef DEBUG_GLOBSKIPPER
@@ -276,6 +280,7 @@ void * translation_thread(void * dummy)
 		    destination.longitude = destination.Data[destination.destNr].longitude;
 		    destination.latitude = destination.Data[destination.destNr].latitude;
 		    destination.skipper_index_call ++;
+		    destination.not_in_list = 0;
 		    destinationData.t_writefrom(destination);
 
 // #ifdef DEBUG_GLOBSKIPPER

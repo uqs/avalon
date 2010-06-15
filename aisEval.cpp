@@ -286,7 +286,7 @@ void * translation_thread(void * dummy)
                     threshold_radius	= 395;  // to be modified: additional safety distance
                     radius_relativ	= ship_length + 4 + threshold_radius;    // ship length + avalon_length + threshold_radius
                     dist_avalon_ship	= sqrt(pow(ship_pos_x - current_pos_x,2) + pow(ship_pos_y - current_pos_y,2));
-
+rtx_message("dist to ship = %f \n", dist_avalon_ship);
 		    if (dist_avalon_ship<0.5*radius_relativ)
 		    {
 			if (remainder((AV_PI+angle_avalon_ship-heading_ship),2*AV_PI)<0)

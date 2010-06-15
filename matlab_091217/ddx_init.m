@@ -27,7 +27,7 @@ if isempty(robot_variable)
     AISDATA_MSG          = 'struct { int number_of_ships; AisStruct Ship[15]; } AisData';
 %     
     DESTINATIONSTRUCT_MSG   = 'struct { double longitude; double latitude; int passed; int type; } DestinationStruct';
-    DESTINATIONDATA_MSG     = 'struct { DestinationStruct Data[1000]; double longitude; double latitude; int destNr; unsigned int skipper_index_call;} DestinationData';
+    DESTINATIONDATA_MSG     = 'struct { DestinationStruct Data[1000]; double longitude; double latitude; int destNr; int destNr_total; int not_in_list; unsigned int skipper_index_call;} DestinationData';
     WAYPOINTSTRUCT_MSG      = 'struct { double heading; int longitude; int latitude; int wyp_type; int passed; double windspeed; double winddirection; } WaypointStruct';
     WAYPOINTDATA_MSG        = 'struct { WaypointStruct Data[100]; } WaypointData';
 

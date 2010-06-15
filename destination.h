@@ -37,7 +37,11 @@ DDX_STORE_TYPE(DestinationData,
         DestinationStruct Data[1000];
         double longitude;               //the current final dest for the navigator in meters
         double latitude; 
-        int destNr; 
+
+        int destNr;
+	int destNr_total;
+  
+	int not_in_list;
 	unsigned int skipper_index_call;
 
         }

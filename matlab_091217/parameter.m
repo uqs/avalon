@@ -13,8 +13,8 @@
 %  -------------------------------------------------------------------------
 T_sim                   = 1000;
 delta_t                 = 0.4;% [s] iteration time step (smallest time step of sensor reading)
-local_size              = 1000;
-world_size              = 8000;          % [m] size of the part we are looking at
+local_size              = 3000;
+world_size              = 14000;          % [m] size of the part we are looking at
 disp_forces             = 1;            % display forces; 0 or 1
 disp_measurements       = 0;            % display measurements; 0 or 1
 rcflags_emergency_stop  = 0;

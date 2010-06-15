@@ -213,6 +213,7 @@ void * translation_thread(void * dummy)
     double torque_des;
     double u;
     double speed;
+    int count=0;
 
 
     while (1)
@@ -243,11 +244,25 @@ void * translation_thread(void * dummy)
 //                     desired_heading_while_no_tack_or_jibe = imu.attitude.yaw;
 //                 }
 //                 desired_heading.heading = desired_heading_while_no_tack_or_jibe;
-//             }
-
+// 
 	    FILE * thetafile;
 	    thetafile = fopen("thetaplot.txt","a+");
-       
+           
+// if(count % 200 < 100)
+// {	    
+// 	    thetafile = fopen("thetaplot.txt","a+");
+// } else
+// { 
+//   thetafile = fopen("thetaplot2.txt","a+");
+// }
+// if(count %200 == 0)
+// { 
+//   thetafile = fopen("thetaplot.txt","w+");
+// }
+// if(count %200 == 100)
+// { 
+//   thetafile = fopen("thetaplot2.txt","w+");
+// }	    
             switch(flags.state)
 	    {
 		    case AV_FLAGS_ST_IDLE:
@@ -564,7 +579,7 @@ void * translation_thread(void * dummy)
                                     u = iter.sailor_main_iter_fn(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144, sailstate.degrees_sail*M_PI/180.0, wind_clean.global_direction_real*M_PI/180.0, imu.attitude.yaw*M_PI/180.0, wind_clean.speed*0.5144);
                                     
 			    }
-			    fprintf(thetafile,"%f %f %f %f\n",theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left);
+			    fprintf(thetafile," Tack: %f %f %f %f\n",theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left);
 
 			    rudder.degrees_left = u;
 			    rudder.degrees_right = u;
@@ -758,7 +773,7 @@ void * translation_thread(void * dummy)
 // rtx_message("rudder degrees: %f",u*AV_PI/180.0);
 	    fclose(thetafile);
             // Bring to store
-
+count++;
             dataRudder.t_writefrom(rudder);
             dataSail.t_writefrom(sail);
             // Do not write to sailorflags in here! Sailor_transitions does that.

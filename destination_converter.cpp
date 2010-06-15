@@ -186,7 +186,8 @@ void * translation_thread(void * dummy)
                     destination.Data[current_destpoint].type = AV_DEST_TYPE_NOMORE;
 
                     //bring to store:
-
+		    destination.destNr_total = current_destpoint;
+		    destination.not_in_list = 0;
                     destinationData.t_writefrom(destination);
              rtx_message("it should end here, %d destinations written", current_destpoint); 
                     //abort programm:

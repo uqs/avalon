@@ -64,9 +64,9 @@ while (t < T_sim && ~Stop && ~rcflags_emergency_stop)
     
     torque_des          = rudder.torque_des;
     
-    [pose]              = ll2xy(imu.position.longitude,imu.position.latitude);
+%     [pose]              = ll2xy(imu.position.longitude,imu.position.latitude);
     
-    pose(3)             = deg2rad(imu.attitude.yaw);  pose(3) = reminderRad(pose(3));
+    pose(3)             = reminderRad(deg2rad(imu.attitude.yaw));
     
     joy_but1            = joystick.buttons(1);          % shooting button
     joy_but2            = joystick.buttons(2);          % thumb button
@@ -357,12 +357,11 @@ end
         dest_x(i) = r_earth*pi/180*(destData.Data(i).latitude-destData.latitude);
     end
     pose(2) = r_earth*cos(destData.latitude*pi/180)*pi/180*(imu.position.longitude-destData.longitude);
-    pose(1) = r_earth*pi/180*(imu.position.latitude-destData.latitude)
+    pose(1) = r_earth*pi/180*(imu.position.latitude-destData.latitude);
     
     [pose, vel_p, vel, X, Y, N, X_p, Y_p, N_p, X_drag, Y_drag, X_waves, Y_waves, N_waves, X_sail, Y_sail, N_sail, N_rudder, N_damping, V_wind, g_r] = PoseStep(t, delta_t, pose, vel, X_p, Y_p, N_p, X_drag, Y_drag,vel_p, m, aoa_sail, A_sail, A_hull, A_rudder, alpha_rudder_r, alpha_rudder_l, C_d, C_hat, I, v_current, d_current, v_wind, d_wind, d_waves, T, h, depth, length, width, sail_factor);
-    ax_lim=[-local_size/2+pose(2)-p2_0 local_size/2+pose(2)-p2_0 -local_size/2+pose(1)-p1_0 local_size/2+pose(1)-p1_0];
-    pose
-    11
+    ax_lim=[-local_size/2+pose(2) local_size/2+pose(2) -local_size/2+pose(1) local_size/2+pose(1)];
+
     
     
     
@@ -382,16 +381,16 @@ end
     end
     num_boats=num_boats_temp;
     for i=1:num_boats
-        if boat_x(i)-p1_0<ax_lim(3)
+        if boat_x(i)<ax_lim(3)
             boat_heading(i)=deg2rad(180*rand-90);
         end
-        if boat_x(i)-p1_0>ax_lim(4)
+        if boat_x(i)>ax_lim(4)
             boat_heading(i)=deg2rad(-180*rand-90);
         end
-        if boat_y(i)-p2_0<ax_lim(1)
+        if boat_y(i)<ax_lim(1)
             boat_heading(i)=deg2rad(180*rand);
         end
-        if boat_y(i)-p2_0>ax_lim(2)
+        if boat_y(i)>ax_lim(2)
             boat_heading(i)=deg2rad(-180*rand);
         end
     end
@@ -423,7 +422,7 @@ end
     end
     wp_x_loc=wp_x_glo+dest_x(destData.destNr+1);
     wp_y_loc=wp_y_glo+dest_y(destData.destNr+1);
-    plot(handles.AxesTrajectory, pose_plot(:,1),pose_plot(:,2),'b',wp_y_loc,wp_x_loc,'ko',wp_y_loc(k),wp_x_loc(k),'ks',dest_y,dest_x,'or', dest_y(destData.destNr+1), dest_x(destData.destNr+1),'sr',boat_plot_x,boat_plot_y,'r');%,wp_x,wp_y,'kx');%,wind(2,:),wind(1,:),'g');
+    plot(handles.AxesTrajectory, pose_plot(:,1),pose_plot(:,2),'b',wp_y_loc,wp_x_loc,'ko-',wp_y_loc(k),wp_x_loc(k),'ks',dest_y,dest_x,'or', dest_y(destData.destNr+1), dest_x(destData.destNr+1),'sr',boat_plot_x,boat_plot_y,'r');%,wp_x,wp_y,'kx');%,wind(2,:),wind(1,:),'g');
     axis(handles.AxesTrajectory,[-world_size/2 world_size/2 -world_size/2 world_size/2])
     plot(handles.AxesLocal, pose_plot(:,1),pose_plot(:,2),'b',pose(2),pose(1),'b',boat_plot_x,boat_plot_y,'r',wp_y_loc,wp_x_loc,'ko-',wp_y_loc(k),wp_x_loc(k),'ks',dest_y,dest_x,'or', dest_y(destData.destNr+1), dest_x(destData.destNr+1),'sr',wind_p(2,:),wind_p(1,:),'g')
     axis(handles.AxesLocal,ax_lim)
@@ -461,7 +460,7 @@ end
     
     %% write variables to DDX Store
     
-    [imu.position.longitude, imu.position.latitude] = xy2ll(pose);
+%     [imu.position.longitude, imu.position.latitude] = xy2ll(pose);
     if (~isempty(boat_x))
         dist_boat(n,:)=[sqrt((pose(1)-boat_x).^2+(pose(2)-boat_y).^2) zeros(1,5-num_boats)];
         
@@ -492,6 +491,8 @@ end
     ind_t=[0:delta_t:t+.01];
     plot(handles.AxesDist,ind_t, dist_boat)
 
+    imu.position.latitude               = destData.latitude + 180/(r_earth*pi)*pose(1);
+    imu.position.longitude              = destData.longitude + 180/(r_earth*pi*cos(destData.latitude*pi/180))*pose(2);
     imu.attitude.yaw                                = rad2deg(pose(3));
     
     imu.velocity.x                      = vel(1,1)/0.5144;
@@ -530,16 +531,14 @@ alpha=rad2deg(atan2(V_wind_y,V_wind_x)-aoa_sail);
     joystick.axes(3)                    = joy_axes3;
     joystick.axes(4)                    = joy_axes4;
     
-    for i=1:num_boats
-        [boat_long boat_lat]                = xy2ll([boat_x(i);boat_y(i)]);
-
+    for i=1:num_boats        
         aisData.Ship(i).mmsi                      = 111111*i;
         aisData.Ship(i).navigational_status       = 0;
         aisData.Ship(i).rate_of_turn              = 0;
         aisData.Ship(i).speed_over_ground         = round(boat_speed(i)/0.5144444);
         aisData.Ship(i).position_accuracy         = 1;
-        aisData.Ship(i).longitude                 = boat_long;
-        aisData.Ship(i).latitude                  = boat_lat;
+        aisData.Ship(i).latitude                  = destData.latitude + 180/(r_earth*pi)*boat_x(i);
+        aisData.Ship(i).longitude                 = destData.longitude + 180/(r_earth*pi*cos(destData.latitude*pi/180))*boat_y(i);
         aisData.Ship(i).course_over_ground        = boat_heading(i)*180/pi;
         aisData.Ship(i).heading                   = boat_heading(i)*180/pi;
         aisData.Ship(i).destination(1)            = 0;

@@ -43,7 +43,7 @@
 #include "aisEval.h"
 
 //#define DEBUG_ISLAND
-#define DEBUG_NAVIGATOR
+// #define DEBUG_NAVIGATOR
 
 /**
  * Global variable for all DDX object
@@ -144,8 +144,9 @@ void * translation_thread(void * dummy)
 	LakeTransformation transformation;
 
 	int xSize, ySize;
-	double windDirection, windSpeed;
+	double windDirection, windDirection_orr, windSpeed;
 	double endTheta;
+	int next_dest_Nr = 0;
 	int arrayPointer = 0;
 	int p,q;
 	double difference, difference_start;
@@ -187,9 +188,8 @@ void * translation_thread(void * dummy)
 				//&& (timedif > 7.0))  //if this is 1, then do the waypoint-calculation
 			{
 				time_initializer = true;
-#ifdef DEBUG_NAVIGATOR
 				rtx_message("new_path_calc!!!\n");
-#endif
+
 				//converting the current and end-state into a meter-coordinates:
 				transformation.longitude_start = boatData.position.longitude;
 				transformation.latitude_start = boatData.position.latitude;
@@ -245,9 +245,10 @@ void * translation_thread(void * dummy)
 				xSize = (2*transformation.x_iter_offset + abs(transformation.x_end - transformation.x_start));
 				ySize = (2*transformation.y_iter_offset + abs(transformation.y_end - transformation.y_start));    
 
-				if(transformation.x_start == transformation.x_end && transformation.y_start == transformation.y_end)
+				if((transformation.x_start == transformation.x_end && transformation.y_start == transformation.y_end)
+				    || (xSize>100) || (ySize>100))
 				{
-					rtx_message("start and end have the same coordinates");
+					rtx_message("start and end have the same coordinates or size to large");
 					continue;
 				}
 
@@ -272,8 +273,10 @@ void * translation_thread(void * dummy)
 				///////////////////////////////////////////////////////////////////////////////////////
 
 				//transformation winddirection into correct mathematical direction:
-				windDirection = remainder(((-(cleanedWind.global_direction_real_long - 90))*(AV_PI / 180.0)),2*AV_PI);  //in rad and mathematically correct!!
-				windSpeed = cleanedWind.speed_long;    	//in knots
+				windDirection 		= remainder(((-(cleanedWind.global_direction_real_long - 90))*(AV_PI / 180.0)),2*AV_PI);  //in rad and mathematically correct!!
+				windSpeed 		= cleanedWind.speed_long;    	//in knots
+
+				windDirection_orr	= cleanedWind.global_direction_real_long*AV_PI/180;
 
 #ifdef DEBUG_NAVIGATOR
 				rtx_message("windspeed = %f, winddirection = %f\n",windSpeed,windDirection);
@@ -289,35 +292,103 @@ void * translation_thread(void * dummy)
 				///////////////////////////////////////////////////////////////////////////////////////////
 				//calculating an appropriate endTheta:
 				//
-				endTheta = atan2((transformation.y_end - transformation.y_start),(transformation.x_end - transformation.x_start));
+// 				endTheta = atan2((transformation.y_end - transformation.y_start),(transformation.x_end - transformation.x_start));
+// rtx_message("theta_end: %f °",endTheta*180/AV_PI);
+// 				if (fabs(remainder((windDirection - endTheta),2*AV_PI))== 0.0)
+// 				{
+// 					endTheta = (-(AV_PI)/4); 
+// 				}
+// 				if ((fabs(remainder((windDirection - endTheta),2*AV_PI)) < (AV_PI/4 - 0.5*AV_PI/180)) &&  (remainder((windDirection - endTheta),2*AV_PI) > 0))
+// 				{
+// 					endTheta = (windDirection -  67.5*AV_PI/180);
+// 				}
+// 				if ((fabs(remainder((windDirection - endTheta),2*AV_PI)) < (AV_PI/4 - 0.5*AV_PI/180)) &&  (remainder((windDirection - endTheta),2*AV_PI) < 0))
+// 				{
+// 					endTheta =(windDirection +  67.5*AV_PI/180); //(AV_PI)*(1/4+1/NEIGHBORHOOD));
+// 				}
+// 
+// 				//if endTheta is out of range:
+// 				endTheta = remainder(endTheta,2*AV_PI);
+// rtx_message("theta_end: %f",endTheta);
+// 				///modifying the endTheta so its in our headingTable:
+// 				difference = AV_PI/2;
+// 				mapTheta_end_correct = 30; //more than it can ever be possible
+// 				for(p=0; p<16; p++)
+// 				{
+// 					if (fabs(remainder((headingTable16[p] - endTheta),2*AV_PI)) < difference)
+// 					{
+// 						difference = fabs(remainder((headingTable16[p] - endTheta),2*AV_PI));
+// 						mapTheta_end_correct = p;
+// 					}
+// 				}
+// 				//-----> theta at the end is mapTheta_end_correct!!
+next_dest_Nr = destination.destNr+1;
+if (destination.not_in_list == 1)
+    { next_dest_Nr--;}
+double alpha = atan2(cos(destination.latitude*AV_PI/180)*(destination.Data[next_dest_Nr].longitude-destination.longitude),(destination.Data[next_dest_Nr].latitude-destination.latitude));
+// 				
+				endTheta = alpha;//atan2((transformation.x_end - transformation.x_start),(transformation.y_end - transformation.y_start));
+// rtx_message("theta_end: %f °, winddirection: %f °",endTheta*180/AV_PI, windDirection*180/AV_PI);
+// 				// if upwind
+// 				if (fabs(remainder((windDirection_orr - endTheta),2*AV_PI))== 0.0) // exactly upwind
+// 				{
+// 					endTheta = remainder(endTheta - AV_SAILOR_MAX_HEIGHT_TO_WIND*AV_PI/180.0,2*AV_PI); //+ or -?? 
+// 				}
+// 				if ((fabs(remainder((windDirection_orr - endTheta),2*AV_PI)) < (AV_SAILOR_MAX_HEIGHT_TO_WIND*AV_PI/180.0 - 0.5*AV_PI/180)) &&  (remainder((windDirection_orr - endTheta),2*AV_PI) > 0))
+// 				{
+// 					endTheta = remainder(windDirection_orr - AV_SAILOR_MAX_HEIGHT_TO_WIND*AV_PI/180.0,2*AV_PI);
+// 				}
+// 				if ((fabs(remainder((windDirection_orr - endTheta),2*AV_PI)) < (AV_SAILOR_MAX_HEIGHT_TO_WIND*AV_PI/180.0 - 0.5*AV_PI/180)) &&  (remainder((windDirection_orr - endTheta),2*AV_PI) < 0))
+// 				{
+// 					endTheta =remainder(windDirection_orr + AV_SAILOR_MAX_HEIGHT_TO_WIND*AV_PI/180.0,2*AV_PI); //(AV_PI)*(1/4+1/NEIGHBORHOOD));
+// 				}
+// 
+// 				if (fabs(remainder((windDirection_orr - endTheta),2*AV_PI))== 180.0) // exactly downwind
+// 				{
+// 					endTheta = remainder(endTheta - (AV_PI-AV_SAILOR_MAX_DOWNWIND_ANGLE*AV_PI/180.0),2*AV_PI);//+ or -?? 
+// 				}
+// 				if ((fabs(remainder((windDirection_orr - endTheta),2*AV_PI)) > (AV_SAILOR_MAX_DOWNWIND_ANGLE*AV_PI/180.0 + 0.5*AV_PI/180)) &&  (remainder((windDirection_orr - endTheta),2*AV_PI) > 0))
+// 				{
+// 					endTheta = remainder(windDirection_orr - (AV_PI-AV_SAILOR_MAX_DOWNWIND_ANGLE*AV_PI/180.0),2*AV_PI);
+// 				}
+// 				if ((fabs(remainder((windDirection_orr - endTheta),2*AV_PI)) > (AV_SAILOR_MAX_DOWNWIND_ANGLE*AV_PI/180.0 + 0.5*AV_PI/180)) &&  (remainder((windDirection_orr - endTheta),2*AV_PI) < 0))
+// 				{
+// 					endTheta = remainder(windDirection_orr + (AV_PI-AV_SAILOR_MAX_DOWNWIND_ANGLE*AV_PI/180.0),2*AV_PI); //(AV_PI)*(1/4+1/NEIGHBORHOOD));
+// 				}
 
-				if (fabs(remainder((windDirection - endTheta),2*AV_PI))== 0.0)
-				{
-					endTheta = (- (AV_PI)/4); 
+				if (fabs(remainder((windDirection_orr - endTheta),2*AV_PI)) < (AV_SAILOR_MAX_HEIGHT_TO_WIND*AV_PI/180.0))
+				{ // upwind sailing
+				    if (remainder(alpha-windDirection_orr,2*AV_PI) > 0)
+				    {
+					endTheta = remainder(windDirection_orr + AV_SAILOR_MAX_HEIGHT_TO_WIND*AV_PI/180.0,2*AV_PI);
+				    } else
+				    {
+					endTheta = remainder(windDirection_orr - AV_SAILOR_MAX_HEIGHT_TO_WIND*AV_PI/180.0,2*AV_PI);
+				    }
 				}
-				if ((fabs(remainder((windDirection - endTheta),2*AV_PI)) < (AV_PI/4 - 0.5*AV_PI/180)) &&  (remainder((windDirection - endTheta),2*AV_PI) > 0))
-				{
-					endTheta = (windDirection -  67.5*AV_PI/180);
+				if (fabs(remainder((windDirection_orr - endTheta),2*AV_PI)) > (AV_SAILOR_MAX_DOWNWIND_ANGLE*AV_PI/180.0))
+				{ // downwind sailing
+				    if (remainder(alpha-windDirection_orr-AV_PI,2*AV_PI) > 0)
+				    {
+					endTheta = remainder(windDirection_orr + AV_SAILOR_MAX_DOWNWIND_ANGLE*AV_PI/180.0,2*AV_PI);
+				    } else
+				    {
+					endTheta = remainder(windDirection_orr - AV_SAILOR_MAX_DOWNWIND_ANGLE*AV_PI/180.0,2*AV_PI);
+				    }
 				}
-				if ((fabs(remainder((windDirection - endTheta),2*AV_PI)) < (AV_PI/4 - 0.5*AV_PI/180)) &&  (remainder((windDirection - endTheta),2*AV_PI) < 0))
-				{
-					endTheta =(windDirection +  67.5*AV_PI/180); //(AV_PI)*(1/4+1/NEIGHBORHOOD));
-				}
-
-				//if endTheta is out of range:
-				endTheta = remainder(endTheta,2*AV_PI);
 
 				///modifying the endTheta so its in our headingTable:
-				difference = AV_PI/2;
+				difference = AV_PI;
 				mapTheta_end_correct = 30; //more than it can ever be possible
 				for(p=0; p<16; p++)
 				{
-					if (fabs(remainder((headingTable16[p] - endTheta),2*AV_PI)) < difference)
+					if (fabs(remainder(headingTable16[p] - (AV_PI/2 - endTheta),2*AV_PI)) < difference)
 					{
-						difference = fabs(remainder((headingTable16[p] - endTheta),2*AV_PI));
+						difference = fabs(remainder(headingTable16[p] - (AV_PI/2 - endTheta),2*AV_PI));
 						mapTheta_end_correct = p;
 					}
 				}
+
 				//-----> theta at the end is mapTheta_end_correct!!
 #if 1
 				//modifying the startTheta so its in our headingTable:
@@ -325,7 +396,7 @@ void * translation_thread(void * dummy)
 				mapTheta_start_correct = 30; //more than it can ever be possible
 				for(q=0; q<16; q++)
 				{
-					if (fabs(remainder((headingTable16[q] + boatData.attitude.yaw*AV_PI/180-AV_PI/2),2*AV_PI)) < difference_start)
+					if (fabs(remainder((headingTable16[q] - (AV_PI/2 - boatData.attitude.yaw*AV_PI/180)),2*AV_PI)) < difference_start)
 					{
 						difference_start = fabs(remainder((headingTable16[q] + boatData.attitude.yaw*AV_PI/180-AV_PI/2),2*AV_PI));
 						mapTheta_start_correct = q;
@@ -333,7 +404,8 @@ void * translation_thread(void * dummy)
 				}
 				//-----> theta at the start is mapTheta_start_correct!!
 #ifdef DEBUG_NAVIGATOR
-				rtx_message("start_theta = %d \n",mapTheta_start_correct);
+				rtx_message("start_theta = %f°  end_theta = %f° \n",headingTable16[mapTheta_start_correct]*180/AV_PI, headingTable16[mapTheta_end_correct]*180/AV_PI);
+				rtx_message("ind_start_theta = %d  ind_end_theta = %d \n",mapTheta_start_correct, mapTheta_end_correct);
 #endif
 #endif
 				//////////////////////////////////////////////////////////////////////////////////////////
@@ -471,9 +543,8 @@ void * translation_thread(void * dummy)
 				transformationData.t_writefrom(transformation);
 				waypointData.t_writefrom(waypoints);
 				time(&start_time);
-#ifdef DEBUG_NAVIGATOR
 				rtx_message("path calc done");
-#endif
+
 			}
 
 		} else if (dataWindClean.hasTimedOut()) {
