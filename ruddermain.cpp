@@ -64,7 +64,7 @@ const char * varname = "rudder";
 const char * varname_ports = "ports";
 const char * varname_state_left = "rudderstateleft";
 const char * varname_state_right = "rudderstateright";
-const char * varname_state = "rudderstateright";            // Make it log enou
+const char * varname_state = "rudderstateleft";            // Make it log enou
 const char * side = "none";
 const char * consumerHelpStr = "Rudder-Motor EPOS-driver";
 unsigned int rudderside = AV_RUDDER_LEFT;
@@ -246,7 +246,6 @@ int main (int argc, const char * argv[])
 
 	// Connect to rudder-target-variable, and create variables for the target-data
 	DOB(store.registerVariable(dataRudder, varname, "rudderTarget"));
-	DOB(store.registerVariable(dataRudderState, varname_state, "Rudderstate"));
 	DOB(store.registerVariable(dataPorts, varname_ports , "Ports"));
 
 	// get Port-Info
@@ -275,6 +274,9 @@ int main (int argc, const char * argv[])
 		return (-1);
 	}
 
+    // Now we know what side we are, so let's connect to the corresponding
+    // store variable...
+	DOB(store.registerVariable(dataRudderState, varname_state, "Rudderstate"));
 
 	// INIT-SEQUENCE EPOS-MOTORS
 	rtx_message("Initializing rudders... ");

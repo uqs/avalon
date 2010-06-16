@@ -55,8 +55,8 @@ ADD_EXECUTABLE(sailmain_keepalive sailmain_keepalive.cpp)
 TARGET_LINK_LIBRARIES(sailmain_keepalive ddxx ddx rtx pthread rt )
 
 # Commented out while I don't have cmt
-# ADD_EXECUTABLE(imu imu.cpp)
-# TARGET_LINK_LIBRARIES(imu ddxx ddx rtx pthread rt cmt -fno-stack-protector)
+ ADD_EXECUTABLE(imu imu.cpp)
+ TARGET_LINK_LIBRARIES(imu ddxx ddx rtx pthread rt cmt -fno-stack-protector)
 
 ADD_EXECUTABLE(windcleaner windcleaner.cpp)
 TARGET_LINK_LIBRARIES(windcleaner ddxx ddx rtx pthread rt )

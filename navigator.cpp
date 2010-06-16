@@ -442,7 +442,7 @@ double alpha = atan2(cos(destination.latitude*AV_PI/180)*(destination.Data[next_
 				Dijkstra3D::ShortestPath::const_iterator it;
 
 				/////////////////////////////////////////////////////////////
-				FILE * pathfile;
+// 				FILE * pathfile;
 				char filename[20];
 #if 0
 				sprintf(filename,"path_%d",calculation_iterator);
@@ -456,8 +456,8 @@ double alpha = atan2(cos(destination.latitude*AV_PI/180)*(destination.Data[next_
 				}
 				fclose(pathfile);
 #endif
-				sprintf(filename,"pathsolution_%d",calculation_iterator);
-				pathfile = fopen(filename,"w");
+// 				sprintf(filename,"pathsolution_%d",calculation_iterator);
+// 				pathfile = fopen(filename,"w");
 				////////////////////////////////////////////////////////////
 				//////////////writing the calculated waypoints into the store in an array
 				////////////////////////////////////////////////////////////
@@ -467,9 +467,9 @@ double alpha = atan2(cos(destination.latitude*AV_PI/180)*(destination.Data[next_
 
 				for (it=path.begin();it!=path.end();it++) {
 #ifdef DEBUG_NAVIGATOR
-					printf("x and y (%d,%d) at curr(%d) position, heading = %f \n",it->x,it->y,arrayPointer,
+// 					printf("x and y (%d,%d) at curr(%d) position, heading = %f \n",it->x,it->y,arrayPointer,
 							(remainder((-(headingTable16[(it->theta)]*180/AV_PI)+90.0),360.0)));
-					printf("stupid difference: %f \n",
+// 					printf("stupid difference: %f \n",
 							(last_wyp_data.heading - (remainder((-(headingTable16[(it->theta)]*180/AV_PI)+90.0),360.0))));
 #endif
 					if(arrayPointer >= 100) break;
@@ -488,7 +488,7 @@ double alpha = atan2(cos(destination.latitude*AV_PI/180)*(destination.Data[next_
 						waypoints.Data[arrayPointer].x = wyp_data.x;
 						waypoints.Data[arrayPointer].y = wyp_data.y;
 
-						fprintf(pathfile,"%d %d %f\n",wyp_data.x,wyp_data.y, wyp_data.heading);
+// 						fprintf(pathfile,"%d %d %f\n",wyp_data.x,wyp_data.y, wyp_data.heading);
 						waypoints.Data[arrayPointer].heading = wyp_data.heading;
 						waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_PASSBY;
 						waypoints.Data[arrayPointer].passed = 1;
@@ -508,7 +508,7 @@ double alpha = atan2(cos(destination.latitude*AV_PI/180)*(destination.Data[next_
 						waypoints.Data[arrayPointer].x = last_wyp_data.x;
 						waypoints.Data[arrayPointer].y = last_wyp_data.y;
 
-						fprintf(pathfile,"%d %d %f\n",last_wyp_data.x,last_wyp_data.y, last_wyp_data.heading);
+// 						fprintf(pathfile,"%d %d %f\n",last_wyp_data.x,last_wyp_data.y, last_wyp_data.heading);
 
 						waypoints.Data[arrayPointer].heading = last_wyp_data.heading;
 						waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_PASSBY;
@@ -526,13 +526,13 @@ double alpha = atan2(cos(destination.latitude*AV_PI/180)*(destination.Data[next_
 				waypoints.Data[arrayPointer].y = last_wyp_data.y;
 				waypoints.Data[arrayPointer].heading = last_wyp_data.heading;
 
-				fprintf(pathfile,"%d %d %f\n",last_wyp_data.x,last_wyp_data.y, last_wyp_data.heading);
+// 				fprintf(pathfile,"%d %d %f\n",last_wyp_data.x,last_wyp_data.y, last_wyp_data.heading);
 				waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_END;
 				waypoints.Data[arrayPointer].passed = 0;
 				waypoints.Data[arrayPointer].windspeed = windSpeed;
 				waypoints.Data[arrayPointer].winddirection = remainder(-(windDirection - AV_PI/2),2*AV_PI)*180/AV_PI;
 
-				fclose(pathfile);
+// 				fclose(pathfile);
 				calculation_iterator++;
 				//finished with that string
 
@@ -603,10 +603,10 @@ void setAisObstacles(ShipData ship, UISpace & map, LakeTransformation transforma
 {
 	int shipiterator, shiplat, shiplong;
 	int dangerpoint_x, dangerpoint_y;
-	FILE * islandplotter;
+// 	FILE * islandplotter;
 	char filename_islands[20];
-	sprintf(filename_islands,"ais_islands_%d",calculation_iterator);
-	islandplotter = fopen(filename_islands,"w");
+// 	sprintf(filename_islands,"ais_islands_%d",calculation_iterator);
+// 	islandplotter = fopen(filename_islands,"w");
 
 	for(shipiterator = 0; shipiterator < ship.shipCount; shipiterator++)
 	{
@@ -623,14 +623,14 @@ void setAisObstacles(ShipData ship, UISpace & map, LakeTransformation transforma
 				{
 					//block that cell:
 					map(dangerpoint_x,dangerpoint_y,0).value = 40000;
-					fprintf(islandplotter,"%d %d \n",dangerpoint_x,dangerpoint_y);
+// 					fprintf(islandplotter,"%d %d \n",dangerpoint_x,dangerpoint_y);
 
 				}
 			}
 		}
 	}
 
-	fclose(islandplotter);
+// 	fclose(islandplotter);
 }
 void setIsland(const char *islandFile, UISpace & map, LakeTransformation transformation,int calculation_iterator)
 {
@@ -640,10 +640,10 @@ void setIsland(const char *islandFile, UISpace & map, LakeTransformation transfo
 	int m;
 	double longitude_curr_old, latitude_curr_old;
 	double longitude_curr, latitude_curr;
-	FILE * islandplotter;
+// 	FILE * islandplotter;
 	char filename_islands[20];
-	sprintf(filename_islands,"gnuplot_islands_%d",calculation_iterator);
-	islandplotter = fopen(filename_islands,"w");
+// 	sprintf(filename_islands,"gnuplot_islands_%d",calculation_iterator);
+// 	islandplotter = fopen(filename_islands,"w");
 
 	char currentLine[10000], *ptr;
 	if (island.is_open())
@@ -682,7 +682,7 @@ void setIsland(const char *islandFile, UISpace & map, LakeTransformation transfo
 				{
 					//block that cell:
 					map(newX,newY,0).value = 100000;
-					fprintf(islandplotter,"%d %d \n",newX,newY);
+// 					fprintf(islandplotter,"%d %d \n",newX,newY);
 #ifdef DEBUG_ISLAND
 					printf("if in setIslands went through\n");
 #endif
@@ -692,7 +692,7 @@ void setIsland(const char *islandFile, UISpace & map, LakeTransformation transfo
 		}
 	}
 	else std::cout << "Unable to open file";
-	fclose(islandplotter);
+// 	fclose(islandplotter);
 }
 ////////////////////////////////////////////////////////////////
 void prepareConnectivity16(Dijkstra3D::ConnectivityList & list) {
