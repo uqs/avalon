@@ -1,11 +1,21 @@
-###### setup eposlib:
+###### setup eposlib: (15 June 2010)
 
-
-go to folder 'can_library'
+go to folder './eposlib/can'
 $ cmake .
-$ make install (only works the 2nd time!!!!!!!)
+$ make install 
 
-go to folder 'eposlib'
+go to folder './eposlib'
+$ cmake .
 $ make install
+
+go to folder './eposlib/can-serial'
+$ cmake .
+$ make install
+
+go to folder './can_library'
+$ make install (YOU NEED TO DO IT TWICE)
+
+
+
 
  
