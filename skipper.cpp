@@ -198,14 +198,15 @@ void * translation_thread(void * dummy)
                 heading_average += 1.0/headingHistory.size() * headingHistory[u];
             }
 	    
-	    dir_wind_mean = 0;
+	    dir_wind_mean = dir_wind_hist[0];
 	    dir_wind_hist.insert(dir_wind_hist.begin(),cleanedwind.global_direction_real_long);
 	    dir_wind_hist.resize(30);
-	    for (unsigned int u=0; u<dir_wind_hist.size(); u++)
+	    for (unsigned int u=1; u<dir_wind_hist.size(); u++)
             {
-                dir_wind_mean += 1.0/dir_wind_hist.size() * dir_wind_hist[u];
+                dir_wind_mean += 1.0/dir_wind_hist.size() * remainder(dir_wind_hist[u]-dir_wind_hist[0],360.0);
             }
-
+	    dir_wind_mean=remainder(dir_wind_mean,360.0);
+// rtx_message("dir_wind_mean: %f",dir_wind_mean);
             if(!generalflags.autonom_navigation)
             {
                 naviflags.navi_state = AV_FLAGS_NAVI_NEWCALCULATION;
@@ -392,7 +393,7 @@ void * translation_thread(void * dummy)
 				    heading_to_next_wyp*180/AV_PI,heading_prev_to_next_wyp*180/AV_PI);
 #endif
                     // DO A NEWCALCULATION -> GO INTO NEWCALC MODE
-                    if(((fabs(dir_wind_mean - waypoints.Data[current_wyp].winddirection) > 10.0)
+                    if(((fabs(remainder(dir_wind_mean - waypoints.Data[current_wyp].winddirection,360.0)) > 10.0)
 			    /*|| ((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3) 
 			    && (dist_next_trajectory > 100.0))*/ || (fabs(dist_solltrajectory) > 100.0))
 			    /*|| ((waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END) && (dist_curr_wyp < 80.0))*/)
