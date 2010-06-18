@@ -15,6 +15,9 @@ LINK_DIRECTORIES(
 # ADD_EXECUTABLE(windsensor windsensor.cpp)
 # TARGET_LINK_LIBRARIES(windsensor ddxx ddx rtx pthread rt )
 
+ADD_EXECUTABLE(keepalive keepalive.cpp)
+TARGET_LINK_LIBRARIES(keepalive rtx pthread rt )
+
 ADD_EXECUTABLE(gps gps.cpp)
 TARGET_LINK_LIBRARIES(gps ddxx ddx rtx pthread rt )
 
