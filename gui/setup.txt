@@ -22,8 +22,5 @@ $ svn checkout svn://svn.berlios.de/python/spe/trunk/_spe
 $ sudo apt-get install python-wxglade
 
 
-#####install Gnuplot.py (important to display gui chart!!
-download gnuplot-py-1.8.tar-gz from http://sourceforge.net/projects/gnuplot-py/files/
-
-extract it and go into the gnuplot-py-1.8 folder:
-$ python setup.py install
+####install matplotlib:
+$ apt-get install python-matplotlib
