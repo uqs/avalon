@@ -10,6 +10,9 @@
 #############################################################################
 
 ####import modules: ####
+import wxversion
+wxversion.ensureMinimal('2.8')
+
 import wx
 #import time	
 import sys
@@ -19,116 +22,134 @@ import ddxInterface
 import wx.gizmos as gizmos
 import math
 
+
+#---------------------------------------
+#for plotting
+#---------------------------------------
+import matplotlib
+matplotlib.use('WXAgg')
+from matplotlib.backends.backend_wxagg import FigureCanvasWxAgg as FigureCanvas
+from matplotlib.backends.backend_wx import NavigationToolbar2Wx
+from matplotlib.figure import Figure
+
+
 from numpy import *
-import Gnuplot, Gnuplot.funcutils
+#import numpy as np
+import pylab
+#import Gnuplot, Gnuplot.funcutils
  
-#### initialize store connection and create store variables: ####
-store = ddxInterface.ddxStore()
-#IMUData = store.variable("imu")
-#FLAGData = store.variable("flags")
-#WINDData = store.variable("cleanwind")
-#DHData = store.variable("desiredheading")
-WypData = store.variable("wypData")
 
 
 EARTH_RAD = 6371000.1
 
 #### main frame: ####
 class ControlFrame(wx.Frame):
-        def __init__(self, parent, id, title):
-        	wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, wx.Size(500, 600))
-		
-		##### Create Menu: #####
-		menubar = wx.MenuBar()
-		file = wx.Menu()
-		file.Append(101, '&Open', 'not working momentarely')
-		file.AppendSeparator()
-		quit = wx.MenuItem(file, 102, '&Quit\tCtrl+Q','Quit the Application')
-		file.AppendItem(quit)
+	def __init__(self, parent, id, title):
+		wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, wx.Size(640, 900))
 
-		menubar.Append(file, '&File')
-		self.SetMenuBar(menubar)
-		self.Bind(wx.EVT_MENU, self.OnQuit, id=102)
-		self.Centre()
-		
-		#### set main sizers: ####	
+		self.initdone = 0 
+		self.create_menu()
+		#-------------------------------------------
+		##### Create Sizers and Panels: #####
+		#-------------------------------------------
 		mainbox = wx.BoxSizer(wx.VERTICAL)
 		perfbox = wx.BoxSizer(wx.HORIZONTAL)
 		rightbox = wx.BoxSizer(wx.VERTICAL)
+		firstbox = wx.BoxSizer(wx.HORIZONTAL)
 
-		#### panels: ####
-		#ctrlPanel = wx.Panel(self, -1, size=(550,-1))
-		boxpanel = wx.Panel(self, -1, size=(500,110))
+		flagpanel = wx.Panel(self, -1, size=(500,110))
 		envpanel = wx.Panel(self, -1, size=(230,120))
 		speedpanel = wx.Panel(self, -1, size=(230,100))
 		energypanel = wx.Panel(self, -1, size=(230,90))
-		#envpanel.SetBackgroundColour('black')
-		#speedpanel.SetBackgroundColour('black')
-		#boxpanel.SetBackgroundColour('black')
-		#energypanel.SetBackgroundColour('black')
+		# panel colors:
+		#envpanel.SetBackgroundColour('green')
+		#speedpanel.SetBackgroundColour('yellow')
+		#flagpanel.SetBackgroundColour('blue')
+		#energypanel.SetBackgroundColour('magenta')
 
-		#### setup timer: ####
+		#-------------------------------------------
+		##### Set Timer: #####
+		#-------------------------------------------
 		self.timer = wx.Timer(self)
-        	self.Bind(wx.EVT_TIMER, self.onUpdate, self.timer)
-		
+		self.Bind(wx.EVT_TIMER, self.OnUpdate, self.timer)
 
 		fatfont = wx.Font(10, wx.DEFAULT, wx.NORMAL, wx.BOLD)
 		title = wx.StaticText(self, 1, 'Control Panel')
 		title.SetFont(fatfont)
-		line = wx.StaticLine(self, -1,(10,10),(460,1))
-		line2 = wx.StaticLine(self, -1,(10,10),(460,1))
-		line3 = wx.StaticLine(self, -1,(10,10),(460,1))
-		
-		#mainbox.Add(ctrlPanel, 1, wx.EXPAND, 0)
+		line = wx.StaticLine(self, -1,(10,10),(560,1))
+		#line3 = wx.StaticLine(self, -1,(10,10),(560,1))
+
 		mainbox.Add((0,20),0)
 		mainbox.Add(title, 0, wx.ALIGN_CENTER, 20)
-		#mainbox.Add((0,4),0)
 		mainbox.Add(line,0,wx.ALIGN_CENTER | wx.ALL ,10)
-		#mainbox.Add((0,4),0)
-		
-		#### Control Buttons: ####
-		ctrl_sizer = wx.GridSizer(2,4,3,3)
-		self.startBtn = wx.Button(self, 10, 'Initialize')
-		self.idleBtn = wx.Button(self, 14, 'MAX E SAVING')
-		self.joystickBtn = wx.Button(self, 15, 'JOYSTICK')
-		self.sailorBtn = wx.Button(self, 16, 'SAILOR')
-		self.fullBtn = wx.Button(self, 17,'AUTONOMOUS')
-		#self.startBtn.SetForegroundColour('black')
-		#self.idleBtn.SetForegroundColour('black')
-		#self.joystickBtn.SetForegroundColour('black')
-		#self.sailorBtn.SetForegroundColour('black')
-		#self.fullBtn.SetForegroundColour('black')
-		
-		ctrl_sizer.AddMany([(self.startBtn,0,wx.EXPAND),
-			(wx.Button(self,11,'Carribean Seas'),0,wx.EXPAND),
-			(wx.StaticText(self, -1, ''),0,wx.EXPAND),
-			(wx.Button(self,12,'Self Destroy'),0,wx.EXPAND),
-			(self.idleBtn, 0, wx.EXPAND),
-			(self.joystickBtn, 0, wx.EXPAND),
-			(self.sailorBtn, 0, wx.EXPAND),
-			(self.fullBtn, 0, wx.EXPAND) ])
 
-		mainbox.Add(ctrl_sizer, 0, wx.ALIGN_CENTER | wx.ALL, 5)
-		mainbox.Add(line2,0,wx.ALIGN_CENTER | wx.ALL ,20)
-
-		self.startBtn.Bind(wx.EVT_BUTTON, self.onInit)
-		
-		### controller info: ####
-		statbox = wx.StaticBox(boxpanel,-1, 'Boat Controller Information', (5,5), size=(450,100))
-		self.joystick = wx.CheckBox(boxpanel, 35, 'Joystick', pos=(20,30))
-		self.sailor = wx.CheckBox(boxpanel, 36, 'Sailor', pos=(100,30))
-		self.autonomous = wx.CheckBox(boxpanel, 37, 'Fully Autonomous', pos=(180,30))
-		wx.StaticText(boxpanel, -1, 'Sailing Mode:', pos=(20,70))
-		self.sailMode = wx.TextCtrl(boxpanel, 40, 'DEFAULT', pos=(150,66), size=(200,-1))
-
-		mainbox.Add(boxpanel,0,wx.ALIGN_CENTER | wx.RIGHT | wx.LEFT, 15)
-		mainbox.Add(line3,0,wx.ALIGN_CENTER | wx.ALL ,5)
-
-		#### speed and energy box: ####
-		speedbox = wx.StaticBox(speedpanel, -1, 'Performance', (5,5), size=(220,200))
-		envbox = wx.StaticBox(envpanel, -1, 'Environment', (5,5), size=(220,100))
-		energybox = wx.StaticBox(energypanel, -1, 'Energy Management', (5,5), size=(220,80))
 	
+		#-------------------------------------------
+		##### Fill Panels: #####
+		#-------------------------------------------
+		self.fill_flagpanel(flagpanel)
+		self.fill_envpanel(envpanel)
+		self.fill_speedpanel(speedpanel)
+		self.fill_energypanel(energypanel)
+
+
+		##### Add to sizers: #####
+		perfbox.Add(speedpanel)
+
+		rightbox.Add(envpanel)
+		rightbox.Add(energypanel)
+		firstbox.Add(flagpanel, 0, wx.ALIGN_CENTER)
+		firstbox.Add(rightbox, 0, wx.ALIGN_CENTER)
+
+		mainbox.Add(firstbox,0,wx.ALIGN_CENTER | wx.RIGHT | wx.LEFT, 15)
+		#mainbox.Add(line3,0,wx.ALIGN_CENTER | wx.TOP ,5)
+
+		#-----------------------------------------------------------
+		##### Create Plots:
+		#-----------------------------------------------------------
+		self.speeddata = [0]
+		self.pos_longitude = []
+		self.pos_latitude = []
+		self.wyp_longitude = []
+		self.wyp_latitude = []
+		self.logtime = [0]
+
+		self.plot_count = 0
+
+		self.create_speed_plot()
+		self.create_wyp_plot()
+
+		perfbox.Add(self.speed_panel, 1, wx.TOP | wx.LEFT | wx.GROW, 10)
+		mainbox.Add(perfbox, 0, wx.ALIGN_CENTER | wx.ALL , 20)
+
+		
+
+
+		mainbox.Add(self.canvas, 1, wx.CENTER)
+
+	
+		self.SetSizer(mainbox)
+
+	def fill_energypanel(self, energypanel):	
+		energybox = wx.StaticBox(energypanel, -1, 'Energy Management', (5,5), size=(220,60))
+
+		wx.StaticText(energypanel, -1, 'Voltage:', pos=(20,30))
+		self.voltage = wx.TextCtrl(energypanel, 46, 'DEFAULT', pos=(110,26), size=(60,-1))
+		wx.StaticText(energypanel, -1, 'Volts', pos=(175,30))
+
+	def fill_envpanel(self, envpanel):
+		envbox = wx.StaticBox(envpanel, -1, 'Environment', (5,5), size=(220,95))
+
+		wx.StaticText(envpanel, -1, 'Wind Speed:', pos=(20,30))
+		self.wind_speed = wx.TextCtrl(envpanel, 44, 'DEFAULT', pos=(110,26), size=(60,-1))
+		wx.StaticText(envpanel, -1, 'knots', pos=(175,30))
+		wx.StaticText(envpanel, -1, 'Direction:', pos=(20,60))
+		self.wind_direction = wx.TextCtrl(envpanel, 45, 'DEFAULT', pos=(110,56), size=(60,-1))
+		wx.StaticText(envpanel, -1, 'degree', pos=(175,60))
+
+	def fill_speedpanel(self, speedpanel):	
+		speedbox = wx.StaticBox(speedpanel, -1, 'Performance', (5,5), size=(220,200))
+
 		wx.StaticText(speedpanel, -1, 'Speed:', pos=(20,30))
 		self.speed = wx.TextCtrl(speedpanel, 41, 'DEFAULT', pos=(100,26), size=(60,-1))
 		wx.StaticText(speedpanel, -1, 'knots', pos=(170,30))
@@ -147,34 +168,208 @@ class ControlFrame(wx.Frame):
 		wx.StaticText(speedpanel, -1, 'Roll:', pos=(20,170))
 		self.roll = wx.TextCtrl(speedpanel, 49, 'DEFAULT', pos=(100,166), size=(60,-1))
 		wx.StaticText(speedpanel, -1,'degree', pos=(170,170)) 
-		perfbox.Add(speedpanel)
+	
+	def fill_flagpanel(self, flagpanel):
+		statbox = wx.StaticBox(flagpanel,-1, 'Boat Controller Information', (5,5), size=(390,160))
 
-		wx.StaticText(envpanel, -1, 'Wind Speed:', pos=(20,30))
-		self.wind_speed = wx.TextCtrl(envpanel, 44, 'DEFAULT', pos=(110,26), size=(60,-1))
-		wx.StaticText(envpanel, -1, 'knots', pos=(175,30))
-		wx.StaticText(envpanel, -1, 'Direction:', pos=(20,60))
-		self.wind_direction = wx.TextCtrl(envpanel, 45, 'DEFAULT', pos=(110,56), size=(60,-1))
-		wx.StaticText(envpanel, -1, 'degree', pos=(175,60))
-		
-		wx.StaticText(energypanel, -1, 'Voltage:', pos=(20,30))
-		self.voltage = wx.TextCtrl(energypanel, 46, 'DEFAULT', pos=(110,26), size=(60,-1))
-		wx.StaticText(energypanel, -1, 'Volts', pos=(175,30))
+		self.joystick = wx.CheckBox(flagpanel, 35, 'Joystick', pos=(20,30))
+		self.sailor = wx.CheckBox(flagpanel, 36, 'Sailor', pos=(100,30))
+		self.autonomous = wx.CheckBox(flagpanel, 37, 'Fully Autonomous', pos=(180,30))
+		self.txtsailingmode = wx.StaticText(flagpanel, -1, 'Sailing Mode:', pos=(20,70))
+		#self.txtsailingmode.SetForegroundColour('white')
+		self.sailMode = wx.TextCtrl(flagpanel, 40, 'DEFAULT', pos=(150,66), size=(200,-1))
 
-		rightbox.Add(envpanel)
-		rightbox.Add(energypanel)
+		#statbox.SetForegroundColour('white')
+		#flagpanel.SetBackgroundColour('black')
+		#self.joystick.SetForegroundColour('white')
+		#self.sailor.SetForegroundColour('white')
+		#self.autonomous.SetForegroundColour('white')
+	
+	def create_wyp_plot(self):
+		self.wypfigure = Figure((6.0, 3.5), dpi =110, facecolor = 'w')
 
-		perfbox.Add(rightbox, 0, wx.ALIGN_CENTER | wx.RIGHT, 0)
-		mainbox.Add(perfbox, 0, wx.ALIGN_CENTER | wx.ALL , 20)
+		self.wypfigure.subplots_adjust(top = 0.93, bottom = 0.04, left = 0.06, right = 0.95, wspace=None, hspace=None)
+		self.wypplot = self.wypfigure.add_subplot(111) #, aspect = 'equal')
+
+		pylab.setp(self.wypplot.get_xticklabels(), fontsize=6)
+		pylab.setp(self.wypplot.get_yticklabels(), fontsize=6)
+		self.wypplot.set_title('navigated path', size=8)
+
+		self.plot_posdata = self.wypplot.plot(
+				array(self.pos_longitude),
+				array(self.pos_latitude),
+				linewidth = 1,
+				color = (1, 0, 0),
+				label = 'AVALON',
+				)[0]
+
+		self.plot_wypdata = self.wypplot.plot(
+				array(self.wyp_longitude),
+				array(self.wyp_latitude),
+				linewidth = 1,
+				color = (0, 0, 1),
+				label = 'desired',
+				)[0]
+
+		myprop = matplotlib.font_manager.FontProperties(size=10)
+		self.wypplot.legend(loc=4, shadow=True, prop=myprop)
+		self.wypplot.set_axis_bgcolor('white')
+		self.canvas = FigureCanvas(self, -1, self.wypfigure)
+
+
+	def create_speed_plot(self):
+		self.speed_panel = wx.Panel(self)
+		self.dpi = 100
+		self.fig = Figure((3.8, 1.95), dpi=self.dpi, facecolor = 'w')
+		self.fig.subplots_adjust(top = 0.95,right = 0.97, bottom = 0.07 )
+
+		self.speedplot = self.fig.add_subplot(111)
+		self.speedplot.set_axis_bgcolor('black')
+		#self.speedplot.set_title('AVALON Speed History', size=10)
+		self.speedplot.set_ylabel('[knots]', size = 8)
+
+		pylab.setp(self.speedplot.get_xticklabels(), fontsize=8)
+		pylab.setp(self.speedplot.get_yticklabels(), fontsize=8)
+
+		# plot the data as a line series, and save the reference 
+		# to the plotted line series
+		#
+		self.plot_data = self.speedplot.plot(
+				self.speeddata, 
+				linewidth=1,
+				color=(1, 1, 0),
+				)[0]
+
+        	self.speed_canvas = FigureCanvas(self.speed_panel, -1, self.fig)
 
 	
-		self.SetSizer(mainbox)
+	def UpdatePosPlot(self):
+		# ---------------------------------------
+		# redraws the position plot:
+		# ---------------------------------------
+		delta_long = max(self.pos_longitude) - min(self.pos_longitude)
+		long_m = 0.5*(max(self.pos_longitude) + min(self.pos_longitude))
+		delta_lat = max(self.pos_latitude) - min(self.pos_latitude)
+		lat_m = 0.5*(max(self.pos_latitude) + min(self.pos_latitude))
+		
+		delta_long_calc = 6.0/3.5 * delta_lat
+		delta_lat_calc = 3.5/6.0 * delta_long
+		
+		# --- set axes boundaries ---
+		if delta_lat_calc > delta_lat:
+			xmax = (long_m + 0.5 * delta_long + 0.0005)
+			xmin = (long_m - 0.5 * delta_long - 0.0005)
+			ymax = (lat_m + 0.5 * delta_lat_calc + 0.0005)
+			ymin = (lat_m - 0.5 * delta_lat_calc - 0.0005)
+		elif delta_long_calc > delta_long:
+			xmax = (long_m + 0.5 * delta_long_calc + 0.0005)
+			xmin = (long_m - 0.5 * delta_long_calc - 0.0005)
+			ymax = (lat_m + 0.5 * delta_lat + 0.0005)
+			ymin = (lat_m - 0.5 * delta_lat - 0.0005)
+		else:
+			# --- not 1:1 ratio ---
+			xmax = max(self.pos_longitude) + 0.0005
+			xmin = min(self.pos_longitude) - 0.0005
+			ymax = max(self.pos_latitude) + 0.0005
+			ymin = min(self.pos_latitude) - 0.0005
 
-	def onUpdate(self, event):
+		print long_m
+
+		self.wypplot.set_xbound(lower=xmin, upper=xmax)
+		self.wypplot.set_ybound(lower=ymin, upper=ymax)
+
+		#grid on:
+		self.wypplot.grid(True, color='gray')
+		
+		self.plot_posdata.set_xdata(array(self.pos_longitude))
+		self.plot_posdata.set_ydata(array(self.pos_latitude))
+		
+		self.canvas.draw()
+
+	def UpdateSpeedPlot(self):
+		""" Redraws the plot
+		"""
+		# define the range of the axes 
+		xmax = self.logtime[30] if len(self.logtime) > 30 else 60
+		xmin = self.logtime[0]
+		ymin = round(min(self.speeddata), 0) - 1
+		ymax = round(max(self.speeddata), 0) + 1
+
+		self.speedplot.set_xbound(lower=xmin, upper=xmax)
+		self.speedplot.set_ybound(lower=ymin, upper=ymax)
+
+		## grid on:
+		self.speedplot.grid(True, color='gray')
+
+		pylab.setp(self.speedplot.get_xticklabels(), 
+		    visible=True)
+		self.plot_data.set_xdata(array(self.logtime))
+		self.plot_data.set_ydata(array(self.speeddata))
+
+		self.speed_canvas.draw()
+
+	def create_menu(self):
+		menubar = wx.MenuBar()
+		file = wx.Menu()
+		file.Append(101, '&Open', 'not working momentarely')
+		file.AppendSeparator()
+		quit = wx.MenuItem(file, 102, '&Quit\tCtrl+Q','Quit the Application')
+		file.AppendItem(quit)
+
+		menudata = wx.Menu()
+		menudata.Append(301, '&Initialize\tCtrl+I','Initialize Store-Data')
+		menudata.Append(302, '&Start\tCtrl+S','Start reading Data')
+		menudata.Append(303, '&Stop\tCtrl+E','Stop reading Data')
+
+		menuplot = wx.Menu()
+		menuplot.Append(401, '&Clear Plot\tCtrl+C','Clear the Navigation plot')
+
+
+		menubar.Append(file, '&File')
+		menubar.Append(menudata,'&Data')
+		menubar.Append(menuplot, '&Plot')
+		self.SetMenuBar(menubar)
+		self.Bind(wx.EVT_MENU, self.OnQuit, id=102)
+		self.Bind(wx.EVT_MENU, self.OnInitData, id=301)
+		self.Bind(wx.EVT_MENU, self.OnStartStop, id=302)
+		self.Bind(wx.EVT_MENU, self.OnStartStop, id=303)
+		self.Bind(wx.EVT_MENU, self.OnClearPlot, id=401)
+		self.Centre()
+	
+	def OnClearPlot(self, event):
+		# clear the data-arrays:
+		del self.pos_longitude[:]
+		del self.pos_latitude[:]
+		del self.wyp_longitude[:]
+		del self.wyp_latitude[:]
+
+		msg = wx.MessageDialog(None, 'Plot data cleared!', 'Info', wx.OK)
+        	msg.ShowModal()
+
+	def OnInitData(self, event):
+		
+		#-----------------------------------------------------------
+		# initialize Store connection and define variables
+		#-----------------------------------------------------------
+		
+		store = ddxInterface.ddxStore()
+		self.IMUData = store.variable("imu")
+		self.FLAGData = store.variable("flags")
+		self.WINDData = store.variable("cleanwind")
+		self.DHData = store.variable("desiredheading")
+		self.WypData = store.variable("wypData")
+		self.DESTData = store.variable("destData")
+
+		#flag:
+		self.initdone = 1
+
+	def OnUpdate(self, event):
 		###read DDX variables and write to GUI: ####
-		#IMUData.read()
-		#FLAGData.read()
-		#WINDData.read()
-		#DHData.read()
+		self.IMUData.read()
+		self.FLAGData.read()
+		self.WINDData.read()
+		self.DHData.read()
+		self.DESTData.read()
 
 		###sailing mode: ####
 		mode = {
@@ -188,50 +383,107 @@ class ControlFrame(wx.Frame):
 				8: 'MAX ENERGY SAVING',
 				9: 'HEADING CHANGE',
 				0: 'ERROR',
-				}[8]
-				#}[int(FLAGData.state)]
+				#}[8]
+				}[int(self.FLAGData.state)]
 		
 		self.sailMode.SetValue(mode)
 		###radio buttons: ####
 
-		#joystick_bool = {1: False, 2: True, 0: False}[int(FLAGData.man_in_charge)]
-		#sailor_bool = {1: True, 2: False, 0: False}[int(FLAGData.man_in_charge)]
-		#autonomous_bool = {0: False, 1: True}[int(FLAGData.autonom_navigation)]
-		joystick_bool = {1: False, 2: True}[1]
-		sailor_bool = {1: True, 2: False}[1]
-		autonomous_bool = {0: False, 1: True}[1]
+		joystick_bool = {1: False, 2: True, 0: False}[int(self.FLAGData.man_in_charge)]
+		sailor_bool = {1: True, 2: False, 0: False}[int(self.FLAGData.man_in_charge)]
+		autonomous_bool = {0: False, 1: True}[int(self.FLAGData.autonom_navigation)]
+		print self.FLAGData.man_in_charge
+		#joystick_bool = {1: False, 2: True}[1]
+		#sailor_bool = {1: True, 2: False}[1]
+		#autonomous_bool = {0: False, 1: True}[1]
 		self.joystick.SetValue(joystick_bool)
 		self.sailor.SetValue(sailor_bool)
 		self.autonomous.SetValue(autonomous_bool)
 	
 		#### performance information: ####
-		self.speed.SetValue(str(6.34))
-		self.des_heading.SetValue(str(130))
-		self.cur_heading.SetValue(str(120))
-		self.drift.SetValue(str(0.1))
-		self.roll.SetValue(str(16))
-		#self.speed.SetValue(str(float(IMUData.speed)))
-		#self.des_heading.SetValue(str(float(DHData.heading)))
-		#self.cur_heading.SetValue(str(float(IMUData.attitude.yaw)))
-		#self.drift.SetValue(str(float(IMUData.velocity.y)))
-		#self.roll.SetValue(str(float(IMUData.attitude.roll)))
+		#self.speed.SetValue(str(6.34))
+		#self.des_heading.SetValue(str(130))
+		#self.cur_heading.SetValue(str(120))
+		#self.drift.SetValue(str(0.1))
+		#self.roll.SetValue(str(16))
+		self.speed.SetValue(str(float(self.IMUData.speed)))
+		self.des_heading.SetValue(str(float(self.DHData.heading)))
+		self.cur_heading.SetValue(str(float(self.IMUData.attitude.yaw)))
+		self.drift.SetValue(str(float(self.IMUData.velocity.y)))
+		self.roll.SetValue(str(float(self.IMUData.attitude.roll)))
 
 		#### environment information: ####
-		#self.wind_speed.SetValue(str(float(WINDData.speed_long)))
-		#self.wind_direction.SetValue(str(float(WINDData.global_direction_real_long)))
+		self.wind_speed.SetValue(str(float(self.WINDData.speed_long)))
+		self.wind_direction.SetValue(str(float(self.WINDData.global_direction_real_long)))
 
 
 		#### energy panel information: ####
 		self.voltage.SetValue('--')
 		
+		# ------------------------------------------------------------------------------
+		# plots:
+		# ------------------------------------------------------------------------------
+		sp_length = len(self.logtime)
+		self.logtime.append((self.logtime[sp_length-1])+2)
+		self.speeddata.append(float(self.IMUData.speed))
+		if sp_length > 30:
+			self.logtime.pop(0)
+			self.speeddata.pop(0)
+
+		self.UpdateSpeedPlot()
+
+		# ---- position decoding (every 10 seconds)------
+		if self.plot_count > 2:
+			self.plot_count = 0
+			
+			#pos_x = float (EARTH_RAD * (math.pi/180)
+				#*(float(self.IMUData.position.latitude) - float(self.DESTData.latitude)))
+			#pos_y = float (EARTH_RAD 
+				#*math.cos((float(self.DESTData.latitude) * math.pi/180.0))*(math.pi/180.0)
+				#*(float(self.IMUData.position.longitude) - float(self.DESTData.longitude)))
+
+			self.pos_longitude.append(float(self.IMUData.position.longitude)) #(pos_x)
+			self.pos_latitude.append(float(self.IMUData.position.latitude)) #(pos_y)
+			if len(self.pos_longitude) > 60:
+				self.pos_longitude.pop(0)
+				self.pos_latitude.pop(0)
+
+			# --- waypoint handling ---
+			if 0:
+				del self.wyp_longitude[:]
+				del self.wyp_latitude[:]
+
+				for i in range(0, 10):
+					self.wyp_longitude.append(float(self.WypData.Data[i].x))
+					self.wyp_latitude.append(float(self.WypData.Data[i].y))
+
+					if self.WypData.Data[i].wyp_type == 1:
+						# --- stop ---
+						break
+
+
+			self.UpdatePosPlot()
+
+			
+		self.plot_count += 1	
+		print self.plot_count
+		
+
+
 		###debug:
-		print 'updating control panel'
+		print 'updated control panel'
 
 
-	def onInit(self, event):
+	def OnStartStop(self, event):
+		if self.initdone == 0:
+			msg = wx.MessageDialog(None, 'Store not initialized. Please press Ctrl-I', 'Error', wx.OK | 
+            			wx.ICON_EXCLAMATION)
+        		msg.ShowModal()
+			return 
+
 		if self.timer.IsRunning():
 			self.timer.Stop()
-			self.startBtn.SetLabel("Restart")
+			#self.startBtn.SetLabel("Restart")
 			#self.fileHandle.close()
 			print "timer stopped"
 		else:
@@ -239,7 +491,7 @@ class ControlFrame(wx.Frame):
 			self.timer.Start(2000)
 			#os.remove('position.txt')
 			#self.fileHandle = open('position.txt','a')
-			self.startBtn.SetLabel("Stop")
+			#self.startBtn.SetLabel("Stop")
 
 	def OnQuit(self, event):
 		self.Destroy()
@@ -267,7 +519,7 @@ class HeadingFrame(wx.Frame):
 
 		#### setup timer: ####
 		self.timer = wx.Timer(self)
-        	self.Bind(wx.EVT_TIMER, self.onUpdate, self.timer)
+        	self.Bind(wx.EVT_TIMER, self.OnUpdate, self.timer)
 
 		#### setup picture panel: ####
        		#sizer = wx.BoxSizer(wx.VERTICAL)	
@@ -356,7 +608,7 @@ class HeadingFrame(wx.Frame):
 			self.status.SetLabel('OFF')
 			print 'head indicator reading stopped'
 
-	def onUpdate(self, event):
+	def OnUpdate(self, event):
 		print 'updating heading indicator'
 		##### reading from store:
 		#IMUData.read()
@@ -400,124 +652,15 @@ class HeadingFrame(wx.Frame):
 	def onQuit(self,event):
 		self.Destroy()
 
-class PlotFrame(wx.Frame):
-        def __init__(self, parent, id, title):
-        	wx.Frame.__init__(self, parent, id, title, wx.DefaultPosition, wx.Size(300,30))
-		
-		##### Create Menu: #####
-		menubar = wx.MenuBar()
-		file = wx.Menu()
-		file.Append(301, '&Update\tCtrl+I', 'initialize frame')
-		file.Append(303, '&Stop\tCtrl+S', 'stop reading DDX data')
-		file.Append(304, '&Clear\tCtrl+C', 'clear plot')
-		file.AppendSeparator()
-		quit = wx.MenuItem(file, 302, '&Quit\tCtrl+Q','Quit the Application')
-		file.AppendItem(quit)
-
-		menubar.Append(file, '&File')
-		self.SetMenuBar(menubar)
-		self.Bind(wx.EVT_MENU, self.onQuit, id=302)
-		self.Bind(wx.EVT_MENU, self.onInit, id=301)
-		self.Bind(wx.EVT_MENU, self.onStop, id=303)
-		self.Bind(wx.EVT_MENU, self.onClear, id=304)
-		self.Centre()
-
-		#### setup timer: ####
-		self.timer = wx.Timer(self)
-        	self.Bind(wx.EVT_TIMER, self.onUpdate, self.timer)
-	
-		self.g = Gnuplot.Gnuplot(debug=1)
-    		self.g.title('AVALON Path and Waypoints') # (optional)
-  		self.g('set data style linespoints') # give gnuplot an arbitrary command
-        	#g.plot(Gnuplot.File(filename1, using=1, with_='lines'), 
-		#	Gnuplot.File(filename1, using=(1,), with_='points'))
-        	self.g.plot(Gnuplot.File('position.txt', with_='lines', title='Avalon'),
-				Gnuplot.File('waypoints.txt', with_='lines', title='Navigator'))
-				#[[0,0], [50,20], [20,50], [300,100], [100,300]]) 
-        	#self.g.plot(Gnuplot.File('position.txt', with_='lines'))
-
-		self.count = 0	
-
-	def onInit(self,event):
-		if not self.timer.IsRunning():
-			self.timer.Start(2000)
-			#self.fileHandle = open('position.txt','w')
-			print 'head indicator reading initialized'
-
-	def onStop(self, event):
-		if self.timer.IsRunning():
-			self.timer.Stop()
-			self.fileHandle.close()
-			print 'head indicator reading stopped'
-
-	def onUpdate(self,event):
-		#IMUData.read()
-		WypData.read()
-
-		print 'writing pos file '
-    		###write position data to file:
-            	#long_m =(EARTH_RAD 
-                	#*math.cos(math.radians(float(IMUData.position.latitude)))*(math.pi/180)
-                	#*float(IMUData.position.longitude))
-            	#lat_m =(EARTH_RAD
-                	#*(math.pi/180)*float(IMUData.position.latitude))
-		#position = str(long_m) + ' ' + str(lat_m) + '\n'
-		#self.fileHandle.write(position)
-
-		##plot every 4th time:
-		if self.count > 3:
-			print 'update plot'
-			###write waypoints to file:
-			self.wypFile = open('waypoints.txt','w')
-
-			for i in range(1, 25):
-				print WypData.Data[i].passed
-				if (int(WypData.Data[i].passed) == 0):
-					self.current = i
-					print 'hello world'
-					break
-
-			for j in range((self.current-1), (self.current+3)):
-				print j
-				waypoint = str(float(WypData.Data[j].longitude)) + ' ' + str(float(WypData.Data[j].latitude)) + '\n'
-				self.wypFile.write(waypoint)
-			self.wypFile.close()
-
-
-			#self.fileHandle.close()
-
-			###replot and open pos file again:
-			self.g.replot()
-			self.fileHandle = open('position.txt','a')
-
-			self.count = 0
-
-		self.count = self.count + 1
-
-
-	def onClear(self,event):
-		if self.timer.IsRunning():
-			self.timer.Stop()
-		self.fileHandle.close()
-		os.rename('position.txt','position_log.txt')
-		self.fileHandle = open('position.txt','w')
-		self.timer.Start()
-
-		print 'clear path log'
-
-
-
-	def onQuit(self,event):
-		self.Destroy()
 
 class MyApp(wx.App):
     def OnInit(self):
-        #frame1 = ControlFrame(None, -1,'AVALON COCKPIT')
-        #frame1.Show(True)
+        frame1 = ControlFrame(None, -1,'AVALON COCKPIT')
+        frame1.Show(True)
 	#frame2 = HeadingFrame(None, -1, 'HEADING INDICATOR')
 	#frame2.Show(True)
-	frame3 = PlotFrame(None, -1, 'PLOT CONTROL')
-	frame3.Show(True)
+	#frame3 = PlotFrame(None, -1, 'PLOT CONTROL')
+	#frame3.Show(True)
         return True
   
 app = MyApp(0)
