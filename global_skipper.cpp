@@ -145,16 +145,18 @@ void * translation_thread(void * dummy)
 	if (ais_dest.ais_dest_index != ais_dest_index_last)
 	{
 	    rtx_message("listen to ais     index_last= %d\n", ais_dest_index_last);
-	    destination.longitude = ais_dest.new_dest_long;
-	    destination.latitude = ais_dest.new_dest_lat;
-	    destination.skipper_index_call ++;
-	    destination.not_in_list = 1;
-	    destinationData.t_writefrom(destination);
+	    
 	    skipperflags.global_locator = ais_dest.global_skipper_flag;
 	    skipperFlagData.t_writefrom(skipperflags);
 	}
 	if (generalflags.global_locator == ais_dest.global_skipper_flag)
 	{
+	    rtx_message("aisflag has been written");
+	    destination.longitude = ais_dest.new_dest_long;
+	    destination.latitude = ais_dest.new_dest_lat;
+	    destination.skipper_index_call ++;
+	    destination.not_in_list = 1;
+	    destinationData.t_writefrom(destination);
 	    ais_dest_index_last=ais_dest.ais_dest_index;
 	}
 
@@ -273,7 +275,7 @@ void * translation_thread(void * dummy)
 
 		rtx_message("destinationtype = %d  \n", destination.Data[destination.destNr].type);
 #endif
-		if((distance_boat_dest < 0.1*dest_dist) && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
+		if((distance_boat_dest < 100) && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
 		{
 		    destination.destNr += 1;
 		    assert((destination.destNr < 1000) && (destination.destNr>=0));
@@ -283,9 +285,9 @@ void * translation_thread(void * dummy)
 		    destination.not_in_list = 0;
 		    destinationData.t_writefrom(destination);
 
-// #ifdef DEBUG_GLOBSKIPPER
+#ifdef DEBUG_GLOBSKIPPER
 		    rtx_message("tracker: increased destination index to %d",destination.skipper_index_call);
-// #endif
+#endif
 		}   
 
 		if(distance_boat_dest > 2.2*dest_dist)

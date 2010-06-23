@@ -165,7 +165,7 @@ void * translation_thread(void * dummy)
     double dist_limit;
     double dist_dest;
     double dist_test;
-    double add_dist_safe=100;
+    double add_dist_safe=100, add_angle_safe=5*AV_PI/180.0;
     double dist_of_sight=20000; // in meter
 
     std::vector<Obstacle> obst_p;
@@ -200,9 +200,9 @@ void * translation_thread(void * dummy)
 	    skipperFlagData.t_readto(skipperflags,0,0);
             dataImuClean.t_readto(imu_clean,0,0);
 
-	    current_pos_x =AV_EARTHRADIUS * cos((destination.latitude * AV_PI/180)) * (AV_PI/180)
+	    current_pos_x =AV_EARTHRADIUS * (AV_PI/180) * (boatData.position.latitude-destination.latitude);
+	    current_pos_y =AV_EARTHRADIUS * cos((destination.latitude * AV_PI/180)) * (AV_PI/180)
 			      *(boatData.position.longitude-destination.longitude);
-	    current_pos_y =AV_EARTHRADIUS * (AV_PI/180) * (boatData.position.latitude-destination.latitude);
 
 
 #if 0
@@ -233,9 +233,9 @@ void * translation_thread(void * dummy)
 	    collision = false;
 	    for (i = 0; i < ais.number_of_ships; i++)
             {
-		ship_pos_x 	= AV_EARTHRADIUS * cos((destination.latitude * AV_PI/180)) * (AV_PI/180)
+		ship_pos_x 	= AV_EARTHRADIUS * (AV_PI/180) * (ais.Ship[i].latitude-destination.latitude);
+		ship_pos_y 	= AV_EARTHRADIUS * cos((destination.latitude * AV_PI/180)) * (AV_PI/180)
 				    *(ais.Ship[i].longitude-destination.longitude);
-		ship_pos_y 	= AV_EARTHRADIUS * (AV_PI/180) * (ais.Ship[i].latitude-destination.latitude);
 
 		distance	= sqrt(pow(ship_pos_x - current_pos_x,2) + pow(ship_pos_y - current_pos_x,2));
 #ifdef DEBUG_AISEVAL
@@ -256,10 +256,8 @@ void * translation_thread(void * dummy)
 #endif
 
 		    speed_ship		= 0.5144444 * ais.Ship[i].speed_over_ground;
-                    heading_avalon     	= boatData.attitude.yaw*AV_PI/180.0;
-                    angle_avalon_ship	= atan2((ship_pos_y-current_pos_y) , (ship_pos_x-current_pos_x));
-		    angle_to_dest	= atan2((-current_pos_y),(-current_pos_x));
-
+                   
+// rtx_message("avalon: x= %f y= %f, ship: x= %f y= %f  angle av-sh = %f \n", current_pos_x, current_pos_y, ship_pos_x,ship_pos_y, angle_avalon_ship*180/AV_PI);
 		    // take the average velocity over the last "num_speed_history" measurements
 		    speed_avalon	= 0.5144444 * sqrt(pow(imu_clean.velocity.x,2) + pow(imu_clean.velocity.y,2));
                     speed_avalon_all.insert(speed_avalon_all.begin(),speed_avalon);
@@ -268,7 +266,15 @@ void * translation_thread(void * dummy)
 		    speed_avalon = 0;
 		    for (l=0;l<speed_avalon_all.size();l++)
 		      {speed_avalon = speed_avalon + 1.0/speed_avalon_all.size()*speed_avalon_all[l];}
-		    speed_avalon_to_dest = speed_avalon*cos(angle_to_dest-heading_avalon); // TODO what velocity and angle do we take?
+
+// 		    speed_avalon_to_dest = speed_avalon*cos(angle_to_dest-heading_avalon); // TODO what velocity and angle do we take?
+		    speed_avalon_to_dest= speed_avalon;
+
+		    heading_avalon	= boatData.attitude.yaw*AV_PI/180.0;
+                    angle_avalon_ship	= atan2((ship_pos_y-current_pos_y) , (ship_pos_x-current_pos_x));
+		    angle_to_dest	= atan2((-current_pos_y),(-current_pos_x));
+
+
 // rtx_message("velocity avalon abs: %f vel to dest: %f \n",speed_avalon,speed_to_dest);
 
                     vel_avalon_x	= cos(angle_to_dest) * speed_avalon_to_dest;
@@ -283,10 +289,10 @@ void * translation_thread(void * dummy)
 
 
                     ship_length		= 1;  // ship length, if not from AIS
-                    threshold_radius	= 395;  // to be modified: additional safety distance
+                    threshold_radius	= 295;  // to be modified: additional safety distance
                     radius_relativ	= ship_length + 4 + threshold_radius;    // ship length + avalon_length + threshold_radius
                     dist_avalon_ship	= sqrt(pow(ship_pos_x - current_pos_x,2) + pow(ship_pos_y - current_pos_y,2));
-rtx_message("dist to ship = %f \n", dist_avalon_ship);
+// rtx_message("dist to ship = %f \n", dist_avalon_ship);
 		    if (dist_avalon_ship<0.5*radius_relativ)
 		    {
 			if (remainder((AV_PI+angle_avalon_ship-heading_ship),2*AV_PI)<0)
@@ -307,7 +313,7 @@ rtx_message("dist to ship = %f \n", dist_avalon_ship);
 
 		    angle_tang_rear	= remainder((angle_avalon_ship - asin(radius_relativ/dist_avalon_ship)),2*AV_PI);
 		    angle_tang_front	= remainder((angle_avalon_ship + asin(radius_relativ/dist_avalon_ship)),2*AV_PI);
-//  rtx_message("ang_rear: %lf     ang_front: %lf",angle_tang_rear,angle_tang_front);
+ rtx_message("ang_rear: %f  ang_front: %f  ang_rel: %f",angle_tang_rear*180/AV_PI,angle_tang_front*180/AV_PI, angle_relativ*180/AV_PI);
 		    if ((remainder(((angle_relativ - angle_tang_rear)),2*AV_PI)>0)
 		      && (remainder(((angle_relativ - angle_tang_front)),2*AV_PI)<0))
 		    {
@@ -331,9 +337,9 @@ rtx_message("Collision course!! check for new destination\n");
 	    // find the collision points with every ship in the vicinity
 	    for (i = 0; i < ais.number_of_ships; i++)
 	    {
-		ship_pos_x 	= AV_EARTHRADIUS * cos((destination.latitude * AV_PI/180)) * (AV_PI/180)
+		ship_pos_x 	= AV_EARTHRADIUS * (AV_PI/180) * (ais.Ship[i].latitude-destination.latitude);
+		ship_pos_y 	= AV_EARTHRADIUS * cos((destination.latitude * AV_PI/180)) * (AV_PI/180)
 				    *(ais.Ship[i].longitude-destination.longitude);
-		ship_pos_y 	= AV_EARTHRADIUS * (AV_PI/180) * (ais.Ship[i].latitude-destination.latitude);
 
 		distance	= sqrt(pow(ship_pos_x - current_pos_x,2) + pow(ship_pos_y - current_pos_x,2));
 
@@ -383,7 +389,7 @@ rtx_message("Collision course!! check for new destination\n");
 
 
                     ship_length		= 1;  // ship length, if not from AIS
-                    threshold_radius	= 395;  // to be modified: additional safety distance
+                    threshold_radius	= 495;  // to be modified: additional safety distance
                     radius_relativ	= ship_length + 4 + threshold_radius;    // ship length + avalon_length + threshold_radius
                     dist_avalon_ship	= sqrt(pow(ship_pos_x - current_pos_x,2) + pow(ship_pos_y - current_pos_y,2));
 
@@ -394,10 +400,10 @@ rtx_message("Collision course!! check for new destination\n");
 
 		    if (speed_avalon_to_dest < speed_ship)
 		    {
-// rtx_message("avalon is slower\n"); 
+rtx_message("avalon is slower\n"); 
 			angle_crit_min = remainder((AV_PI+heading_ship - asin(speed_avalon_to_dest/speed_ship)),2*AV_PI);
 			angle_crit_max = remainder((AV_PI+heading_ship + asin(speed_avalon_to_dest/speed_ship)),2*AV_PI);
-
+rtx_message("ang_rear: %f  ang_front: %f  ang_min: %f  ang_max: %f",angle_tang_rear*180/AV_PI,angle_tang_front*180/AV_PI, angle_crit_min*180/AV_PI, angle_crit_max*180/AV_PI);
 			if ((remainder((angle_crit_min-angle_tang_rear),2*AV_PI) < 0)
 			  && (remainder((angle_crit_max-angle_tang_rear),2*AV_PI) > 0))
 			{	// Calculate the two intersectin with the first tangent
@@ -409,7 +415,7 @@ rtx_message("two obstacles at rear\n");
 							  + (current_pos_x-ship_pos_x)*(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle)))
 							  /(pow(vel_ship_y - speed_avalon_to_dest*sin(obst_p[num_obstP].angle),2)
 							  +pow(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle),2));
-			    obst_p[num_obstP].dist	= speed_avalon_to_dest * obst_p[num_obstP].t_crit;  // + add_dist_safe;
+			    obst_p[num_obstP].dist	= speed_avalon_to_dest * obst_p[num_obstP].t_crit + add_dist_safe;
 			    obst_p[num_obstP].x		= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_x;
 			    obst_p[num_obstP].y		= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_y;
 			    num_obstP ++;
@@ -421,7 +427,7 @@ rtx_message("two obstacles at rear\n");
 							  + (current_pos_x-ship_pos_x)*(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle)))
 							  /(pow(vel_ship_y - speed_avalon_to_dest*sin(obst_p[num_obstP].angle),2)
 							  +pow(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle),2));
-			    obst_p[num_obstP].dist	= speed_avalon_to_dest * obst_p[num_obstP].t_crit;  // + add_dist_safe;
+			    obst_p[num_obstP].dist	= speed_avalon_to_dest * obst_p[num_obstP].t_crit + add_dist_safe;
 			    obst_p[num_obstP].x		= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_x;
 			    obst_p[num_obstP].y		= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_y;
 			    num_obstP ++;
@@ -439,7 +445,7 @@ rtx_message("two obstacles at front\n");
 							  + (current_pos_x-ship_pos_x)*(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle)))
 							  /(pow(vel_ship_y - speed_avalon_to_dest*sin(obst_p[num_obstP].angle),2)
 							  +pow(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle),2));
-			    obst_p[num_obstP].dist	= speed_avalon_to_dest * obst_p[num_obstP].t_crit;  // + add_dist_safe;
+			    obst_p[num_obstP].dist	= speed_avalon_to_dest * obst_p[num_obstP].t_crit + add_dist_safe;
 			    obst_p[num_obstP].x		= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_x;
 			    obst_p[num_obstP].y		= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_y;
 			    num_obstP ++;
@@ -451,7 +457,7 @@ rtx_message("two obstacles at front\n");
 							  + (current_pos_x-ship_pos_x)*(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle)))
 							  /(pow(vel_ship_y - speed_avalon_to_dest*sin(obst_p[num_obstP].angle),2)
 							  +pow(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle),2));
-			    obst_p[num_obstP].dist	= speed_avalon_to_dest * obst_p[num_obstP].t_crit;  // + add_dist_safe;
+			    obst_p[num_obstP].dist	= speed_avalon_to_dest * obst_p[num_obstP].t_crit + add_dist_safe;
 			    obst_p[num_obstP].x		= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_x;
 			    obst_p[num_obstP].y		= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_y;
 			    num_obstP ++;
@@ -468,7 +474,7 @@ rtx_message("avalon is faster\n");
 							  + (current_pos_x-ship_pos_x)*(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle)))
 							  /(pow(vel_ship_y - speed_avalon_to_dest*sin(obst_p[num_obstP].angle),2)
 							  +pow(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle),2));
-			obst_p[num_obstP].dist		= speed_avalon_to_dest * obst_p[num_obstP].t_crit;  // + add_dist_safe;
+			obst_p[num_obstP].dist		= speed_avalon_to_dest * obst_p[num_obstP].t_crit + add_dist_safe;
 			obst_p[num_obstP].x		= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_x;
 			obst_p[num_obstP].y		= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_y;
 			num_obstP ++;
@@ -480,7 +486,7 @@ rtx_message("avalon is faster\n");
 							  + (current_pos_x-ship_pos_x)*(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle)))
 							  /(pow(vel_ship_y - speed_avalon_to_dest*sin(obst_p[num_obstP].angle),2)
 							  +pow(vel_ship_x - speed_avalon_to_dest*cos(obst_p[num_obstP].angle),2));
-			obst_p[num_obstP].dist		= speed_avalon_to_dest * obst_p[num_obstP].t_crit;  // + add_dist_safe;
+			obst_p[num_obstP].dist		= speed_avalon_to_dest * obst_p[num_obstP].t_crit + add_dist_safe;
 			obst_p[num_obstP].x		= obst_p[num_obstP].dist*cos(obst_p[num_obstP].angle) + current_pos_x;
 			obst_p[num_obstP].y		= obst_p[num_obstP].dist*sin(obst_p[num_obstP].angle) + current_pos_y;
 			num_obstP ++;
@@ -528,7 +534,7 @@ rtx_message("num_obst: %d    obst_p: %d\n",num_obstP,obst_p.size());
 			dist_limit = 2000;//2*dist_dest;
 			for ( p = 0; p < num_obstP-1; p=p+2)
 			{
- rtx_message("dest: %lf  imit: %lf  obst: front= %lf back= %lf",dist_dest, dist_limit, obst_p[p].dist, obst_p[p+1].dist);
+ rtx_message("dest: %lf  limit: %lf  obst: front= %lf back= %lf",dist_dest, dist_limit, obst_p[p].dist, obst_p[p+1].dist);
 			    if ((obst_p[p].dist<dist_limit) || (obst_p[p+1].dist<dist_limit))
 			    {
 				obst_p_start.push_back(obst_p[p]);
@@ -592,11 +598,13 @@ rtx_message("numbers of obstacles: %d\n",obst_p_start.size());
 		}
 	    }
 
-	    ais_dest.new_dest_long = destination.longitude+safe_destpoint_y*180/(AV_PI*AV_EARTHRADIUS*destination.latitude*AV_PI/180.0);
+	    ais_dest.new_dest_long = destination.longitude+safe_destpoint_y*180/(AV_PI*AV_EARTHRADIUS*cos(destination.latitude*AV_PI/180.0));
 	    ais_dest.new_dest_lat = destination.latitude+safe_destpoint_x*180.0/(AV_PI*AV_EARTHRADIUS);
 	    ais_dest.ais_dest_index ++;
 	    ais_dest.global_skipper_flag = AV_FLAGS_GLOBALSK_AVOIDANCE;
 	    aisDestData.t_writefrom(ais_dest);
+	    rtx_message("safe point local: x: %f, y: %f", safe_destpoint_x, safe_destpoint_y);
+	    rtx_message("new destpoint: lat: %f, long: %f", ais_dest.new_dest_lat, ais_dest.new_dest_long);
 
 	}
     }

@@ -329,12 +329,12 @@ void * translation_thread(void * dummy)
 			    {
 				    desired_heading.heading = remainder(desired_heading.heading + atan2(imu_clean.velocity.y, imu_clean.velocity.x),360.0);
 			    }
-			    e = desired_heading.heading - imu.attitude.yaw;
-			    if(fabs(e) > 180)
-			    {
-				    imu.attitude.yaw = 0;
-				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
-			    }
+// 			    e = desired_heading.heading - imu.attitude.yaw;
+// 			    if(fabs(e) > 180)
+// 			    {
+// 				    imu.attitude.yaw = 0;
+// 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
+// 			    }
 			    theta_dot_des = rtx_pid_eval(thetapid, remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0);
                            
                             // theta_dot_des = imu.theta_star;
@@ -769,8 +769,10 @@ void * translation_thread(void * dummy)
 			    break;
 	    }
 // theta_dot_des = rtx_pid_eval(thetapid, remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0) ;
-//rtx_message("theta_dot_des: %f    delta_head: %f  torque_des: %f  state: %d",theta_dot_des, remainder(imu.attitude.yaw-desired_heading.heading,360.), torque_des, flags.state);
-// rtx_message("rudder degrees: %f",u*AV_PI/180.0);
+// rtx_message("theta_dot_des: %f, delta_head: %f, torque_des: %f, state: %d, rudder degrees: %f",theta_dot_des, remainder(imu.attitude.yaw-desired_heading.heading,360.), torque_des, flags.state, u);
+// rtx_message("rudder degrees: %f",u/* *AV_PI/180.0*/);
+
+
 // 	    fclose(thetafile);
             // Bring to store
 count++;

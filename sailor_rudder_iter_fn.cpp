@@ -140,13 +140,13 @@ V_wind=sqrt((V_wind_x)*(V_wind_x)+(V_wind_y)*(V_wind_y));
     N_rudder_des        = -N_sail + N_damping + N_des;
     Y_rudder            = -N_rudder_des/1.7;  //+??
     Y_rudder_right      = Y_rudder/2.0;
-// rtx_message("desired: %f  damping: %f  sail: %f  rudder: %f\n",N_des, N_damping, N_sail, N_rudder_des);
+// rtx_message("desired: %f  damping: %f  sail: %f  rudder: %f, rudderangle: %f",N_des, N_damping, N_sail, N_rudder_des, x*180/AV_PI);
     v_r_tot         = sqrt((speed_x*speed_x) + ((speed_y - 1.7*heading_speed)*(speed_y - 1.7*heading_speed)));
     d_water         = atan2((speed_y - 1.7*heading_speed)*0.01,speed_x); 
-    d_water         = remainder(d_water,2*AV_PI);
-    k               = 0.5*dens_water*v_r_tot*v_r_tot*A_rudder;
-    incid_angle     = -d_water + x;
-    incid_angle     = remainder(incid_angle,2*AV_PI);
+//     d_water         = remainder(d_water,2*AV_PI);
+//     k               = 0.5*dens_water*v_r_tot*v_r_tot*A_rudder;
+    incid_angle     = remainder(-d_water + x,2*AV_PI);
+//     incid_angle     = remainder(incid_angle,2*AV_PI);
 
 // rtx_message("v_r_tot: %f  d_water: %f  incid: %f rudder: %f",v_r_tot, d_water, incid_angle, x);
     if (incid_angle >= 0.0)
@@ -189,7 +189,7 @@ double output = (Y_rudder_right+Y_rudder_left-Y_rudder)/Y_rudder;
 	output *= output;
 #endif
 // rtx_message("out: %f,   x: %f", output, x);
-
+// rtx_message("rudder_T: %f, rudderangle: %f, error: %f",N_rudder_des, x*180/AV_PI, output);
 	return output;
 }
 

@@ -187,6 +187,11 @@ void * translation_thread(void * dummy)
 					&& (generalflags.autonom_navigation)) 
 				//&& (timedif > 7.0))  //if this is 1, then do the waypoint-calculation
 			{
+				if (last_dest_index != destination.skipper_index_call)
+				{
+				    rtx_message("newcalculation, reason: new destination point");
+				}
+
 				time_initializer = true;
 				rtx_message("new_path_calc!!!");
 
@@ -246,15 +251,21 @@ void * translation_thread(void * dummy)
 				ySize = (2*transformation.y_iter_offset + abs(transformation.y_end - transformation.y_start));    
 
 				if((transformation.x_start == transformation.x_end && transformation.y_start == transformation.y_end)
-				    || (xSize>100) || (ySize>100))
+				    || (xSize>1000) || (ySize>1000))
 				{
-					rtx_message("start and end have the same coordinates or size to large");
+					if((xSize>1000) || (ySize>1000))
+					{
+					    rtx_message("size too large!! xSize = %d, ySize = %d", xSize, ySize);
+					} else
+					{
+					    rtx_message("start and end have the same coordinates");
+					}
 					continue;
 				}
 
-				#ifdef DEBUG_NAVIGATOR
+#ifdef DEBUG_NAVIGATOR
 				rtx_message("2: xsize: %d, ysize %d; xstart = %d, xend = %d, ystart = %d, yend = %d \n",xSize, ySize, transformation.x_start, transformation.x_end, transformation.y_start, transformation.y_end);
-				#endif
+#endif
 
 				//initializing the grid:
 				UISpace vspace(0,100,xSize,

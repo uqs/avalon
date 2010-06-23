@@ -42,10 +42,10 @@ rudder_pos=[];
 rudder_pos_des=[];
 % other boats
 num_boats = str2double(get(handles.num_boats,'String'));
-boat_x                  = ones(1,num_boats)*p1_0-local_size/2; % [m]
-boat_y                  = ones(1,num_boats)*p2_0-local_size/2;  % [m]
+boat_x                  = ones(num_boats,1)*p1_0-local_size/2; % [m]
+boat_y                  = ones(num_boats,1)*p2_0-local_size/2;  % [m]
 boat_heading            = deg2rad(34);%90*rand(1,num_boats)); % in rad
-boat_speed              =(30 + (50-30)*rand(1,num_boats))*0.5144; % [m/s]
+boat_speed              =(30 + (50-30)*rand(num_boats,1))*0.5144; % [m/s]
 
 % wypx                    = []
 while (t < T_sim && ~Stop && ~rcflags_emergency_stop)
@@ -92,8 +92,8 @@ while (t < T_sim && ~Stop && ~rcflags_emergency_stop)
     
     
     aoa_sail            = sailUpdate(aoa_sail_des, aoa_sail, delta_t, deg2rad(15));   aoa_sail        = reminderRad(aoa_sail);
-    alpha_rudder_l      = alpha_rudder_l_des;%rudderUpdate(alpha_rudder_l_des, alpha_rudder_l, delta_t, deg2rad(30));  %35 for delta_t = 0.2
-    alpha_rudder_r      = alpha_rudder_r_des;%rudderUpdate(alpha_rudder_r_des, alpha_rudder_r, delta_t, deg2rad(30));
+    alpha_rudder_l      = rudderUpdate(alpha_rudder_l_des, alpha_rudder_l, delta_t, deg2rad(30));  %35 for delta_t = 0.2
+    alpha_rudder_r      = rudderUpdate(alpha_rudder_r_des, alpha_rudder_r, delta_t, deg2rad(30));
     alpha_rudder_p      = [alpha_rudder_p alpha_rudder_r];
     delta_rudder(end+1)=rad2deg(alpha_rudder_r-alpha_rudder_r_des)*1e+03;
     rudder_pos(end+1)=rad2deg(alpha_rudder_r);
@@ -348,7 +348,7 @@ end
 % 	t_elaps_old=0;
     imu.position.latitude               = destData.Data(1).latitude;
     imu.position.longitude              = destData.Data(1).longitude;
-        dist_boat                         =[sqrt((pose(1)-boat_x).^2+(pose(2)-boat_y).^2) zeros(1,5-num_boats)];
+        dist_boat                         =[sqrt((pose(1)-boat_x).^2+(pose(2)-boat_y).^2);zeros(5-num_boats,1)];
         dist_min                          = min(sqrt((pose(1)-boat_x).^2+(pose(2)-boat_y).^2));
     end
     
@@ -368,29 +368,38 @@ end
     
     num_boats_temp = str2double(get(handles.num_boats,'String'));
     if num_boats_temp>num_boats
-        boat_x(num_boats+1:num_boats_temp)        =ones(1,num_boats_temp-num_boats)*pose(1)+local_size/2; % [m]
-        boat_y(num_boats+1:num_boats_temp)        =ones(1,num_boats_temp-num_boats)*pose(2)-local_size/2;  % [m]
-        boat_heading(num_boats+1:num_boats_temp)  =deg2rad(120);%90*rand(1,num_boats_temp-num_boats)); % in rad
-        boat_speed(num_boats+1:num_boats_temp)    =17;%(30 + (50-30)*rand(1,num_boats_temp-num_boats))*0.5144; % [m/s]   
+        for i=num_boats+1:num_boats_temp
+            aisData.Ship(i).latitude                  = destData.latitude + 180/(r_earth*pi)*(pose(1)+local_size/2);
+            aisData.Ship(i).longitude                 = destData.longitude + 180/(r_earth*pi*cos(destData.latitude*pi/180))*(pose(2)-local_size/2);
+%         boat_x(num_boats+1:num_boats_temp)        =ones(1,num_boats_temp-num_boats)*pose(1)+local_size/2; % [m]
+%         boat_y(num_boats+1:num_boats_temp)        =ones(1,num_boats_temp-num_boats)*pose(2)-local_size/2;  % [m]
+        end
+        boat_heading(num_boats+1:num_boats_temp,1)  =deg2rad(125);%90*rand(1,num_boats_temp-num_boats)); % in rad
+        boat_speed(num_boats+1:num_boats_temp,1)    =22;%(30 + (50-30)*rand(1,num_boats_temp-num_boats))*0.5144; % [m/s]   
     end
     if num_boats_temp<num_boats
-        boat_x          =boat_x(1:num_boats_temp); % [m]
-        boat_y          =boat_y(1:num_boats_temp);  % [m]
         boat_heading    =boat_heading(1:num_boats_temp); % in rad
         boat_speed      =boat_speed(1:num_boats_temp); % [m/s]   
     end
     num_boats=num_boats_temp;
+clear boat_x boat_y;
+boat_x                  = ones(num_boats,1); % [m]
+boat_y                  = ones(num_boats,1); % [m]
+    for i=1:num_boats        
+        boat_y(i) = r_earth*cos(destData.latitude*pi/180)*pi/180*(aisData.Ship(i).longitude-destData.longitude);
+        boat_x(i) = r_earth*pi/180*(aisData.Ship(i).latitude-destData.latitude);
+    end
     for i=1:num_boats
-        if boat_x(i)<ax_lim(3)
+        if boat_x(i)<(ax_lim(3)-10)
             boat_heading(i)=deg2rad(180*rand-90);
         end
-        if boat_x(i)>ax_lim(4)
+        if boat_x(i)>(ax_lim(4)+10)
             boat_heading(i)=deg2rad(-180*rand-90);
         end
-        if boat_y(i)<ax_lim(1)
+        if boat_y(i)<(ax_lim(1)-10)
             boat_heading(i)=deg2rad(180*rand);
         end
-        if boat_y(i)>ax_lim(2)
+        if boat_y(i)>(ax_lim(2)+10)
             boat_heading(i)=deg2rad(-180*rand);
         end
     end
@@ -405,7 +414,11 @@ end
     wind_p    = [ones(1,5)*ax_lim(3)+local_size/20; ones(1,5)*ax_lim(1)+local_size/20] + ([0,-local_size/20, +local_size/20, -local_size/20, 0; 0, local_size/40, 0, -local_size/40, 0]'*[cos(d_wind+pi) sin(d_wind+pi); -sin(d_wind+pi) cos(d_wind+pi)])';
     traj(n,:)                           = [(pose(1)-p1_0),(pose(2)-p2_0),pose(3)];
     
-
+    for i=1:num_boats        
+        boat_y(i) = r_earth*cos(destData.latitude*pi/180)*pi/180*(aisData.Ship(i).longitude-destData.longitude);
+        boat_x(i) = r_earth*pi/180*(aisData.Ship(i).latitude-destData.latitude);
+    end
+% whos
     boat_x      = boat_x + boat_speed.*cos(boat_heading)*delta_t;
     boat_y      = boat_y + boat_speed.*sin(boat_heading)*delta_t;
 
@@ -420,11 +433,11 @@ end
     if round(t)==100
         2324;
     end
-    wp_x_loc=wp_x_glo+dest_x(destData.destNr+1);
-    wp_y_loc=wp_y_glo+dest_y(destData.destNr+1);
-    plot(handles.AxesTrajectory, pose_plot(:,1),pose_plot(:,2),'b',wp_y_loc,wp_x_loc,'ko-',wp_y_loc(k),wp_x_loc(k),'ks',dest_y,dest_x,'or', dest_y(destData.destNr+1), dest_x(destData.destNr+1),'sr',boat_plot_x,boat_plot_y,'r');%,wp_x,wp_y,'kx');%,wind(2,:),wind(1,:),'g');
+    wp_x_loc=wp_x_glo;%+dest_x(destData.destNr+1);
+    wp_y_loc=wp_y_glo;%+dest_y(destData.destNr+1);
+    plot(handles.AxesTrajectory, pose_plot(:,1),pose_plot(:,2),'b',wp_y_loc,wp_x_loc,'ko-',wp_y_loc(k),wp_x_loc(k),'ks',dest_y,dest_x,'or', 0, 0,'sr',boat_plot_x,boat_plot_y,'r');%,wp_x,wp_y,'kx');%,wind(2,:),wind(1,:),'g');
     axis(handles.AxesTrajectory,[-world_size/2 world_size/2 -world_size/2 world_size/2])
-    plot(handles.AxesLocal, pose_plot(:,1),pose_plot(:,2),'b',pose(2),pose(1),'b',boat_plot_x,boat_plot_y,'r',wp_y_loc,wp_x_loc,'ko-',wp_y_loc(k),wp_x_loc(k),'ks',dest_y,dest_x,'or', dest_y(destData.destNr+1), dest_x(destData.destNr+1),'sr',wind_p(2,:),wind_p(1,:),'g')
+    plot(handles.AxesLocal, pose_plot(:,1),pose_plot(:,2),'b',pose(2),pose(1),'b',boat_plot_x,boat_plot_y,'r',wp_y_loc,wp_x_loc,'ko-',wp_y_loc(k),wp_x_loc(k),'ks',dest_y,dest_x,'or', 0,0,'sr',wind_p(2,:),wind_p(1,:),'g')
     axis(handles.AxesLocal,ax_lim)
     %% plot desired heading on compass
     
@@ -462,13 +475,13 @@ end
     
 %     [imu.position.longitude, imu.position.latitude] = xy2ll(pose);
     if (~isempty(boat_x))
-        dist_boat(n,:)=[sqrt((pose(1)-boat_x).^2+(pose(2)-boat_y).^2) zeros(1,5-num_boats)];
+        dist_boat(:,n)=[sqrt((pose(1)-boat_x).^2+(pose(2)-boat_y).^2);zeros(5-num_boats,1)];
         
-        dist_min(n)=min(dist_boat(n,find(dist_boat(n,:))));
+        dist_min(n)=min(dist_boat(find(dist_boat(:,n),n)));
         av_speed=sqrt(vel(1,1)^2+vel(2,1)^2);
-        t_min=((pose(2)-boat_y).*(sin(boat_heading).*boat_speed-sin(pose(3)+atan2(vel(2),vel(1)))*av_speed)+(pose(1)-boat_x).*(cos(boat_heading).*boat_speed-cos(pose(3)+atan2(vel(2),vel(1)))*av_speed))./((boat_speed.*sin(boat_heading)-av_speed*sin(pose(3)+atan2(vel(2),vel(1))))^2+(boat_speed.*cos(boat_heading)-av_speed*cos(pose(3)+atan2(vel(2),vel(1))))^2);
+        [t_min, ind_t_min]=min(((pose(2)-boat_y).*(sin(boat_heading).*boat_speed-sin(pose(3)+atan2(vel(2),vel(1)))*av_speed)+(pose(1)-boat_x).*(cos(boat_heading).*boat_speed-cos(pose(3)+atan2(vel(2),vel(1)))*av_speed))./((boat_speed.*sin(boat_heading)-av_speed*sin(pose(3)+atan2(vel(2),vel(1)))).^2+(boat_speed.*cos(boat_heading)-av_speed*cos(pose(3)+atan2(vel(2),vel(1)))).^2));
         t_coll=t+t_min;
-        curr_min_dist=sqrt((pose(2)+sin(pose(3)+atan2(vel(2),vel(1)))*av_speed.*t_min-boat_y-sin(boat_heading).*boat_speed*t_min).^2+(pose(1)+cos(pose(3)+atan2(vel(2),vel(1)))*av_speed.*t_min-boat_x-cos(boat_heading).*boat_speed.*t_min).^2);
+        curr_min_dist=sqrt((pose(2)+sin(pose(3)+atan2(vel(2),vel(1)))*av_speed*t_min-boat_y(ind_t_min)-sin(boat_heading(ind_t_min)).*boat_speed(ind_t_min).*t_min).^2+(pose(1)+cos(pose(3)+atan2(vel(2),vel(1)))*av_speed.*t_min-boat_x(ind_t_min)-cos(boat_heading(ind_t_min)).*boat_speed(ind_t_min).*t_min).^2);
         if t_min<0
             t_min=NaN;
             curr_min_dist=NaN;
@@ -478,7 +491,7 @@ end
 %         pause
         end
     else
-        dist_boat(n,:)=zeros(1,5);
+        dist_boat(:,n)=zeros(5,1);
         dist_min(n)= NaN;
         t_min=NaN;
         curr_min_dist=NaN;
@@ -489,7 +502,7 @@ end
     set(handles.exp_time,'String',num2str(round(t_min)));
     
     ind_t=[0:delta_t:t+.01];
-    plot(handles.AxesDist,ind_t, dist_boat)
+    plot(handles.AxesDist,ind_t, dist_boat')
 
     imu.position.latitude               = destData.latitude + 180/(r_earth*pi)*pose(1);
     imu.position.longitude              = destData.longitude + 180/(r_earth*pi*cos(destData.latitude*pi/180))*pose(2);

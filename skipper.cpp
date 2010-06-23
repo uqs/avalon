@@ -254,8 +254,8 @@ void * translation_thread(void * dummy)
             vec_dist_wyp_x = waypoints.Data[current_wyp].x - current_pos_x; //everything already in meters
             vec_dist_wyp_y = waypoints.Data[current_wyp].y - current_pos_y; //everything already in meters
             ///////
-            vec_dist_wyp2_x = waypoints.Data[current_wyp+1].x - current_pos_y; //everything already in meters
-            vec_dist_wyp2_y = waypoints.Data[current_wyp+1].x - current_pos_x; //everything already in meters
+            vec_dist_wyp2_x = waypoints.Data[current_wyp+1].x - current_pos_x; //everything already in meters
+            vec_dist_wyp2_y = waypoints.Data[current_wyp+1].y - current_pos_y; //everything already in meters
             ///////
             vec_fix_next_x = waypoints.Data[current_wyp+1].x - waypoints.Data[current_wyp].x;
             vec_fix_next_y = waypoints.Data[current_wyp+1].y - waypoints.Data[current_wyp].y;
@@ -272,9 +272,13 @@ void * translation_thread(void * dummy)
             ///////
             dist_curr_wyp = sqrt((vec_dist_wyp_x * vec_dist_wyp_x) + (vec_dist_wyp_y * vec_dist_wyp_y));
             heading_to_wyp = remainder((-atan2(vec_dist_wyp_y,vec_dist_wyp_x) + AV_PI/2),2*AV_PI); //schon richtig genullt, nicht mehr mathematisch!
-            heading_to_next_wyp = remainder((-(atan2(vec_dist_wyp2_y,vec_dist_wyp2_x)) + AV_PI/2),2*AV_PI); //richtig genullt!! 
-            heading_prev_to_next_wyp = remainder((-(atan2(vec_prev_to_next_wyp_y,vec_prev_to_next_wyp_x)) + AV_PI/2),2*AV_PI); //richtig genullt!! 
-            heading_curr_to_next_wyp = remainder((-(atan2(vec_fix_next_y,vec_fix_next_x)) + AV_PI/2),2*AV_PI); //richtig genullt!! 
+//             heading_to_next_wyp = remainder((-(atan2(vec_dist_wyp2_y,vec_dist_wyp2_x)) + AV_PI/2),2*AV_PI); //richtig genullt!! 
+//             heading_prev_to_next_wyp = remainder((-(atan2(vec_prev_to_next_wyp_y,vec_prev_to_next_wyp_x)) + AV_PI/2),2*AV_PI); //richtig genullt!! 
+// 	    heading_curr_to_next_wyp = remainder((-(atan2(vec_fix_next_y,vec_fix_next_x)) + AV_PI/2),2*AV_PI); //richtig genullt!! 
+	    heading_to_next_wyp = remainder((atan2(vec_dist_wyp2_y,vec_dist_wyp2_x)),2*AV_PI); //richtig genullt!! 
+	    heading_prev_to_next_wyp = remainder((atan2(vec_prev_to_next_wyp_y,vec_prev_to_next_wyp_x)),2*AV_PI); //richtig genullt!!
+            heading_curr_to_next_wyp = remainder((atan2(vec_fix_next_y,vec_fix_next_x)),2*AV_PI); //richtig genullt!! 
+// rtx_message("head_prev_next = %f, head_pose_next = %f, head_curr_next = %f ", heading_prev_to_next_wyp*180.0/AV_PI, heading_to_next_wyp*180.0/AV_PI, heading_curr_to_next_wyp*180.0/AV_PI);
             ///////
             dist_solltrajectory = (vec_dist_wyp_x * vec_fix_curr_y - vec_dist_wyp_y * vec_fix_curr_x) / 
 		    (sqrt((double) (vec_fix_curr_x * vec_fix_curr_x) + (double) (vec_fix_curr_y * vec_fix_curr_y)));
@@ -396,7 +400,9 @@ void * translation_thread(void * dummy)
                     if(((fabs(remainder(dir_wind_mean - waypoints.Data[current_wyp].winddirection,360.0)) > 10.0)
 			    /*|| ((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3) 
 			    && (dist_next_trajectory > 100.0))*/ || (fabs(dist_solltrajectory) > 100.0))
-			    /*|| ((waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END) && (dist_curr_wyp < 80.0))*/)
+			    /*|| ((waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END) && (dist_curr_wyp < 80.0))*/
+			    || (remainder(heading_prev_to_next_wyp - heading_to_next_wyp-0.04,2*AV_PI)>0 && (remainder(heading_curr_to_next_wyp-heading_to_next_wyp-0.04,2*AV_PI)>0))
+			    || (remainder(heading_prev_to_next_wyp-heading_to_next_wyp+0.04,2*AV_PI)<0 && (remainder(heading_curr_to_next_wyp-heading_to_next_wyp+0.04,2*AV_PI)<0)))
                         {
 // #ifdef DEBUG_SKIPPER
                             rtx_message("normalnavi: switching to newcalculation state; reason:");
@@ -404,16 +410,16 @@ void * translation_thread(void * dummy)
                             {
                                 rtx_message("wind has changed");
                             }
- 
+ /*
 			    if ((waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END) && (dist_curr_wyp < 80.0))
 			    {
 				rtx_message("reached last waypoint");
-			    }
-
+			    }*/
                             if (fabs(dist_solltrajectory) > 100.0)
                             {
                                 rtx_message("dist_solltrajectory too bigi (%f meters) ",dist_solltrajectory);
                             }
+
 // #endif
                             naviflags.navi_state = AV_FLAGS_NAVI_NEWCALCULATION;
                             naviflags.navi_index_call ++;

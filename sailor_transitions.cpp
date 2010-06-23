@@ -440,7 +440,7 @@ void * translation_thread(void * dummy)
                 if((fabs(remainder((desired_heading_after_tack - imu.attitude.yaw),360.0)) < AV_SAILOR_EPSILON_TACK)
                         || (tackendtimeout_diff > AV_SAILOR_TACK_END_TIMEOUT))
                 {
-rtx_message("change to normalsailing");
+// rtx_message("change to normalsailing");
                     sailorflags.state = AV_FLAGS_ST_NORMALSAILING;
                     time(&tacktimeout_start); // start the timer
                 }
