@@ -1,6 +1,6 @@
 function [alpha_rudder_neu] = rudderUpdate(alpha_rudder_des, alpha_rudder, delta_t, maxSpeed)
 
-delta_r = abs((alpha_rudder_des-alpha_rudder))*delta_t;
+delta_r = abs(alpha_rudder_des-alpha_rudder);
 
 if delta_r > (maxSpeed*delta_t)
     delta_r = maxSpeed*delta_t;

@@ -12,7 +12,7 @@
 %  simulation variables
 %  -------------------------------------------------------------------------
 T_sim                   = 7*24*3600;
-delta_t                 = 0.04;% [s] iteration time step (smallest time step of sensor reading)i
+delta_t                 = 0.03;% [s] iteration time step (smallest time step of sensor reading)i
 local_size              = 1000;
 world_size              = 8000;          % [m] size of the part we are looking at
 disp_forces             = 1;            % display forces; 0 or 1

@@ -11,7 +11,7 @@
 
 
 
-function [pose, vel_p, vel, X, Y, N, X_p, Y_p, N_p, X_drag, Y_drag, X_waves, Y_waves, N_waves, X_sail, Y_sail, N_sail, N_rudder, N_damping, V_wind, g_r] = PoseStep(t, delta_t, pose, vel, X_p, Y_p, N_p, X_drag, Y_drag,vel_p, m, aoa_sail, A_sail, A_hull, A_rudder, alpha_rudder_r, alpha_rudder_l, C_d, C_hat, I, v_current, d_current, v_wind, d_wind, d_waves, T, h, depth, length, width, sail_factor)
+function [pose, vel, X, Y, N, X_waves, Y_waves, N_waves, X_sail, Y_sail, N_sail, N_rudder, N_damping, V_wind, g_r] = PoseStep(t, delta_t, pose, vel, m, aoa_sail, A_sail, A_hull, A_rudder, alpha_rudder_r, alpha_rudder_l, C_d, C_hat, I, v_current, d_current, v_wind, d_wind, d_waves, T, h, depth, length, width, sail_factor)
 %global a
 %a(4)=toc;
 % unchangeable variables
@@ -257,11 +257,11 @@ X = X_sail + X_current + X_wind + X_waves + X_rudder - X_damping;
 Y = Y_sail + Y_current + Y_wind + Y_waves + Y_rudder - Y_damping;
 N = N_sail + N_current + N_wind + N_waves + N_rudder - N_damping;% -N_rudder
 % [aoa d_wind_r N_sail];
-vel;
-[N N_damping N_sail N_rudder];
-[X X_damping X_sail X_rudder];
-[Y Y_damping Y_sail Y_rudder];
-0;
+%vel;
+%[N N_damping N_sail N_rudder];
+%[X X_damping X_sail X_rudder];
+%[Y Y_damping Y_sail Y_rudder];
+%0;
 % N = 0.9*N;                                                              % 0.6 correction term by FJ   waves must be additive
 
 %str=['N_rud:' num2str(N_rudder) '   N_sail:' num2str(N_sail) ' N_wind:' num2str(N_wind) '   N:' num2str(N)]; 
@@ -280,7 +280,6 @@ vel_new(3,1)    = delta_t/I(3)*N+vel(3,1);
 vel_new(2,1)    = 1/(1+vel_new(3,1)*delta_t^2)*(Y/m*delta_t+vel(2,1)-delta_t^2*X/m);
 vel_new(1,1)    = delta_t*(X/m+vel_new(2,1)*vel_new(3,1))+vel(1,1);
 vel             = vel_new;
-vel_p           = [vel];
 
 pose(3)         = reminderRad(pose(3));
 psi             = pose(3);

@@ -19,7 +19,7 @@ addpath '.'
 double d_wind;
 double v_wind;
 v_wind=15;
-d_wind=-pi/2;
+d_wind=130*pi/180;
 avalon = ddx_init();
 
 parameter_shell;
@@ -193,7 +193,7 @@ while (t < T_sim)
 %pose
 %aoa_sail
 %d_wind
-    [pose, vel_p, vel, X, Y, N, X_p, Y_p, N_p, X_drag, Y_drag, X_waves, Y_waves, N_waves, X_sail, Y_sail, N_sail, N_rudder, N_damping, V_wind, g_r] = PoseStep_shell(t, delta_t, pose, vel, X_p, Y_p, N_p, X_drag, Y_drag,vel_p, m, aoa_sail, A_sail, A_hull, A_rudder, alpha_rudder_r, alpha_rudder_l, C_d, C_hat, I, v_current, d_current, v_wind, d_wind, d_waves, T, h, depth, length, width, sail_factor);
+    [pose, vel, X, Y, N, X_waves, Y_waves, N_waves, X_sail, Y_sail, N_sail, N_rudder, N_damping, V_wind, g_r] = PoseStep_shell(t, delta_t, pose, vel, m, aoa_sail, A_sail, A_hull, A_rudder, alpha_rudder_r, alpha_rudder_l, C_d, C_hat, I, v_current, d_current, v_wind, d_wind, d_waves, T, h, depth, length, width, sail_factor);
 %     ax_lim=[-local_size/2+pose(2)-p2_0 local_size/2+pose(2)-p2_0
 %     -local_size/2+pose(1)-p1_0 local_size/2+pose(1)-p1_0];
     
