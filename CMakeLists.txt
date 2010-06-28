@@ -12,8 +12,8 @@ LINK_DIRECTORIES(
 	 ${CMAKE_HOME_DIRECTORY}/lib /usr/local/lib
 )
 
-# ADD_EXECUTABLE(windsensor windsensor.cpp)
-# TARGET_LINK_LIBRARIES(windsensor ddxx ddx rtx pthread rt )
+ADD_EXECUTABLE(windsensor windsensor.cpp)
+TARGET_LINK_LIBRARIES(windsensor ddxx ddx rtx pthread rt )
 
 ADD_EXECUTABLE(keepalive keepalive.cpp)
 TARGET_LINK_LIBRARIES(keepalive rtx pthread rt )
@@ -57,7 +57,7 @@ TARGET_LINK_LIBRARIES(sailmain ddxx ddx rtx epos can pthread rt )
 ADD_EXECUTABLE(sailmain_keepalive sailmain_keepalive.cpp)
 TARGET_LINK_LIBRARIES(sailmain_keepalive ddxx ddx rtx pthread rt )
 
-# Commented out while I don't have cmt
+# Commented out while I don't have cmt 
  ADD_EXECUTABLE(imu imu.cpp)
  TARGET_LINK_LIBRARIES(imu ddxx ddx rtx pthread rt cmt -fno-stack-protector)
 
