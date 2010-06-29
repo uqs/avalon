@@ -190,6 +190,7 @@ N_sail = sail_factor*N_sail;
 % X_sail = 200;
 % Y_sail =0;
 % N_sail = 0;
+
 % rudder
 % ------------------------------------------------------------------------
 
@@ -203,7 +204,7 @@ dist_to_rudder = [-1.7; 0; 0];
 vel_app_rudder = vel + cross(rot,dist_to_rudder);
 v_r_tot = sqrt((vel_app_rudder(1))^2 + (vel_app_rudder(2))^2);% + (vel(3,1)*1.7)^2);
 
-d_water = atan2(vel_app_rudder(2)*0.01,vel_app_rudder(1));% 
+d_water = atan2(vel_app_rudder(2),vel_app_rudder(1));% 
 d_water = reminderRad(d_water);
 
 c_rudder_drag = 1.28*sin(abs(-d_water + alpha_rudder));
@@ -229,26 +230,29 @@ else
     vorzeichenR = -1;
 end
 %a(8)=toc;
-F_lift_v_right = 1/2*dens_water*c_rudder_lift*v_r_tot^2*A_rudder*cos(incid_angle);
+F_lift_v_right = 1/2*dens_water*c_rudder_lift*v_r_tot^2*A_rudder*sin(incid_angle);
 F_drag_v_right = 1/2*dens_water*c_rudder_drag*v_r_tot^2*A_rudder*sin(incid_angle)*sign(vorzeichenR);
 
-F_lift_v_left = 1/2*dens_water*c_rudder_lift*v_r_tot^2*A_rudder*cos(incid_angle);
+F_lift_v_left = 1/2*dens_water*c_rudder_lift*v_r_tot^2*A_rudder*sin(incid_angle);
 F_drag_v_left = 1/2*dens_water*c_rudder_drag*v_r_tot^2*A_rudder*sin(incid_angle)*sign(vorzeichenR);
-
 % if d_water >= 0
 %     vorzeichenRR = 1;
 % else
 %     vorzeichenRR = -1;
 % end
 X_rudder_right = F_lift_v_right*sin(abs(d_water)) - F_drag_v_right*cos(d_water);
-Y_rudder_right = F_lift_v_right*cos(d_water)*sign(vorzeichenR) + F_drag_v_right*sin(-d_water);% )*sign(-vorzeichenRR); %sign(vorzeichenR)....))*sign(-vorzeichenRR)
+Y_rudder_right = F_lift_v_right*cos(d_water) + F_drag_v_right*sin(-d_water);% )*sign(-vorzeichenRR); %sign(vorzeichenR)....))*sign(-vorzeichenRR)
 
 X_rudder_left = F_lift_v_left*sin(abs(d_water)) - F_drag_v_left*cos(d_water);
-Y_rudder_left = F_lift_v_left*cos(d_water)*sign(vorzeichenR) + F_drag_v_left*sin(-d_water);
+Y_rudder_left = F_lift_v_left*cos(d_water) + F_drag_v_left*sin(-d_water);
 
 X_rudder = X_rudder_left + X_rudder_right;
 Y_rudder = Y_rudder_left + Y_rudder_right;
 N_rudder = -Y_rudder*1.7;        % 2*Y_rudder ????    distance CoR to rudder-center = -1.7 m (in x-direction)
+[c_rudder_lift c_rudder_drag v_r_tot incid_angle d_water alpha_rudder Y_rudder N_rudder];
+[Y_rudder alpha_rudder*180/pi];
+[v_r_tot d_water incid_angle alpha_rudder Y_rudder];
+[v_r_tot vel(1) vel(2) vel(3) alpha_rudder*180/pi];
 %N_rudder = 0.4*N_rudder;
 % summarize the forces/moments
 % -------------------------------------------------------------------------
@@ -258,7 +262,7 @@ Y = Y_sail + Y_current + Y_wind + Y_waves + Y_rudder - Y_damping;
 N = N_sail + N_current + N_wind + N_waves + N_rudder - N_damping;% -N_rudder
 % [aoa d_wind_r N_sail];
 %vel;
-%[N N_damping N_sail N_rudder];
+[N N_damping N_sail N_rudder alpha_rudder*180/pi]
 %[X X_damping X_sail X_rudder];
 %[Y Y_damping Y_sail Y_rudder];
 %0;

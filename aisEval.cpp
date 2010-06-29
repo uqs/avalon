@@ -181,7 +181,7 @@ void * translation_thread(void * dummy)
     ais_dest.new_dest_long=0;
     ais_dest.new_dest_lat=0;
     ais_dest.ais_dest_index=0;
-    ais_dest.global_skipper_flag=generalflags.global_locator;
+    ais_dest.global_skipper_flag=0;
     aisDestData.t_writefrom(ais_dest);
 
     obst_p.reserve(4);

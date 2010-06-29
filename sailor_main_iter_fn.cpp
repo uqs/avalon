@@ -127,6 +127,6 @@ gsl_min_fminimizer_set (s, &F, iter_start, x_lo, x_hi);
 #endif
 
 	// return status;
-	return alpha_r*180/M_PI;
+	return alpha_r*180/AV_PI;
 }
 

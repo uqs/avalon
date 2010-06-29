@@ -139,10 +139,10 @@ V_wind=sqrt((V_wind_x)*(V_wind_x)+(V_wind_y)*(V_wind_y));
     N_des               = 0.9*torque_des;//*0.81;
     N_rudder_des        = -N_sail + N_damping + N_des;
     Y_rudder            = -N_rudder_des/1.7;  //+??
-    Y_rudder_right      = Y_rudder/2.0;
+//     Y_rudder_right      = Y_rudder/2.0;
 // rtx_message("desired: %f  damping: %f  sail: %f  rudder: %f, rudderangle: %f",N_des, N_damping, N_sail, N_rudder_des, x*180/AV_PI);
     v_r_tot         = sqrt((speed_x*speed_x) + ((speed_y - 1.7*heading_speed)*(speed_y - 1.7*heading_speed)));
-    d_water         = atan2((speed_y - 1.7*heading_speed)*0.01,speed_x); 
+    d_water         = atan2((speed_y - 1.7*heading_speed),speed_x); 
 //     d_water         = remainder(d_water,2*AV_PI);
 //     k               = 0.5*dens_water*v_r_tot*v_r_tot*A_rudder;
     incid_angle     = remainder(-d_water + x,2*AV_PI);
@@ -169,25 +169,29 @@ V_wind=sqrt((V_wind_x)*(V_wind_x)+(V_wind_y)*(V_wind_y));
 c_rudder_drag = 1.28*sin(fabs(incid_angle));
 c_rudder_lift = 1.9*(1-exp(-fabs(incid_angle)*9))-2.4*fabs(incid_angle);
 // rtx_message("c_r_drag: %f, c_r_lift: %f incid: %f",c_rudder_drag,c_rudder_lift, incid_angle);
-F_lift_v_right = 1.0/2.0*dens_water*c_rudder_lift*v_r_tot*v_r_tot*A_rudder*cos(incid_angle);
+F_lift_v_right = 1.0/2.0*dens_water*c_rudder_lift*v_r_tot*v_r_tot*A_rudder*sin(incid_angle);
 F_drag_v_right = 1.0/2.0*dens_water*c_rudder_drag*v_r_tot*v_r_tot*A_rudder*sin(incid_angle)*vorzeichenR;
 
-F_lift_v_left = 1.0/2.0*dens_water*c_rudder_lift*v_r_tot*v_r_tot*A_rudder*cos(incid_angle);
+F_lift_v_left = 1.0/2.0*dens_water*c_rudder_lift*v_r_tot*v_r_tot*A_rudder*sin(incid_angle);
 F_drag_v_left = 1.0/2.0*dens_water*c_rudder_drag*v_r_tot*v_r_tot*A_rudder*sin(incid_angle)*vorzeichenR;
 // rtx_message("F_lift_R: %f, F_drag_R: %f, F_lift_L: %f, F_drag_L: %f\n",F_lift_v_right,F_drag_v_right,F_lift_v_left,F_drag_v_left);
 
-Y_rudder_right = F_lift_v_right*cos(d_water)*vorzeichenR + F_drag_v_right*sin(-d_water);
-double Y_rudder_left = F_lift_v_left*cos(d_water)*vorzeichenR + F_drag_v_left*sin(-d_water);
+Y_rudder_right = F_lift_v_right*cos(d_water) + F_drag_v_right*sin(-d_water);
+double Y_rudder_left = F_lift_v_left*cos(d_water) + F_drag_v_left*sin(-d_water);
 // rtx_message("rudderforceR: %f, rudderforceR: %f\n",Y_rudder_right,Y_rudder_left);
 double output = (Y_rudder_right+Y_rudder_left-Y_rudder)/Y_rudder;
-// rtx_message("desired: %f  damping: %f  sail: %f  rudder: %f error: %f\n",N_des, N_damping, N_sail, N_rudder_des, output);
-// rtx_message("rudderforce: %f, error: %f\n",Y_rudder,output);
+
 #ifdef ROOT_FINDING
 	// do nothing
 #else
 	// Square the value to help minimisation
 	output *= output;
 #endif
+// rtx_message("v_r_tot: %f  d_water: %f  incid: %f rudder: %f force: %f error: %f",v_r_tot, d_water, incid_angle, x*180/AV_PI, Y_rudder_right*2, output);
+// rtx_message("v_r_tot: %f  speed_x: %f  speed_y: %f heading_speed: %f rudder: %f error: %f",v_r_tot, speed_x, speed_y, heading_speed, x, output);
+// rtx_message("desired: %f  damping: %f  sail: %f  rudder: %f angle: %f error: %f\n",N_des, N_damping, N_sail, N_rudder_des, x*180/AV_PI, output);
+// rtx_message("rudderforce: %f, error: %f\n",Y_rudder,output);
+// rtx_message("des_force: %f, real_force: %f, rudderangle: %f, error: %f",Y_rudder, Y_rudder_right, x*180/AV_PI, output);
 // rtx_message("out: %f,   x: %f", output, x);
 // rtx_message("rudder_T: %f, rudderangle: %f, error: %f",N_rudder_des, x*180/AV_PI, output);
 	return output;

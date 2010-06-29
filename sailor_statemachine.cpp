@@ -329,7 +329,7 @@ if(count > 500 && count < 1000)
 			    // compensate drift
 			    if(imu_clean.velocity.x > 0.5) // below 0.5kn it probably doesn't make sense to compensate drift
 			    {
-				    desired_heading.heading = remainder(desired_heading.heading + atan2(imu_clean.velocity.y, imu_clean.velocity.x),360.0);
+				    desired_heading.heading = remainder(desired_heading.heading + atan2(imu_clean.velocity.y, imu_clean.velocity.x)*180/AV_PI,360.0);
 			    }
 			    e = desired_heading.heading - imu.attitude.yaw;
 			    if(fabs(e) > 180)

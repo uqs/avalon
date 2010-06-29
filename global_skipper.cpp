@@ -275,7 +275,7 @@ void * translation_thread(void * dummy)
 
 		rtx_message("destinationtype = %d  \n", destination.Data[destination.destNr].type);
 #endif
-		if((distance_boat_dest < 100) && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
+		if((distance_boat_dest < 300) && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
 		{
 		    destination.destNr += 1;
 		    assert((destination.destNr < 1000) && (destination.destNr>=0));
