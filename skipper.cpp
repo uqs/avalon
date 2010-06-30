@@ -401,8 +401,9 @@ void * translation_thread(void * dummy)
 			    /*|| ((dist_next_trajectory > dist_next_trajectory2) && (dist_next_trajectory2 > dist_next_trajectory3) 
 			    && (dist_next_trajectory > 100.0))*/ || (fabs(dist_solltrajectory) > 100.0))
 			    /*|| ((waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END) && (dist_curr_wyp < 80.0))*/
-			    || (((remainder(heading_prev_to_next_wyp - heading_to_next_wyp-0.04,2*AV_PI)>0 && (remainder(heading_curr_to_next_wyp-heading_to_next_wyp-0.04,2*AV_PI)>0))
-			    || (remainder(heading_prev_to_next_wyp-heading_to_next_wyp+0.04,2*AV_PI)<0 && (remainder(heading_curr_to_next_wyp-heading_to_next_wyp+0.04,2*AV_PI)<0))) && fabs(dist_curr_wyp) > 200.0))
+			    || (((remainder(heading_prev_to_next_wyp - heading_to_next_wyp-0.1,2*AV_PI)>0 && (remainder(heading_curr_to_next_wyp-heading_to_next_wyp-0.04,2*AV_PI)>0))
+			    || (remainder(heading_prev_to_next_wyp-heading_to_next_wyp+0.1,2*AV_PI)<0 && (remainder(heading_curr_to_next_wyp-heading_to_next_wyp+0.04,2*AV_PI)<0)))
+				&& fabs(dist_curr_wyp) > 400.0 && (waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END)))
                         {
 // #ifdef DEBUG_SKIPPER
                             rtx_message("normalnavi: switching to newcalculation state; reason:");
