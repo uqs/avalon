@@ -22,7 +22,7 @@
 #include <rtx/message.h>
 
 // #define ROOT_FINDING
-
+// #define MINIMIZING
 //sailor_main_iter_class::sailor_main_iter_class()
 //{
 //}
@@ -68,7 +68,8 @@ double sailor_main_iter_class::sailor_main_iter_fn(double heading_speed, double 
 	while (status == GSL_CONTINUE && iter < max_iter);
 
 	gsl_root_fsolver_free (s);
-#else // Minimisation
+#else 
+#ifdef MINIMIZING// Minimisation
 	const gsl_min_fminimizer_type *T;
 	gsl_min_fminimizer *s;
 // rtx_message("-3");
@@ -76,33 +77,51 @@ double sailor_main_iter_class::sailor_main_iter_fn(double heading_speed, double 
 	s = gsl_min_fminimizer_alloc (T);
 // rtx_message("-2");
 //check if there is a minimum
+double x_med=(x_lo+x_hi)/2;
 double output_lo = sailor_rudder_iter_fn(x_lo, &params);
 double output_hi = sailor_rudder_iter_fn(x_hi, &params);
-double output_med;
-if (output_lo == output_hi)
+double output_med = sailor_rudder_iter_fn(x_med, &params);
+double output_med2;
+if (output_lo == output_hi && output_hi == output_med)
 {
     return x_lo*180/M_PI;
 }
 
 if (output_lo < output_hi)
 {
-    output_med = sailor_rudder_iter_fn((x_lo+x_hi)/2, &params);
 // rtx_message("check if there is a minimum: x_min (%f)-> %f   x_med (%f)-> %f   x_max (%f)-> %f", x_lo, output_lo,(x_lo+x_hi)/2, output_med, x_hi, output_hi);
     if (output_lo < output_med)
     {
-	return x_lo*180/M_PI;
+	output_med2 = sailor_rudder_iter_fn((x_lo+x_med)/2, &params);
+	if (output_lo < output_med2)
+	{
+	  return x_lo*180/M_PI;
+	}
+	else
+	{
+	    x_hi=x_med;
+	    output_hi=output_med;
+	}
     }
 }
 else
 {
-    output_med = sailor_rudder_iter_fn((x_lo+x_hi)/2, &params);
 // rtx_message("check if there is a minimum: x_min (%f)-> %f   x_med (%f)-> %f   x_max (%f)-> %f", x_lo, output_lo,(x_lo+x_hi)/2, output_med, x_hi, output_hi);
     if (output_hi < output_med)
     {
-	return x_hi*180/M_PI;
+	output_med2 = sailor_rudder_iter_fn((x_hi+x_med)/2, &params);
+	if (output_hi < output_med2)
+	{
+	  return x_hi*180/M_PI;
+	}
+	else
+	{
+	    x_lo=x_med;
+	    output_lo=output_med;
+	}
     }
 }
-// rtx_message("check if there is a minimum: x_min (%f)-> %f   x_max (%f)-> %f", x_lo, output_lo, x_hi, output_hi, );
+// rtx_message("check if there is a minimum: x_min (%f)-> %f   x_max (%f)-> %f", x_lo*180/AV_PI, output_lo, x_hi*180/AV_PI, output_hi);
 	
 // rtx_message("-1");
 gsl_min_fminimizer_set (s, &F, iter_start, x_lo, x_hi);
@@ -124,6 +143,30 @@ gsl_min_fminimizer_set (s, &F, iter_start, x_lo, x_hi);
 // rtx_message("3");
 	gsl_min_fminimizer_free (s);
 // rtx_message("4");
+#else
+double iteration_gap = 0.1*AV_PI/180;
+int num_iter = int((x_hi-x_lo)/iteration_gap);
+int i = 1;
+
+double x_iter = x_lo;
+// double alpha_r;
+double err_min = sailor_rudder_iter_fn(x_lo, &params);
+double err;
+
+while (i<num_iter)
+{
+	x_iter += iteration_gap;
+	err = sailor_rudder_iter_fn(x_iter, &params);
+	
+	if (err < err_min)
+	{
+		err_min = err;
+		alpha_r = x_iter;
+	}
+	i++;
+}
+// rtx_message("error: %f, alpha: %f",err_min, alpha_r*180/AV_PI);
+#endif
 #endif
 
 	// return status;
