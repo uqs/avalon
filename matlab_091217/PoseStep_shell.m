@@ -262,7 +262,7 @@ Y = Y_sail + Y_current + Y_wind + Y_waves + Y_rudder - Y_damping;
 N = N_sail + N_current + N_wind + N_waves + N_rudder - N_damping;% -N_rudder
 % [aoa d_wind_r N_sail];
 %vel;
-[N N_damping N_sail N_rudder alpha_rudder*180/pi]
+[N N_damping N_sail N_rudder alpha_rudder*180/pi];
 %[X X_damping X_sail X_rudder];
 %[Y Y_damping Y_sail Y_rudder];
 %0;

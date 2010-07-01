@@ -144,16 +144,16 @@ gsl_min_fminimizer_set (s, &F, iter_start, x_lo, x_hi);
 	gsl_min_fminimizer_free (s);
 // rtx_message("4");
 #else
-double iteration_gap = 0.1*AV_PI/180;
+// rtx_message("start");
+double iteration_gap = 0.05*AV_PI/180;
 int num_iter = int((x_hi-x_lo)/iteration_gap);
-int i = 1;
 
 double x_iter = x_lo;
-// double alpha_r;
+int i=1;
 double err_min = sailor_rudder_iter_fn(x_lo, &params);
 double err;
 
-while (i<num_iter)
+while (x_iter<x_hi)
 {
 	x_iter += iteration_gap;
 	err = sailor_rudder_iter_fn(x_iter, &params);
@@ -163,8 +163,9 @@ while (i<num_iter)
 		err_min = err;
 		alpha_r = x_iter;
 	}
-	i++;
+i++;
 }
+// rtx_message("end after %d iterations\n",i);
 // rtx_message("error: %f, alpha: %f",err_min, alpha_r*180/AV_PI);
 #endif
 #endif

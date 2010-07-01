@@ -189,7 +189,7 @@ double output = (Y_rudder_right+Y_rudder_left-Y_rudder)/Y_rudder;
 #endif
 // rtx_message("v_r_tot: %f  d_water: %f  incid: %f rudder: %f force: %f error: %f",v_r_tot, d_water, incid_angle, x*180/AV_PI, Y_rudder_right*2, output);
 // rtx_message("v_r_tot: %f  speed_x: %f  speed_y: %f heading_speed: %f rudder: %f error: %f",v_r_tot, speed_x, speed_y, heading_speed, x, output);
-// rtx_message("desired: %f  damping: %f  sail: %f  rudder: %f angle: %f error: %f\n",N_des, N_damping, N_sail, N_rudder_des, x*180/AV_PI, output);
+// rtx_message("des: %f  damp: %f  sail: %f  rud: %f, rud_t: %f ang: %f err: %f\n",N_des, N_damping, N_sail, N_rudder_des, -Y_rudder_right*3.4, x*180/AV_PI, output);
 // rtx_message("rudderforce: %f, error: %f\n",Y_rudder,output);
 // rtx_message("des_force: %f, real_force: %f, rudderangle: %f, error: %f",Y_rudder, Y_rudder_right, x*180/AV_PI, output);
 // rtx_message("out: %f,   x: %f", output, x);
