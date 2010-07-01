@@ -25,6 +25,8 @@ typedef struct {
   unsigned char content[8];  //!< The actual CAN message content.
 } can_message_t;
 
+extern can_message_t message;
+
 /** \brief Initialize CAN communication by opening devices
   * \param[in] dev The character device to be used for CAN communication.
   */

@@ -1,0 +1,11 @@
+FILE(GLOB CAN_CPC_SOURCES *)
+
+INCLUDE_DIRECTORIES(../can ../cpc-usb)
+ADD_LIBRARY(
+	can-cpc
+	SHARED
+	${CAN_CPC_SOURCES}
+)
+TARGET_LINK_LIBRARIES(can-cpc cpc)
+
+INSTALL_TARGETS(/lib can-cpc)

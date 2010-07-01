@@ -12,8 +12,8 @@
 
 #include <math.h>
 
-#include "include/can.h"
-#include "eposlib-test/epos.h"
+#include "can/can.h"
+#include "epos/epos.h"
 
 #include <rtx/getopt.h>
 #include <rtx/main.h>

@@ -10,6 +10,7 @@
 
 #include <cpc.h>
 #include <cpclib.h>
-#include <can.h>
+
+#include "can/can.h"
 
 #endif

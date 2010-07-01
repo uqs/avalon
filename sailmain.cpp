@@ -35,8 +35,8 @@
 #include <DDXVariable.h>
 
 // Specific Things
-#include "eposlib-test/epos.h"
-#include "include/can.h"
+#include "epos/epos.h"
+#include "can/can.h"
 #include "include/ddxjoystick.h"
 
 #include "sail-target.h"

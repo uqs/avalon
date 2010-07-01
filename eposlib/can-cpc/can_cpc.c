@@ -33,7 +33,7 @@
                   tv.tv_usec = 500000; \
                   nfds = select(cpcfd+1, NULL, &writefds, NULL, &tv);
 
-static can_message_t message;
+can_message_t message;
 
 unsigned char btr0, btr1;
 int handle;

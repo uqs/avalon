@@ -5,12 +5,16 @@ cmake_minimum_required(VERSION 2.6)
 ADD_DEFINITIONS( -ggdb -Wall )
 
 INCLUDE_DIRECTORIES(
-	 ${CMAKE_HOME_DIRECTORY}/include /usr/local/include
+	${CMAKE_HOME_DIRECTORY}/eposlib
+	${CMAKE_HOME_DIRECTORY}/include
+	/usr/local/include
 )
 
 LINK_DIRECTORIES(
 	 ${CMAKE_HOME_DIRECTORY}/lib /usr/local/lib
 )
+
+SUBDIRS(eposlib)
 
 ADD_EXECUTABLE(windsensor windsensor.cpp)
 TARGET_LINK_LIBRARIES(windsensor ddxx ddx rtx pthread rt )

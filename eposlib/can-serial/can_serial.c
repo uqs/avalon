@@ -53,7 +53,7 @@
 #include "can_serial.h"
 
 int fd = 0;
-static can_message_t message;
+can_message_t message;
 
 EPOS_ERROR_SERIAL error_serial[MAXERRORSERIAL] = {
   { 0x00000000, "No error." },

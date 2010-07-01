@@ -36,8 +36,8 @@
 #include <DDXVariable.h>
 
 // Specific Things
-#include "include/epos.h"
-#include "include/can.h"
+#include "epos/epos.h"
+#include "can/can.h"
 
 #include "ports.h"
 #include "RudderMotor.h"

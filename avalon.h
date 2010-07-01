@@ -92,7 +92,8 @@
 #define AV_SAIL_BRAKE_OPEN              0x0000          // Setting for the brake to be open
 #define AV_SAIL_BRAKE_CLOSE             0x000C          // Setting for the brake to be closed
 #define AV_SAIL_NODE_ID                 0x0002          // Node ID of the Sail EPOS
-#define AV_POTI_NODE_ID                 0x0001          // Node ID of the poti
+#define AV_POTI_NODE_ID                 0x0008          // Node ID of the poti
+#define AV_POTI_RESOLUTION		4096		// ticks per revolution (360°)
 
 // If you want to have a fancy control room environnment, activate this!!
 //#define AV_SAILMAIN_CONTROLCENTER
