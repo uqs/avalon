@@ -179,6 +179,14 @@ class ControlFrame(wx.Frame):
 		#self.txtsailingmode.SetForegroundColour('white')
 		self.sailMode = wx.TextCtrl(flagpanel, 40, 'DEFAULT', pos=(150,66), size=(200,-1))
 
+		smallline = wx.StaticLine(flagpanel, -1,(20,100),(350,1))
+		wx.StaticText(flagpanel, -1, 'RudderState Right:', pos=(20, 110))
+		wx.StaticText(flagpanel, -1, 'RudderState Left:', pos=(20, 135))
+		self.rudderright = wx.TextCtrl(flagpanel, 60, 'DFLT', pos=(150, 105), size=(80, -1))
+		self.rudderleft = wx.TextCtrl(flagpanel, 61, 'DFLT', pos=(150, 130), size=(80, -1))
+		wx.StaticText(flagpanel, -1, 'degree', pos=(260, 110))
+		wx.StaticText(flagpanel, -1, 'degree', pos=(260, 135))
+
 		#statbox.SetForegroundColour('white')
 		#flagpanel.SetBackgroundColour('black')
 		#self.joystick.SetForegroundColour('white')
@@ -359,6 +367,8 @@ class ControlFrame(wx.Frame):
 		self.DHData = store.variable("desiredheading")
 		self.WypData = store.variable("wypData")
 		self.DESTData = store.variable("destData")
+		self.RDRData = store.variable("rudderstateright")
+		self.RDLData = store.variable("rudderstateleft")
 
 		#flag:
 		self.initdone = 1
@@ -370,6 +380,8 @@ class ControlFrame(wx.Frame):
 		self.WINDData.read()
 		self.DHData.read()
 		self.DESTData.read()
+		self.RDRData.read()
+		self.RDLData.read()
 
 		###sailing mode: ####
 		mode = {
@@ -392,14 +404,18 @@ class ControlFrame(wx.Frame):
 		joystick_bool = {1: False, 2: True, 0: False}[int(self.FLAGData.man_in_charge)]
 		sailor_bool = {1: True, 2: False, 0: False}[int(self.FLAGData.man_in_charge)]
 		autonomous_bool = {0: False, 1: True}[int(self.FLAGData.autonom_navigation)]
-		print self.FLAGData.man_in_charge
+		#print self.FLAGData.man_in_charge
 		#joystick_bool = {1: False, 2: True}[1]
 		#sailor_bool = {1: True, 2: False}[1]
 		#autonomous_bool = {0: False, 1: True}[1]
 		self.joystick.SetValue(joystick_bool)
 		self.sailor.SetValue(sailor_bool)
 		self.autonomous.SetValue(autonomous_bool)
-	
+
+		#self.rudderright.SetValue(' %1.3f') % (float(self.RDRData.degrees_rudder))
+		self.rudderright.SetValue(str(float(self.RDRData.degrees_rudder)))
+		self.rudderleft.SetValue(str(float(self.RDLData.degrees_rudder)))
+		
 		#### performance information: ####
 		#self.speed.SetValue(str(6.34))
 		#self.des_heading.SetValue(str(130))
