@@ -1,89 +1,174 @@
 /**
- *	This reads the target angles form the Store and sets it on the Rudder-EPOS
+ * Skipper calls the navigations-programs and sets a current heading to the
+ * store, so sailor can take over!!
  *
  **/
+// TODO check "remainder", speed history, which obstacles do we care about, 
+
+// General Project Constants
+#include "avalon.h"
 
 // General Things
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <assert.h>
+#include <time.h>
+
+
+// General rtx-Things
+#include <rtx/getopt.h>
+#include <rtx/main.h>
+#include <rtx/error.h>
+#include <rtx/timer.h>
+#include <rtx/time.h>
+#include <rtx/thread.h>
+#include <rtx/message.h>
 
 // Specific Things
-// #include "poti.h"
-#include "avalon.h"
+
+#include <DDXStore.h>
+#include <DDXVariable.h>
+
+#include "flags.h"
+#include "poti.h"
+#include "ports.h"
 #include "can/can.h"
 #include "epos/epos.h"
 
-static can_message_t msg = {
+// #define DEBUG_AISEVAL
+
+/**
+ * Global variable for all DDX object
+ * */
+DDXStore store;
+DDXVariable dataFlags;
+DDXVariable potiData;
+DDXVariable dataPorts;
+
+
+/**
+ * Storage for the command line arguments
+ * */
+
+const char * varname_potiData = "potiData";
+const char * varname_flags = "flags";
+const char * varname_ports = "ports";
+const char * producerHelpStr = "poti help-string";
+
+static can_message_t msg_clear = {
   0x0,
   {0x0, 0x0, 0x0, 0, 0, 0, 0, 0}
 };
+static can_message_t msg_poti_pos_request = {
+  0x600 + AV_POTI_NODE_ID,
+  {0x40, 0x04, 0x60, 0, 0, 0, 0, 0}
+};
+static can_message_t msg_poti_set_pdo = {
+  0x600 + AV_POTI_NODE_ID,
+  {0x01, 0x08, 0x0, 0, 0, 0, 0, 0}
+};
 
-int poti_pos_request(double* angle)
+RtxGetopt producerOpts[] = {
+
+//   {"imuData", "Store Variable where the imuData is written",
+//    {
+//      {RTX_GETOPT_STR, &varname4, "imuData"},
+//      RTX_GETOPT_END_ARG
+//    }
+//   },
+// 
+//   {"cleanimuname", "Store Variable where the cleaned imu data is written to",
+//    {
+//      {RTX_GETOPT_STR, &varname_imuClean, ""},
+//      RTX_GETOPT_END_ARG
+//    }
+//   },
+  RTX_GETOPT_END
+};
+
+
+/**
+ * Working thread, wait the data, transform them and write them again
+ * */
+void * translation_thread(void * dummy)
 {
+
+    Flags generalflags;
+    PotiData poti;
+    Ports ports;
+
+    char commport[99] = "auto";
     int num_tick;
+    double angle;
 
-    msg.id = 0x600 + AV_POTI_NODE_ID;
-    msg.content[0] = 0x40;
-    msg.content[1] = 0x04;
-    msg.content[2] = 0x60;
     
-    int ret=can_send_message(&msg);
-    if (!ret)
+    dataPorts.t_readto(ports,0,0);
+    sprintf(commport, "/dev/ttyUSB%d", ports.sail);
+    
+    can_init("commport");
+    
+    while (1)
     {
-	num_tick = int(message.content[4])+int(message.content[5])*256+int(message.content[6])*256*256;
-	*angle = remainder((num_tick%AV_POTI_RESOLUTION)*360.0/AV_POTI_RESOLUTION,360.0);
+	can_send_message(&msg_poti_pos_request);
+	num_tick = int(message.content[4])+int(message.content[5])*256+int(message.content[6])*256*256 + int(message.content[7])*256*256*256;
+	angle = remainder((num_tick%AV_POTI_RESOLUTION)*360.0/AV_POTI_RESOLUTION,360.0);
+	poti.sail_angle_abs = angle;
+	potiData.t_writefrom(poti);
     }
-
-    return ret;
-}
-
-
-int poti_set_PDO()
-{
-    msg.id = 0x600 + AV_POTI_NODE_ID;
-    msg.content[0] = 0x01;
-    msg.content[1] = 0x08;
-
-    int ret=can_send_message(&msg);
-
-    return ret;
-}
-
-
-int poti_init()
-{
-    can_init("/dev/ttyUSB0");
-return 0;
-}
-
-
-int
-main (int argc, char * argv[])
-{
-  int num_tick;
-  double angle;
-  if(argc < 2) {
-    fprintf(stderr, "usage: %s DEV\n", argv[0]); 
-    return -1;
-  }
-// poti_init();
-  can_init(argv[1]);
-  poti_pos_request(&angle);
-//   poti_set_PDO();
-
   
-
-while(1) {
-  
-    can_read_message();
-  num_tick = int(message.content[4]) + int(message.content[5])*256 + int(message.content[6])*256*256 + int(message.content[7])*256*256*256;
-  angle = remainder((num_tick%AV_POTI_RESOLUTION)*360.0/AV_POTI_RESOLUTION,360.0);
-  if (message.id != 0)
-    printf("Received 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X   ticks: %d  angle: %f°\n", message.id, message.content[0], message.content[1], message.content[2], message.content[3], message.content[4], message.content[5], message.content[6], message.content[7], num_tick, angle);
 }
 
-  can_close();
-  return (0);
-}
+// Error handling for C functions (return 0 on success)
+#define DOC(c) {int ret = c;if (ret != 0) {rtx_error("Command "#c" failed with value %d",ret);return -1;}}
 
+// Error handling for C++ function (return true on success)
+#define DOB(c) if (!(c)) {rtx_error("Command "#c" failed");return -1;}
+
+// Error handling for pointer-returning function (return NULL on failure)
+#define DOP(c) if ((c)==NULL) {rtx_error("Command "#c" failed");return -1;}
+
+
+int main (int argc, const char * argv[])
+{
+	RtxThread * th;
+    int ret;
+
+	// Process the command line
+    if ((ret = RTX_GETOPT_CMD (producerOpts, argc, argv, NULL, producerHelpStr)) == -1) {
+		RTX_GETOPT_PRINT (producerOpts, argv[0], NULL, producerHelpStr);
+		exit (1);
+	}
+	rtx_main_init ("AIS Eval Interface", RTX_ERROR_STDERR);
+
+	// Open the store
+	DOB(store.open());
+
+// Register the new Datatypes
+	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), Flags));
+	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), PotiData));
+
+    //
+	
+    // Create output variable
+	DOB(store.registerVariable(dataFlags, varname_flags, "Flags"));
+        DOB(store.registerVariable(potiData, varname_potiData, "PotiData"));
+
+	// Start the working thread
+    DOP(th = rtx_thread_create ("aisEval thread", 0,
+								RTX_THREAD_SCHED_OTHER, RTX_THREAD_PRIO_MIN, 0,
+								RTX_THREAD_CANCEL_DEFERRED,
+								translation_thread, NULL,
+								NULL, NULL));
+
+	// Wait for Ctrl-C
+    DOC (rtx_main_wait_shutdown (0));
+	rtx_message_routine ("Ctrl-C detected. Shutting down aisEval...");
+
+	// Terminating the thread
+    rtx_thread_destroy_sync (th);
+
+	// The destructors will take care of cleaning up the memory
+    return (0);
+
+}

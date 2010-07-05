@@ -117,5 +117,7 @@ TARGET_LINK_LIBRARIES(mtod)
 #TARGET_LINK_LIBRARIES(rootsolver_test gsl gslcblas rtx)
 
 ADD_EXECUTABLE(poti poti.cpp)
-TARGET_LINK_LIBRARIES(poti can-serial epos)
+TARGET_LINK_LIBRARIES(poti ddxx ddx rtx epos can-serial pthread rt )
+# ADD_EXECUTABLE(poti poti.cpp)
+# TARGET_LINK_LIBRARIES(poti can-serial epos)
 
