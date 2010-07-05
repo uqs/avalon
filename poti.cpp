@@ -97,7 +97,6 @@ void * translation_thread(void * dummy)
     Flags generalflags;
     PotiData poti;
     Ports ports;
-
     char commport[99] = "auto";
     int num_tick;
     double angle;
@@ -105,8 +104,7 @@ void * translation_thread(void * dummy)
     
     dataPorts.t_readto(ports,0,0);
     sprintf(commport, "/dev/ttyUSB%d", ports.sail);
-    
-    can_init("commport");
+    can_init(commport);
     
     while (1)
     {
@@ -139,7 +137,7 @@ int main (int argc, const char * argv[])
 		RTX_GETOPT_PRINT (producerOpts, argv[0], NULL, producerHelpStr);
 		exit (1);
 	}
-	rtx_main_init ("AIS Eval Interface", RTX_ERROR_STDERR);
+	rtx_main_init ("POTI Interface", RTX_ERROR_STDERR);
 
 	// Open the store
 	DOB(store.open());
@@ -147,15 +145,16 @@ int main (int argc, const char * argv[])
 // Register the new Datatypes
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), Flags));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), PotiData));
-
+    DOC(DDX_STORE_REGISTER_TYPE (store.getId(), Ports));
     //
 	
     // Create output variable
 	DOB(store.registerVariable(dataFlags, varname_flags, "Flags"));
         DOB(store.registerVariable(potiData, varname_potiData, "PotiData"));
+    DOB(store.registerVariable(dataPorts, varname_ports,"Ports"));
 
 	// Start the working thread
-    DOP(th = rtx_thread_create ("aisEval thread", 0,
+    DOP(th = rtx_thread_create ("potiData thread", 0,
 								RTX_THREAD_SCHED_OTHER, RTX_THREAD_PRIO_MIN, 0,
 								RTX_THREAD_CANCEL_DEFERRED,
 								translation_thread, NULL,
@@ -163,7 +162,7 @@ int main (int argc, const char * argv[])
 
 	// Wait for Ctrl-C
     DOC (rtx_main_wait_shutdown (0));
-	rtx_message_routine ("Ctrl-C detected. Shutting down aisEval...");
+	rtx_message_routine ("Ctrl-C detected. Shutting down poti...");
 
 	// Terminating the thread
     rtx_thread_destroy_sync (th);

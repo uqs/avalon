@@ -15,4 +15,5 @@
 ./global_skipper &
 ./skipper &
 ./navigator &
+./poti &
 ./aisEval &

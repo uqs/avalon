@@ -14,6 +14,7 @@ killall destination_converter
 killall global_skipper
 killall skipper
 killall navigator
+killall poti
 killall aisEval
 
 sleep 5
@@ -32,4 +33,5 @@ killall -9 destination_converter
 killall -9 global_skipper
 killall -9 skipper
 killall -9 navigator
+killall -9 poti
 killall -9 aisEval
