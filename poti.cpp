@@ -97,7 +97,7 @@ void * translation_thread(void * dummy)
     Flags generalflags;
     PotiData poti;
     Ports ports;
-    char commport[99] = "auto";
+    char commport[99] = "";
     int num_tick;
     double angle;
 
@@ -114,7 +114,8 @@ void * translation_thread(void * dummy)
 	poti.sail_angle_abs = angle;
 	potiData.t_writefrom(poti);
     }
-  
+
+    return NULL;  
 }
 
 // Error handling for C functions (return 0 on success)

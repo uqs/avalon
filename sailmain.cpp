@@ -44,6 +44,7 @@
 #include "Sailstate.h"
 #include "flags.h"
 #include "ports.h"
+#include "poti.h"
 
 /**
  * Global variable for all DDX object
@@ -53,10 +54,15 @@ DDXVariable dataSail;
 DDXVariable dataSailState;
 DDXVariable dataFlags;
 DDXVariable dataPorts;
+DDXVariable potiData;
 
 SailMotor motor;
 Ports ports;
 // char commport[99] = "auto\0";
+/**
+ * Prototypes for utility functions
+ * */
+// double get_poti_angle();
 
 /**
  * Storage for the command line arguments
@@ -64,9 +70,15 @@ Ports ports;
 const char * varname = "sail";
 const char * varname_state = "sailstate";
 const char * varname_ports = "ports";
+const char * varname_potiData = "potiData";
 const char * commport = "auto";
 const char * consumerHelpStr = "Sail-Motor EPOS-driver";
 char device[99] = "";
+
+static can_message_t msg_poti_pos_request = {
+  0x600 + AV_POTI_NODE_ID,
+  {0x40, 0x04, 0x60, 0, 0, 0, 0, 0}
+};
 
 /**
  * Command line arguments
@@ -107,10 +119,11 @@ RtxGetopt producerOpts[] = {
  * */
 void * sailmain_thread(void * dummy)
 {
-	sailTarget sail;
-	Sailstate sailState = {0,0};
+    sailTarget sail;
+    Sailstate sailState = {0,0};
+    PotiData poti;
 
-	int ret = 0;
+    int ret = 0;
     int demand_speed = 0;
     int demand_position = 0;
     int speed = 0;
@@ -120,6 +133,9 @@ void * sailmain_thread(void * dummy)
     bool brake = true;
     bool reset_active = false;
     int num_rounds = 0;
+    int num_ticks;
+
+    double angle;
 
     // Initialize sailState (Set everything to zero)
 	dataSailState.t_writefrom(sailState);
@@ -210,7 +226,13 @@ void * sailmain_thread(void * dummy)
             {
                 reset_active = false;
             }
-
+	
+	    // Read position of the poti
+	    can_send_message(&msg_poti_pos_request);
+	    num_ticks = int(message.content[4])+int(message.content[5])*256+int(message.content[6])*256*256 + int(message.content[7])*256*256*256;
+	    angle = remainder((num_ticks%AV_POTI_RESOLUTION)*360.0/AV_POTI_RESOLUTION,360.0);
+	    poti.sail_angle_abs = angle;
+	    potiData.t_writefrom(poti);
 	
 
         } else if (dataSail.hasTimedOut()) {
@@ -238,6 +260,10 @@ void * sailmain_thread(void * dummy)
 // Error handling for pointer-returning function (return NULL on failure)
 #define DOP(c) if ((c)==NULL) {rtx_error("Command "#c" failed");return -1;} 
 
+
+// Some self-defined utility functions:
+
+
 int main (int argc, const char * argv[])
 {
 	RtxThread * th;
@@ -259,11 +285,13 @@ int main (int argc, const char * argv[])
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), sailTarget));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), Sailstate));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), Ports));
+	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), PotiData));
 
 	// Connect to sail-target-variable, and create variables for the target-data
 	DOB(store.registerVariable(dataSail, varname, "sailTarget"));
 	DOB(store.registerVariable(dataSailState, varname_state, "Sailstate"));
 	DOB(store.registerVariable(dataPorts, varname_ports, "Ports"));
+        DOB(store.registerVariable(potiData, varname_potiData, "PotiData"));
 
     dataPorts.t_readto(ports,0,0);
     if (!strcmp(commport, "auto")) {
@@ -274,7 +302,8 @@ int main (int argc, const char * argv[])
 
 	// Initialisation of the Motor 
 	motor.init(device);
-
+	// Initialisation of the CAN-Bus
+	can_init(device);
 	// Start the working thread
 	DOP(th = rtx_thread_create ("Sailmotor driver thread", 0,
 								RTX_THREAD_SCHED_OTHER, RTX_THREAD_PRIO_MIN, 0, 

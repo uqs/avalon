@@ -56,7 +56,7 @@ TARGET_LINK_LIBRARIES(sailor_statemachine gsl gslcblas ddxx ddx rtx pthread rt )
 #TARGET_LINK_LIBRARIES(sailor_statemachine_testGB ddxx ddx rtx pthread rt )
 
 ADD_EXECUTABLE(sailmain sailmain.cpp SailMotor.cpp)
-TARGET_LINK_LIBRARIES(sailmain ddxx ddx rtx epos can pthread rt )
+TARGET_LINK_LIBRARIES(sailmain ddxx ddx rtx epos can-serial pthread rt )
 
 ADD_EXECUTABLE(sailmain_keepalive sailmain_keepalive.cpp)
 TARGET_LINK_LIBRARIES(sailmain_keepalive ddxx ddx rtx pthread rt )
