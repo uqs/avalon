@@ -207,7 +207,6 @@ v_r_tot = sqrt((vel_app_rudder(1))^2 + (vel_app_rudder(2))^2);% + (vel(3,1)*1.7)
 d_water = atan2(vel_app_rudder(2),vel_app_rudder(1));% 
 d_water = reminderRad(d_water);
 
-c_rudder_drag = 1.28*sin(abs(-d_water + alpha_rudder));
 
 incid_angle = -d_water + alpha_rudder;
 incid_angle = reminderRad(incid_angle);
@@ -222,7 +221,16 @@ format long
 % elseif abs(incid_angle) >= 90*pi/180 && abs(incid_angle) <= pi
 %     c_rudder_lift = 0;
 % end
-c_rudder_lift = 1.9*(1-exp(-abs(incid_angle)*9))-2.4*abs(incid_angle);
+% c_rudder_drag = 1.28*sin(abs(-d_water + alpha_rudder));
+% c_rudder_lift = 1.9*(1-exp(-abs(incid_angle)*9))-2.4*abs(incid_angle);
+c_rudder_drag = 0.1+0.3*incid_angle^2; % from Mario
+c_rudder_lift = abs(abs(7.1*incid_angle) - 4*incid_angle^2 -abs(16.6*incid_angle^3)); % from Mario
+% if c_rudder_lift>2
+%     c_rudder_lift = 2;
+% end
+% if c_rudder_drag>0.1
+%     c_rudder_drag = 0.1;
+% end
 % [c_rudder_drag c_rudder_lift, incid_angle];
 if incid_angle > 0
     vorzeichenR = 1;

@@ -166,8 +166,11 @@ V_wind=sqrt((V_wind_x)*(V_wind_x)+(V_wind_y)*(V_wind_y));
 
 
 // same model as in the matlab-file
-c_rudder_drag = 1.28*sin(fabs(incid_angle));
-c_rudder_lift = 1.9*(1-exp(-fabs(incid_angle)*9))-2.4*fabs(incid_angle);
+// c_rudder_drag = 1.28*sin(fabs(incid_angle)); //from Fabian
+// c_rudder_lift = 1.9*(1-exp(-fabs(incid_angle)*9))-2.4*fabs(incid_angle); //from Fabian
+c_rudder_drag = 0.1+0.3*pow(incid_angle,2);; //from Mario
+c_rudder_lift = fabs(7.1*fabs(incid_angle) - 4*pow(incid_angle,2) -16.6*pow(fabs(incid_angle),3)); //from Mario
+// rtx_message("c_lift: %f", c_rudder_lift);
 // rtx_message("c_r_drag: %f, c_r_lift: %f incid: %f",c_rudder_drag,c_rudder_lift, incid_angle);
 F_lift_v_right = 1.0/2.0*dens_water*c_rudder_lift*v_r_tot*v_r_tot*A_rudder*sin(incid_angle);
 F_drag_v_right = 1.0/2.0*dens_water*c_rudder_drag*v_r_tot*v_r_tot*A_rudder*sin(incid_angle)*vorzeichenR;
