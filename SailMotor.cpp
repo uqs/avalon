@@ -98,14 +98,18 @@ bool SailMotor::move_to_angle(float degrees, float reference, int& feedback, int
 		// get feedback
         epos_get_actual_position(AV_SAIL_NODE_ID);
         feedback = epos_read.node[AV_SAIL_NODE_ID-1].actual_position;
-        position = remainder((feedback / (AV_SAIL_TICKS_PER_DEGREE)),360.0);
+        position = (feedback / (AV_SAIL_TICKS_PER_DEGREE))-reference;
 
-        num_rounds = (feedback - 180 * AV_SAIL_TICKS_PER_DEGREE) / (360 * AV_SAIL_TICKS_PER_DEGREE);
+       // num_rounds = (feedback + 180 * AV_SAIL_TICKS_PER_DEGREE) / (360 * AV_SAIL_TICKS_PER_DEGREE);
+		num_rounds = (position+180.0*sign(position))/360.0;
+		//rtx_message("num_ro: %d, feedback: %d", num_rounds, feedback);
+		//num_rounds = (position+180.0)/360.0;
+		position = remainder(position, 360.0);
         if(fabs(degrees - position) > 180.0)
         {
             num_rounds -= 1*sign(remainder((position - degrees),360.0));
         }
-
+//rtx_message("pos: %f, num_ro: %d", position, num_rounds);
 		// Go to position
         target = (int)round(AV_SAIL_TICKS_PER_DEGREE * (degrees + reference + num_rounds*360));
         epos_set_target_position(AV_SAIL_NODE_ID, target);

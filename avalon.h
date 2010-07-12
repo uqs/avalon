@@ -94,6 +94,7 @@
 #define AV_SAIL_NODE_ID                 0x0002          // Node ID of the Sail EPOS
 #define AV_POTI_NODE_ID                 0x0008          // Node ID of the poti
 #define AV_POTI_RESOLUTION		4096		// ticks per revolution (360°)
+//#define AV_POTI_OFFSET			178			// offset in degrees
 
 // If you want to have a fancy control room environnment, activate this!!
 //#define AV_SAILMAIN_CONTROLCENTER

@@ -144,25 +144,27 @@ void * sailmain_thread(void * dummy)
      dataSailState.t_readto(sailState,0,0);
     // Read position of the poti
     can_send_message(&msg_poti_pos_request);
-rtx_message("poti-message: 0x%X 0x%X 0x%X 0x%X",message.content[4], message.content[5], message.content[6], message.content[7]);
+//rtx_message("poti-message: 0x%X 0x%X 0x%X 0x%X",message.content[4], message.content[5], message.content[6], message.content[7]);
     num_ticks = int(message.content[4])+int(message.content[5])*256+int(message.content[6])*256*256 + int(message.content[7])*256*256*256;
     angle = remainder((num_ticks%AV_POTI_RESOLUTION)*360.0/AV_POTI_RESOLUTION,360.0);
-    poti.sail_angle_abs = angle;
+    poti.sail_angle_abs = -angle;
     potiData.t_writefrom(poti);
     
     // define reference sail angle
     sailState.ref_sail = sailState.degrees_sail - poti.sail_angle_abs;
+	rtx_message("real: %f, poti: %f, ref: %f", sailState.degrees_sail, poti.sail_angle_abs, sailState.ref_sail);
     // Initialize sailState (Set everything to zero)
-    dataSailState.t_writefrom(sailState);
+    //sailState.ref_sail = 0;
+	dataSailState.t_writefrom(sailState);
 
 	while (1) {
 		// Read the next data available, or wait at most 5 seconds
-can_send_message(&msg_poti_pos_request);
-rtx_message("poti-message: 0x%X 0x%X 0x%X 0x%X",message.content[4], message.content[5], message.content[6], message.content[7]);
+//can_send_message(&msg_poti_pos_request);
+//rtx_message("poti-message: 0x%X 0x%X 0x%X 0x%X",message.content[4], message.content[5], message.content[6], message.content[7]);
 		if (1) {
             dataSailState.t_readto(sailState,0,0);
 			dataSail.t_readto(sail,0,0);
-
+//rtx_message("start");
             // check if errors are present
             epos_read.node[AV_SAIL_NODE_ID].req_reset = 0;
             // rtx_timer_sleep(0.1);
@@ -180,7 +182,7 @@ rtx_message("poti-message: 0x%X 0x%X 0x%X 0x%X",message.content[4], message.cont
 			//sailState.degrees_sail =  feedback / AV_SAIL_TICKS_PER_DEGREE;
             sailState.degrees_sail = remainder((feedback / (AV_SAIL_TICKS_PER_DEGREE)),360.0);
 			dataSailState.t_writefrom(sailState);
-
+//rtx_message("goal: %f actual: %f ref: %f", sail.degrees, sailState.degrees_sail,sailState.ref_sail);
             // Ask for Some of the Data and display
             epos_get_actual_velocity(AV_SAIL_NODE_ID);
             epos_get_actual_position(AV_SAIL_NODE_ID);
@@ -235,7 +237,7 @@ rtx_message("poti-message: 0x%X 0x%X 0x%X 0x%X",message.content[4], message.cont
             {
                 rtx_message("Resetting sail ... ");
 		sailState.ref_sail = sailState.degrees_sail - poti.sail_angle_abs;
-//                 sailState.ref_sail = sailState.degrees_sail;
+        //         sailState.ref_sail = sailState.degrees_sail;
                 reset_active = true;
 				// Bring Encoder and reference values to Store
 				dataSailState.t_writefrom(sailState);
@@ -244,7 +246,12 @@ rtx_message("poti-message: 0x%X 0x%X 0x%X 0x%X",message.content[4], message.cont
             {
                 reset_active = false;
             }
-	
+	    can_send_message(&msg_poti_pos_request);
+//rtx_message("poti-message: 0x%X 0x%X 0x%X 0x%X",message.content[4], message.content[5], message.content[6], message.content[7]);
+	    num_ticks = int(message.content[4])+int(message.content[5])*256+int(message.content[6])*256*256 + int(message.content[7])*256*256*256;
+	    angle = remainder((num_ticks%AV_POTI_RESOLUTION)*360.0/AV_POTI_RESOLUTION,360.0);
+	    poti.sail_angle_abs = -angle;
+	    potiData.t_writefrom(poti);
 
 	
 

@@ -165,6 +165,7 @@ while (x_iter<x_hi)
 	}
 i++;
 }
+err=sailor_rudder_iter_fn(alpha_r, &params);
 // rtx_message("end after %d iterations\n",i);
 // rtx_message("error: %f, alpha: %f",err_min, alpha_r*180/AV_PI);
 #endif
