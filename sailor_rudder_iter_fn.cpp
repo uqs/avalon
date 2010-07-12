@@ -165,24 +165,24 @@ V_wind=sqrt((V_wind_x)*(V_wind_x)+(V_wind_y)*(V_wind_y));
 	//
 
 
-// same model as in the matlab-file
-// c_rudder_drag = 1.28*sin(fabs(incid_angle)); //from Fabian
-// c_rudder_lift = 1.9*(1-exp(-fabs(incid_angle)*9))-2.4*fabs(incid_angle); //from Fabian
-c_rudder_drag = 0.1+0.3*pow(incid_angle,2);; //from Mario
-c_rudder_lift = fabs(7.1*fabs(incid_angle) - 4*pow(incid_angle,2) -16.6*pow(fabs(incid_angle),3)); //from Mario
+    // same model as in the matlab-file
+    // c_rudder_drag = 1.28*sin(fabs(incid_angle)); //from Fabian
+    // c_rudder_lift = 1.9*(1-exp(-fabs(incid_angle)*9))-2.4*fabs(incid_angle); //from Fabian
+    c_rudder_drag = 0.1+0.3*pow(incid_angle,2);; //from Mario
+    c_rudder_lift = fabs(7.1*fabs(incid_angle) - 4*pow(incid_angle,2) -16.6*pow(fabs(incid_angle),3)); //from Mario
 // rtx_message("c_lift: %f", c_rudder_lift);
 // rtx_message("c_r_drag: %f, c_r_lift: %f incid: %f",c_rudder_drag,c_rudder_lift, incid_angle);
-F_lift_v_right = 1.0/2.0*dens_water*c_rudder_lift*v_r_tot*v_r_tot*A_rudder*sin(incid_angle);
-F_drag_v_right = 1.0/2.0*dens_water*c_rudder_drag*v_r_tot*v_r_tot*A_rudder*sin(incid_angle)*vorzeichenR;
+    F_lift_v_right = 1.0/2.0*dens_water*c_rudder_lift*v_r_tot*v_r_tot*A_rudder*sin(incid_angle);
+    F_drag_v_right = 1.0/2.0*dens_water*c_rudder_drag*v_r_tot*v_r_tot*A_rudder*sin(incid_angle)*vorzeichenR;
 
-F_lift_v_left = 1.0/2.0*dens_water*c_rudder_lift*v_r_tot*v_r_tot*A_rudder*sin(incid_angle);
-F_drag_v_left = 1.0/2.0*dens_water*c_rudder_drag*v_r_tot*v_r_tot*A_rudder*sin(incid_angle)*vorzeichenR;
+    F_lift_v_left = 1.0/2.0*dens_water*c_rudder_lift*v_r_tot*v_r_tot*A_rudder*sin(incid_angle);
+    F_drag_v_left = 1.0/2.0*dens_water*c_rudder_drag*v_r_tot*v_r_tot*A_rudder*sin(incid_angle)*vorzeichenR;
 // rtx_message("F_lift_R: %f, F_drag_R: %f, F_lift_L: %f, F_drag_L: %f\n",F_lift_v_right,F_drag_v_right,F_lift_v_left,F_drag_v_left);
 
-Y_rudder_right = F_lift_v_right*cos(d_water) + F_drag_v_right*sin(-d_water);
-double Y_rudder_left = F_lift_v_left*cos(d_water) + F_drag_v_left*sin(-d_water);
+    Y_rudder_right = F_lift_v_right*cos(d_water) + F_drag_v_right*sin(-d_water);
+    double Y_rudder_left = F_lift_v_left*cos(d_water) + F_drag_v_left*sin(-d_water);
 // rtx_message("rudderforceR: %f, rudderforceR: %f\n",Y_rudder_right,Y_rudder_left);
-double output = (Y_rudder_right+Y_rudder_left-Y_rudder)/Y_rudder;
+    double output = (Y_rudder_right+Y_rudder_left-Y_rudder)/Y_rudder;
 
 #ifdef ROOT_FINDING
 	// do nothing

@@ -79,6 +79,10 @@ static can_message_t msg_poti_pos_request = {
   0x600 + AV_POTI_NODE_ID,
   {0x40, 0x04, 0x60, 0, 0, 0, 0, 0}
 };
+static can_message_t msg_poti_set_ref = {
+  0x600 + AV_POTI_NODE_ID,
+  {0x23, 0x03, 0x60, 0, 0, 0, 0, 0}
+};
 
 /**
  * Command line arguments
@@ -137,11 +141,24 @@ void * sailmain_thread(void * dummy)
 
     double angle;
 
+     dataSailState.t_readto(sailState,0,0);
+    // Read position of the poti
+    can_send_message(&msg_poti_pos_request);
+rtx_message("poti-message: 0x%X 0x%X 0x%X 0x%X",message.content[4], message.content[5], message.content[6], message.content[7]);
+    num_ticks = int(message.content[4])+int(message.content[5])*256+int(message.content[6])*256*256 + int(message.content[7])*256*256*256;
+    angle = remainder((num_ticks%AV_POTI_RESOLUTION)*360.0/AV_POTI_RESOLUTION,360.0);
+    poti.sail_angle_abs = angle;
+    potiData.t_writefrom(poti);
+    
+    // define reference sail angle
+    sailState.ref_sail = sailState.degrees_sail - poti.sail_angle_abs;
     // Initialize sailState (Set everything to zero)
-	dataSailState.t_writefrom(sailState);
+    dataSailState.t_writefrom(sailState);
 
 	while (1) {
 		// Read the next data available, or wait at most 5 seconds
+can_send_message(&msg_poti_pos_request);
+rtx_message("poti-message: 0x%X 0x%X 0x%X 0x%X",message.content[4], message.content[5], message.content[6], message.content[7]);
 		if (1) {
             dataSailState.t_readto(sailState,0,0);
 			dataSail.t_readto(sail,0,0);
@@ -217,7 +234,8 @@ void * sailmain_thread(void * dummy)
             if(sail.reset_request == 1 && !reset_active)
             {
                 rtx_message("Resetting sail ... ");
-                sailState.ref_sail = sailState.degrees_sail;
+		sailState.ref_sail = sailState.degrees_sail - poti.sail_angle_abs;
+//                 sailState.ref_sail = sailState.degrees_sail;
                 reset_active = true;
 				// Bring Encoder and reference values to Store
 				dataSailState.t_writefrom(sailState);
@@ -227,12 +245,7 @@ void * sailmain_thread(void * dummy)
                 reset_active = false;
             }
 	
-	    // Read position of the poti
-	    can_send_message(&msg_poti_pos_request);
-	    num_ticks = int(message.content[4])+int(message.content[5])*256+int(message.content[6])*256*256 + int(message.content[7])*256*256*256;
-	    angle = remainder((num_ticks%AV_POTI_RESOLUTION)*360.0/AV_POTI_RESOLUTION,360.0);
-	    poti.sail_angle_abs = angle;
-	    potiData.t_writefrom(poti);
+
 	
 
         } else if (dataSail.hasTimedOut()) {
@@ -302,8 +315,8 @@ int main (int argc, const char * argv[])
 
 	// Initialisation of the Motor 
 	motor.init(device);
-	// Initialisation of the CAN-Bus
-	can_init(device);
+// 	// Initialisation of the CAN-Bus
+// 	can_init(device);
 	// Start the working thread
 	DOP(th = rtx_thread_create ("Sailmotor driver thread", 0,
 								RTX_THREAD_SCHED_OTHER, RTX_THREAD_PRIO_MIN, 0, 

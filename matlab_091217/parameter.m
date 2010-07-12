@@ -59,7 +59,7 @@ m           = 450;                    % [kg] mass of the ship
 length      = 3.95;                   % [m] length of ship
 width       = 1.2;                    % [m] width of ship parts in water
 depth       = 0.2;                    % [m] depth of ship parts in water
-I           = [635;2427;150]; % I(3)=150;             % [kg*m^2] moment of inertia
+I           = [635;2427;120]; % I(3)=150;             % [kg*m^2] moment of inertia
 
 A_sail      = 8.4;                   % [m^2] Area of the sail
 A_hull      = [0.35;4;2.0];           % [m^2] Area for hull drag
