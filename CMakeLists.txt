@@ -49,8 +49,11 @@ TARGET_LINK_LIBRARIES(aisEval ddxx ddx rtx epos can pthread rt )
 ADD_EXECUTABLE(sailor_transitions sailor_transitions.cpp Ship.cpp)
 TARGET_LINK_LIBRARIES(sailor_transitions ddxx ddx rtx pthread rt )
 
-ADD_EXECUTABLE(sailor_statemachine sailor_statemachine.cpp Ship.cpp sailor_main_iter_fn.cpp sailor_rudder_iter_fn.cpp)
-TARGET_LINK_LIBRARIES(sailor_statemachine gsl gslcblas ddxx ddx rtx pthread rt )
+# ADD_EXECUTABLE(sailor_statemachine sailor_statemachine.cpp Ship.cpp sailor_main_iter_fn.cpp sailor_rudder_iter_fn.cpp)
+# TARGET_LINK_LIBRARIES(sailor_statemachine gsl gslcblas ddxx ddx rtx pthread rt )
+
+ADD_EXECUTABLE(sailor_statemachine sailor_statemachine.cpp Ship.cpp sailor_inverted_linear_model.cpp)
+TARGET_LINK_LIBRARIES(sailor_statemachine ddxx ddx rtx pthread rt)
 
 #ADD_EXECUTABLE(sailor_statemachine_testGB sailor_statemachine_testGB.cpp Ship.cpp)
 #TARGET_LINK_LIBRARIES(sailor_statemachine_testGB ddxx ddx rtx pthread rt )

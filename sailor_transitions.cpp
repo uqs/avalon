@@ -227,7 +227,7 @@ void * translation_thread(void * dummy)
             case AV_FLAGS_ST_NORMALSAILING: //current state NORMALSAILING
                 // to UPWINDSAILING
 // rtx_message("desired_head= %lf   wind_clean= %lf \n",desired_heading.heading,wind_clean.global_direction_real );
-		if(fabs(remainder((desired_heading.heading - wind_clean.global_direction_real),360.0)) <= AV_SAILOR_MAX_HEIGHT_TO_WIND)
+		if(fabs(remainder((desired_heading.heading - wind_clean.global_direction_real),360.0)) <= (AV_SAILOR_MAX_HEIGHT_TO_WIND-5))
                 {
                     sailorflags.state = AV_FLAGS_ST_UPWINDSAILING;
                 }

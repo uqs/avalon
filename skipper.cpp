@@ -169,7 +169,7 @@ void * translation_thread(void * dummy)
     std::vector<double> headingHistory(30,boatData.attitude.yaw);
     double heading_average;
     dataWindClean.t_readto(cleanedwind,0,0);
-    std::vector<double> dir_wind_hist(30,cleanedwind.global_direction_real_long);
+    //std::vector<double> dir_wind_hist(30,cleanedwind.global_direction_real_long);
     double dir_wind_mean;
 
     //initializing the call index
@@ -198,14 +198,15 @@ void * translation_thread(void * dummy)
                 heading_average += 1.0/headingHistory.size() * headingHistory[u];
             }
 	    
-	    dir_wind_mean = dir_wind_hist[0];
-	    dir_wind_hist.insert(dir_wind_hist.begin(),cleanedwind.global_direction_real_long);
-	    dir_wind_hist.resize(30);
-	    for (unsigned int u=1; u<dir_wind_hist.size(); u++)
-            {
-                dir_wind_mean += 1.0/dir_wind_hist.size() * remainder(dir_wind_hist[u]-dir_wind_hist[0],360.0);
-            }
-	    dir_wind_mean=remainder(dir_wind_mean,360.0);
+// 	    dir_wind_mean = dir_wind_hist[0];
+// 	    dir_wind_hist.insert(dir_wind_hist.begin(),cleanedwind.global_direction_real_long);
+// 	    dir_wind_hist.resize(30);
+// 	    for (unsigned int u=1; u<dir_wind_hist.size(); u++)
+//             {
+//                 dir_wind_mean += 1.0/dir_wind_hist.size() * remainder(dir_wind_hist[u]-dir_wind_hist[0],360.0);
+//             }
+// 	    dir_wind_mean=remainder(dir_wind_mean,360.0);
+	dir_wind_mean = cleanedwind.global_direction_real;
 // rtx_message("dir_wind_mean: %f",dir_wind_mean);
             if(!generalflags.autonom_navigation)
             {

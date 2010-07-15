@@ -1,7 +1,7 @@
-torque/P    9.3
-torque/I    0.2
-torque/Imin	-20.0
-torque/Imax 20.0
-torque/D    0.1
-torque/min  -80.0
-torque/max  80.0
+torque/P    30.3
+torque/I    2.2
+torque/Imin	-220.0
+torque/Imax 220.0
+torque/D    10.3
+torque/min  -180.0
+torque/max  180.0
