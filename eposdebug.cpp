@@ -149,7 +149,7 @@ int main(int argc, const char * argv[])
         {
             printf("Going to start a homing operation...\n");
         }
-        ruddermotor.conduct_homing(1);
+        ruddermotor.conduct_homing_left(1);
     }
 
     if(poti != 0)

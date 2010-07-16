@@ -112,18 +112,18 @@ int RudderMotor::obtain_serial_number(int i)
 }
 
 
-bool RudderMotor::conduct_homing(int id)
+bool RudderMotor::conduct_homing_left(int id)
 {
 	// Set Operation Mode and homing method
 	epos_set_mode_of_operation(id, EPOS_OPERATION_MODE_HOMING);
-	epos_set_homing_method(id, AV_HOMING_MODE);
+	epos_set_homing_method(id, AV_HOMING_MODE_LEFT);
 
     // Set All the Parameters
     epos_set_homing_speed_switch_search(id, AV_HOMING_SWITCH_SPEED);
     epos_set_homing_current_threshold(id, AV_HOMING_THRESHOLD);
     epos_set_homing_speed_zero_search(id, AV_HOMING_ZERO_SPEED);
     epos_set_home_position(id, AV_HOMING_POSITION);
-    epos_set_home_offset(id, AV_HOMING_OFFSET);
+    epos_set_home_offset(id, AV_HOMING_OFFSET_LEFT);
 
 	// Set to Zero
 	epos_start_homing_operation(id);
@@ -133,6 +133,30 @@ bool RudderMotor::conduct_homing(int id)
 
 	return true;
 }
+
+
+bool RudderMotor::conduct_homing_right(int id)
+{
+	// Set Operation Mode and homing method
+	epos_set_mode_of_operation(id, EPOS_OPERATION_MODE_HOMING);
+	epos_set_homing_method(id, AV_HOMING_MODE_RIGHT);
+
+    // Set All the Parameters
+    epos_set_homing_speed_switch_search(id, AV_HOMING_SWITCH_SPEED);
+    epos_set_homing_current_threshold(id, AV_HOMING_THRESHOLD);
+    epos_set_homing_speed_zero_search(id, AV_HOMING_ZERO_SPEED);
+    epos_set_home_position(id, AV_HOMING_POSITION);
+    epos_set_home_offset(id, AV_HOMING_OFFSET_RIGHT);
+
+	// Set to Zero
+	epos_start_homing_operation(id);
+
+	// Reset Operation Mode
+	epos_set_mode_of_operation(id, EPOS_OPERATION_MODE_PROFILE_POSITION);
+
+	return true;
+}
+
 
 bool RudderMotor::move_to_angle(int id, float degrees, float reference, int& feedback) {
 	

@@ -285,7 +285,10 @@ int main (int argc, const char * argv[])
 		rtx_message("Something failed... Exiting.\n");
 		return 0;
 	}
-	motor.conduct_homing(1);
+	if(rudderside == AV_RUDDER_LEFT)
+	{	motor.conduct_homing_left(1);}
+	else if (rudderside == AV_RUDDER_RIGHT)
+	{	motor.conduct_homing_right(1);}
 
 	// Start the working thread
 	DOP(th = rtx_thread_create ("Ruddermotor driver thread", 0,

@@ -71,12 +71,14 @@
 #define AV_RUDDER_RIGHT				    2
 
 // Rudder Homing Stuff
-#define AV_HOMING_MODE                  -1
+#define AV_HOMING_MODE_LEFT             18
+#define AV_HOMING_MODE_RIGHT            17
 #define AV_HOMING_SWITCH_SPEED          300
 #define AV_HOMING_THRESHOLD             2000
 #define AV_HOMING_ZERO_SPEED            500
 #define AV_HOMING_POSITION              0
-#define AV_HOMING_OFFSET                30000
+#define AV_HOMING_OFFSET_LEFT           30000
+#define AV_HOMING_OFFSET_RIGHT          30000
 
 // Sail
 #define AV_MAX_SAIL_ANGLE			    180.0
