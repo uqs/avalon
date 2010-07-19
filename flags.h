@@ -87,6 +87,8 @@ DDX_STORE_TYPE(Flags,
         unsigned long navi_index_call;       // shows which calculation is currently beeing calculated!
         unsigned long navi_index_answer;
 
+	unsigned int sail_reset_index;
+
         int autonom_navigation;
         int global_locator;         // to decide which state the global skipper is in 
 
@@ -132,7 +134,9 @@ DDX_STORE_TYPE(NaviFlags,
         int navi_state; 
               
         unsigned long navi_index_call;       // shows which calculation is currently beeing calculated!
-        unsigned long navi_index_answer;      
+        unsigned long navi_index_answer;
+	
+	unsigned int sail_reset_index;
     }
 );
 

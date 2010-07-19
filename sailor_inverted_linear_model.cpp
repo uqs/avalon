@@ -18,14 +18,18 @@ double sailor_inverted_linear_model(double heading_speed, double torque_des,
 {    
     double dens_water      = 1025.0;       
     double A_rudder        = 0.085;
+    double dist_rudder_CenterOfRotation = 1.7;
+    double linearisation_coeff = 0.9;
+
     double v_r_tot;
     double d_water;
     double incid_angle;
     double rudder_angle;
 
-    v_r_tot         = sqrt((speed_x*speed_x) + ((speed_y - 1.7*heading_speed)*(speed_y - 1.7*heading_speed)));
-    d_water         = atan2((speed_y - 1.7*heading_speed),speed_x)*180/AV_PI; 
-    incid_angle = -torque_des/(0.9*1.7*dens_water*v_r_tot*v_r_tot*A_rudder)*180/AV_PI;
+    v_r_tot	= sqrt((speed_x*speed_x) + ((speed_y - dist_rudder_CenterOfRotation*heading_speed)*(speed_y - dist_rudder_CenterOfRotation*heading_speed)));
+    d_water     = atan2((speed_y - dist_rudder_CenterOfRotation*heading_speed),speed_x)*180/AV_PI; 
+    incid_angle = -torque_des / (linearisation_coeff*dist_rudder_CenterOfRotation*dens_water*v_r_tot*v_r_tot*A_rudder) *180/AV_PI;
+
     if(incid_angle > 10)
     {
 	incid_angle = 10;

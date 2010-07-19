@@ -67,6 +67,7 @@ Ports ports;
 /**
  * Storage for the command line arguments
  * */
+const char * varname_flags = "flags";
 const char * varname = "sail";
 const char * varname_state = "sailstate";
 const char * varname_ports = "ports";
@@ -90,6 +91,12 @@ static can_message_t msg_poti_set_ref = {
  * */
 
 RtxGetopt producerOpts[] = {
+  {"flagsname", "Store-Variable where the flags are",
+        {
+            {RTX_GETOPT_STR, &varname_flags, ""},
+            RTX_GETOPT_END_ARG
+        }
+  },
   {"inname", "Store-Variable where the target angle is",
    {
      {RTX_GETOPT_STR, &varname, ""},
@@ -124,6 +131,7 @@ RtxGetopt producerOpts[] = {
 void * sailmain_thread(void * dummy)
 {
     sailTarget sail;
+    Flags flags;
     Sailstate sailState = {0,0};
     PotiData poti;
 
@@ -138,6 +146,7 @@ void * sailmain_thread(void * dummy)
     bool reset_active = false;
     int num_rounds = 0;
     int num_ticks;
+    unsigned int reset_index = 0;
 
     double angle;
 
@@ -162,6 +171,7 @@ void * sailmain_thread(void * dummy)
 //can_send_message(&msg_poti_pos_request);
 //rtx_message("poti-message: 0x%X 0x%X 0x%X 0x%X",message.content[4], message.content[5], message.content[6], message.content[7]);
 		if (1) {
+	    dataFlags.t_readto(flags,0,0);
             dataSailState.t_readto(sailState,0,0);
 			dataSail.t_readto(sail,0,0);
 //rtx_message("start");
@@ -233,12 +243,13 @@ void * sailmain_thread(void * dummy)
             }
 
 			// Reset Options (if requested by the Remote-Controller)
-            if(sail.reset_request == 1 && !reset_active)
+            if((sail.reset_request == 1 && !reset_active) || reset_index != flags.sail_reset_index)
             {
                 rtx_message("Resetting sail ... ");
 		sailState.ref_sail = sailState.degrees_sail - poti.sail_angle_abs;
         //         sailState.ref_sail = sailState.degrees_sail;
                 reset_active = true;
+		reset_index = flags.sail_reset_index;
 				// Bring Encoder and reference values to Store
 				dataSailState.t_writefrom(sailState);
             }
@@ -303,12 +314,14 @@ int main (int argc, const char * argv[])
 
     // Register Datatypes
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), sailTarget));
+	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), Flags));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), Sailstate));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), Ports));
 	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), PotiData));
 
 	// Connect to sail-target-variable, and create variables for the target-data
 	DOB(store.registerVariable(dataSail, varname, "sailTarget"));
+	DOB(store.registerVariable(dataFlags, varname_flags, "Flags"));
 	DOB(store.registerVariable(dataSailState, varname_state, "Sailstate"));
 	DOB(store.registerVariable(dataPorts, varname_ports, "Ports"));
         DOB(store.registerVariable(potiData, varname_potiData, "PotiData"));

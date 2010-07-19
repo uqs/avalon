@@ -178,7 +178,8 @@ void * rudderdrive_thread(void * dummy)
 			if(rudder.resetleft_request && rudderside == AV_RUDDER_LEFT && !left_pressed)
 			{
 				rtx_message("Resetting left rudder ... ");
-				rudderstate.ref_rudder = rudderstate.degrees_rudder;
+			//	rudderstate.ref_rudder = rudderstate.degrees_rudder;
+				motor.conduct_homing_left(1);
 				left_pressed = true;
 			}
 			else if(!rudder.resetleft_request && rudderside == AV_RUDDER_LEFT)
@@ -189,7 +190,8 @@ void * rudderdrive_thread(void * dummy)
 			if(rudder.resetright_request && rudderside == AV_RUDDER_RIGHT && !right_pressed)
 			{
 				rtx_message("Resetting right rudder ... ");
-				rudderstate.ref_rudder = rudderstate.degrees_rudder;
+				//rudderstate.ref_rudder = rudderstate.degrees_rudder;
+				motor.conduct_homing_right(1);
 				right_pressed = true;
 			}
 			else if(!rudder.resetleft_request && rudderside == AV_RUDDER_RIGHT)

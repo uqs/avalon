@@ -550,6 +550,7 @@ double alpha = atan2(cos(destination.latitude*AV_PI/180)*(destination.Data[next_
 				last_calc_index = generalflags.navi_index_call;
 				last_dest_index = destination.skipper_index_call;
 				naviflags.navi_index_answer = generalflags.navi_index_call;
+				naviflags.sail_reset_index++;
 				dataNaviFlags.t_writefrom(naviflags);
 				transformationData.t_writefrom(transformation);
 				waypointData.t_writefrom(waypoints);

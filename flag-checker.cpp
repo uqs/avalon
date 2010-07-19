@@ -149,6 +149,7 @@ void * translation_thread(void * dummy)
     naviflags.navi_state = AV_FLAGS_NAVI_NEWCALCULATION; //shoudn't make a difference, gets filled further down!!
     naviflags.navi_index_call = 0;
     naviflags.navi_index_answer = 0;
+    naviflags.sail_reset_index = 0;
 
     //Skipper Flags:
     skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
@@ -210,6 +211,7 @@ void * translation_thread(void * dummy)
             
             flags.navi_index_call = naviflags.navi_index_call;
             flags.navi_index_answer = naviflags.navi_index_answer;
+	    flags.sail_reset_index = naviflags.sail_reset_index;
 
 
 

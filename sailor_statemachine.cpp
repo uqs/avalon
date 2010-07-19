@@ -163,7 +163,7 @@ RtxGetopt producerOpts[] =
 };
 
 double sailor_inverted_linear_model(double heading_speed, double torque_des, 
-		double speed_x, double speed_y);
+		double speed_x, double speed_y); // Prototype of the controllerfunction defined in sailor_inverted_linear_model.cpp
 
 /**
  * Working thread, wait for the data, transform them and write them again
@@ -183,7 +183,6 @@ void * translation_thread(void * dummy)
     DesiredHeading desired_heading;
 
 
-   //  double u;  // the input that will be written to rudderangle
     double theta_dot_des; //desired theta_dot by first controller
     double e;  // the current error
     RtxPid* mypid = NULL;
@@ -212,7 +211,7 @@ void * translation_thread(void * dummy)
 //     double desired_heading_while_no_tack_or_jibe;
 //     int last_no_tack_or_jibe_value;
     double torque_des;
-    double u;
+    double u;  		// the input that will be written to rudderangle
     double speed;
     int count=0;
 
@@ -655,13 +654,13 @@ if(count > 500 && count < 1000)
                                                             * (fabs(sailstate.degrees_sail) - 180.0) / (fabs(sail_pre_jibe) - 180.0)),360.0);
 			    }
 
-			    e = desired_heading.heading - imu.attitude.yaw;
-			    if(fabs(e) > 180) // +-180 thing...
-			    {
-				    imu.attitude.yaw = 0;
-				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
-
-			    }
+// 			    e = desired_heading.heading - imu.attitude.yaw;
+// 			    if(fabs(e) > 180) // +-180 thing...
+// 			    {
+// 				    imu.attitude.yaw = 0;
+// 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
+// 
+// 			    }
 
                             theta_dot_des = rtx_pid_eval(thetapid,remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0) ;
                             torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
