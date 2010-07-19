@@ -273,23 +273,27 @@ int main (int argc, const char * argv[])
 		rtx_message("No rudderside specified. Terminating Programm...");
 		return (-1);
 	}
-
+//sprintf(commport, "/dev/ttyUSB3");
     // Now we know what side we are, so let's connect to the corresponding
     // store variable...
 	DOB(store.registerVariable(dataRudderState, varname_state, "Rudderstate"));
 
 	// INIT-SEQUENCE EPOS-MOTORS
-	rtx_message("Initializing rudders... ");
+	rtx_message("Initializing rudders...: side: %d port: %s ",rudderside, commport);
 	if(!motor.init(rudderside, commport))
 	{
 		rtx_message("Something failed... Exiting.\n");
 		return 0;
 	}
+	rtx_message("rudderside: %d",rudderside);
 	if(rudderside == AV_RUDDER_LEFT)
 	{	motor.conduct_homing_left(1);}
 	else if (rudderside == AV_RUDDER_RIGHT)
-	{	motor.conduct_homing_right(1);}
-
+	{	motor.conduct_homing_right(1);
+		//rtx_message("test\n");
+	}
+	//sleep(20);
+rtx_message("homing done!!");
 	// Start the working thread
 	DOP(th = rtx_thread_create ("Ruddermotor driver thread", 0,
 				RTX_THREAD_SCHED_OTHER, RTX_THREAD_PRIO_MIN, 0, 

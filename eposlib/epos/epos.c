@@ -972,6 +972,25 @@ void epos_set_RS232_baudrate(int id, int val)
 	can_send_message(&message);
 }
 
+void epos_set_homing_profile_acceleration(int id, long int val)
+{	
+	PDEBUG("set homing acceleration profille");
+	can_message_t message;
+
+	message.id = 0x600+id;
+	message.content[0]= EPOS_WRITE_4_BYTE;
+	message.content[1]= 0x9A;
+	message.content[2]= 0x60;
+	message.content[3]= 0x00;
+	message.content[4]= (val & 0x000000ff);
+	message.content[5]= ((val & 0x0000ff00)>>8);
+	message.content[6]= ((val & 0x00ff0000)>>16);
+	message.content[7]= ((val & 0xff000000)>>24);
+
+	PDEBUG("%ld\n",val);
+	can_send_message(&message);
+}
+
 /* *************************** */
 /* EPOS_READ OPERATIONS             */
 /* *************************** */

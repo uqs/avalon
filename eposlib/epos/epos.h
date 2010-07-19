@@ -212,6 +212,7 @@ void epos_set_output_current_limit(int id, int i);
 void epos_get_serial_number(int id);
 void epos_set_homing_current_threshold(int id, int i);
 void epos_set_RS232_baudrate(int id, int val);
+void epos_set_homing_profile_acceleration(int id, long int val);
 
 /* *************************** */
 /* READ OPERATIONS             */

@@ -117,19 +117,33 @@ bool RudderMotor::conduct_homing_left(int id)
 	// Set Operation Mode and homing method
 	epos_set_mode_of_operation(id, EPOS_OPERATION_MODE_HOMING);
 	epos_set_homing_method(id, AV_HOMING_MODE_LEFT);
-
-    // Set All the Parameters
+    
+	// Set All the Parameters
     epos_set_homing_speed_switch_search(id, AV_HOMING_SWITCH_SPEED);
     epos_set_homing_current_threshold(id, AV_HOMING_THRESHOLD);
     epos_set_homing_speed_zero_search(id, AV_HOMING_ZERO_SPEED);
     epos_set_home_position(id, AV_HOMING_POSITION);
     epos_set_home_offset(id, AV_HOMING_OFFSET_LEFT);
-
+	epos_set_homing_profile_acceleration(id, AV_HOMING_ACCELERATION);
+//epos_get_mode_of_operation(id);
+//can_read_message();
+//rtx_message("message: 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X \n",message.id, message.content[0], message.content[1],message.content[2],message.content[3],message.content[4],message.content[5],message.content[6],message.content[7]);
 	// Set to Zero
 	epos_start_homing_operation(id);
+//epos_get_mode_of_operation(id);
+//rtx_message("message: 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X \n",message.id, message.content[0], message.content[1],message.content[2],message.content[3],message.content[4],message.content[5],message.content[6],message.content[7]);
 
 	// Reset Operation Mode
+	epos_get_statusword(id);
+    while(!(epos_read.node[id-1].msg_content[5] & 0x10))
+	{
+		epos_get_statusword(id);
+						        //rtx_message("waiting, byte: 0x%X",
+								//epos_read.node[id-1].msg_content[5]);
+	}
 	epos_set_mode_of_operation(id, EPOS_OPERATION_MODE_PROFILE_POSITION);
+//epos_get_mode_of_operation(id);
+//rtx_message("message: 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X \n\n",message.id, message.content[0], message.content[1],message.content[2],message.content[3],message.content[4],message.content[5],message.content[6],message.content[7]);
 
 	return true;
 }
@@ -147,13 +161,23 @@ bool RudderMotor::conduct_homing_right(int id)
     epos_set_homing_speed_zero_search(id, AV_HOMING_ZERO_SPEED);
     epos_set_home_position(id, AV_HOMING_POSITION);
     epos_set_home_offset(id, AV_HOMING_OFFSET_RIGHT);
+	epos_set_homing_profile_acceleration(id, AV_HOMING_ACCELERATION);
 
 	// Set to Zero
 	epos_start_homing_operation(id);
 
+	epos_get_statusword(id);
+	while(!(epos_read.node[id-1].msg_content[5] & 0x10))
+	{
+		epos_get_statusword(id);
+		//rtx_message("waiting, byte: 0x%X", epos_read.node[id-1].msg_content[5]);
+	}
 	// Reset Operation Mode
 	epos_set_mode_of_operation(id, EPOS_OPERATION_MODE_PROFILE_POSITION);
-
+//while(1)
+//{	epos_get_statusword(id);
+//	rtx_message("status: 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X 0x%X \n",epos_read.node[id-1].msg_content[0], epos_read.node[id-1].msg_content[1], epos_read.node[id-1].msg_content[2], epos_read.node[id-1].msg_content[3], epos_read.node[id-1].msg_content[4], epos_read.node[id-1].msg_content[5], epos_read.node[id-1].msg_content[6], epos_read.node[id-1].msg_content[7]);
+//}	
 	return true;
 }
 

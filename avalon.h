@@ -62,7 +62,7 @@
 #define AV_RUDDER_TICKS_PER_DEGREE	    (-1583)	        // Convert Ticks to degrees (rudder)
 #define AV_NOF_RUDDER_EPOS			    2	            // How many Epos on the Rudders?
 #define AV_MAX_RUDDER_CURRENT		    10000	        // mA max per Rudder EPOS
-#define AV_MAX_RUDDER_CONT_CURRENT	    5000	        // mA max continous per Rudder EPOS
+#define AV_MAX_RUDDER_CONT_CURRENT	    10000	        // mA max continous per Rudder EPOS
 #define AV_RUDDER_SPEED				    9000	        // RPM
 #define AV_RUDDER_ACCELERATION		    30000	        // RPM/s
 #define AV_RUDDER_DECELERATION		    16000	        // RPM/s
@@ -71,14 +71,15 @@
 #define AV_RUDDER_RIGHT				    2
 
 // Rudder Homing Stuff
-#define AV_HOMING_MODE_LEFT             18
-#define AV_HOMING_MODE_RIGHT            17
-#define AV_HOMING_SWITCH_SPEED          300
+#define AV_HOMING_MODE_LEFT				2
+#define AV_HOMING_MODE_RIGHT            1
+#define AV_HOMING_ACCELERATION			100000
+#define AV_HOMING_SWITCH_SPEED          3500
 #define AV_HOMING_THRESHOLD             2000
-#define AV_HOMING_ZERO_SPEED            500
+#define AV_HOMING_ZERO_SPEED            200
 #define AV_HOMING_POSITION              0
-#define AV_HOMING_OFFSET_LEFT           30000
-#define AV_HOMING_OFFSET_RIGHT          30000
+#define AV_HOMING_OFFSET_LEFT           162000
+#define AV_HOMING_OFFSET_RIGHT          150000
 
 // Sail
 #define AV_MAX_SAIL_ANGLE			    180.0
