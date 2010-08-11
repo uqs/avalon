@@ -147,7 +147,7 @@ void * translation_thread(void * dummy)
                 
                 if(navigation_type == 2)
                 {
-                    while(currentLine[0]!='#' && current_destpoint < 1000)
+                    while(currentLine[0]!='#' && current_destpoint < AV_MAXNUM_DESTINATION)
                     {
                         longitude = strtod(currentLine,&ptr);
                         latitude = strtod(ptr,NULL);
@@ -171,7 +171,7 @@ void * translation_thread(void * dummy)
 
                         //bring to store:
 
-                        destinationData.t_writefrom(destination);
+//                        destinationData.t_writefrom(destination);
 
                         destfile.getline (currentLine,30,'\n');
                         current_destpoint ++;
@@ -179,8 +179,9 @@ void * translation_thread(void * dummy)
                     }
 
      		    // set the second destination point to the current one
-		    destination.longitude = destination.Data[1].longitude;
-		    destination.latitude = destination.Data[1].latitude;
+		    destination.longitude = destination.Data[0].longitude;
+		    destination.latitude = destination.Data[0].latitude;
+			destination.destNr = 0;
 
                     destination.Data[current_destpoint-1].type = AV_DEST_TYPE_END;
                     destination.Data[current_destpoint].type = AV_DEST_TYPE_NOMORE;
@@ -251,21 +252,19 @@ int main (int argc, const char * argv[])
 	DOB(store.registerVariable(destinationData, varname_destData, "DestinationData"));
 	DOB(store.registerVariable(destinationStruct, varname_destStruct, "DestinationStruct"));
 
-
-	// Start the working thread
+// Start the working thread
     DOP(th = rtx_thread_create ("dest_converter thread", 0,
 								RTX_THREAD_SCHED_OTHER, RTX_THREAD_PRIO_MIN, 0,
 								RTX_THREAD_CANCEL_DEFERRED,
 								translation_thread, NULL,
 								NULL, NULL));
-
-	// Wait for Ctrl-C
+	
+// Wait for Ctrl-C
     DOC (rtx_main_wait_shutdown (0));
 	rtx_message_routine ("Ctrl-C detected. Shutting down destination_converter...");
-
+	
 	// Terminating the thread
     rtx_thread_destroy_sync (th);
-
 	// The destructors will take care of cleaning up the memory
     return (0);
 }

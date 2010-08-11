@@ -1,4 +1,4 @@
-theta_dot/P    0.5
+theta_dot/P		1
 theta_dot/I    0.0
 theta_dot/Imin	-20.0
 theta_dot/Imax 20.0

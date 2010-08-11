@@ -10,10 +10,11 @@
 ./windsensor &
 ./windcleaner &
 ./sailor_transitions &
-./sailor_statemachine &
-./destination_converter &
-./global_skipper &
+#./sailor_statemachine &
+launch -c launch.conf &
+#./destination_converter &
+#./global_skipper &
 ./skipper &
 ./navigator &
-./poti &
-./aisEval &
+#./poti &
+#.:/aisEval &

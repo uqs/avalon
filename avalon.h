@@ -30,8 +30,14 @@
 // Settings for WindCleaner
 /////////////////////////////
 
-#define AV_CLEAN_LENGTH				50 		// number of last windData to be considered int between 3 and 99
-#define AV_CLEAN_LENGTH_LONG	    90 		// number of last windData to be considered for navigator input
+#define AV_CLEAN_LENGTH				2 		// number of last windData to be considered int between 3 and 99
+#define AV_CLEAN_LENGTH_LONG	    2 		// number of last windData to be considered for navigator input
+
+/////////////////////////////
+// Settings for destination input
+/////////////////////////////
+
+#define AV_MAXNUM_DESTINATION		100
 
 /////////////////////////////
 // Settings for input devices

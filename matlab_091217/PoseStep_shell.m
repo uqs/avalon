@@ -11,7 +11,7 @@
 
 
 
-function [pose, vel, X, Y, N, X_waves, Y_waves, N_waves, X_sail, Y_sail, N_sail, N_rudder, N_damping, V_wind, g_r, d_water] = PoseStep(t, delta_t, pose, vel, m, aoa_sail, A_sail, A_hull, A_rudder, alpha_rudder_r, alpha_rudder_l, C_d, C_hat, I, v_current, d_current, v_wind, d_wind, d_waves, T, h, depth, length, width, sail_factor)
+function [pose, vel, X, Y, N, X_waves, Y_waves, N_waves, X_sail, Y_sail, N_sail, N_rudder, N_damping, V_wind, g_r, d_water] = PoseStep_shell(t, delta_t, pose, vel, m, aoa_sail, A_sail, A_hull, A_rudder, alpha_rudder_r, alpha_rudder_l, C_d, C_hat, I, v_current, d_current, v_wind, d_wind, d_waves, T, h, depth, length, width, sail_factor)
 %global a
 %a(4)=toc;
 % unchangeable variables

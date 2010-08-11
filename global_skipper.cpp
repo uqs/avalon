@@ -115,20 +115,24 @@ void * translation_thread(void * dummy)
     SkipperFlags skipperflags;
     AisDestData ais_dest;
 
-    double dest_dist = 3500;
+    double dest_dist = 1000;
     int i,p;
     unsigned int ais_dest_index_last=0;
     double distance_arr[1000];
+    double distance_boat_dest_loc;
     double distance_boat_dest;
     double closest_distance;
 
     //initializing the call index
     skipperFlagData.t_readto(skipperflags,0,0);
     skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
+//     skipperflags.global_locator = AV_FLAGS_GLOBALSK_CLOSING;
     skipperFlagData.t_writefrom(skipperflags);
-            
 
+    aisDestData.t_readto(ais_dest,0,0);
+    ais_dest_index_last=ais_dest.ais_dest_index;
     double current_pos_x, current_pos_y; //already transformed and in meters
+    double dist_stored_dest_x, dist_stored_dest_y;
 
 
 
@@ -140,16 +144,21 @@ void * translation_thread(void * dummy)
             destinationData.t_readto(destination,0,0);
             skipperFlagData.t_readto(skipperflags,0,0);
 	    aisDestData.t_readto(ais_dest,0,0);
+	    if(destination.destNr == 0)
+	    {
+		skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
+		skipperFlagData.t_writefrom(skipperflags);
+	    }
 
 	// if we are on collision course, ais tells us the new destination point
 	if (ais_dest.ais_dest_index != ais_dest_index_last)
 	{
-	    rtx_message("listen to ais     index_last= %d\n", ais_dest_index_last);
+	    rtx_message("listen to ais     index_last= %d index_ddx= %d\n", ais_dest_index_last, ais_dest.ais_dest_index);
 	    
 	    skipperflags.global_locator = ais_dest.global_skipper_flag;
 	    skipperFlagData.t_writefrom(skipperflags);
 	}
-	if (generalflags.global_locator == ais_dest.global_skipper_flag)
+	if ((generalflags.global_locator == ais_dest.global_skipper_flag) && (ais_dest.ais_dest_index != ais_dest_index_last))
 	{
 	    rtx_message("aisflag has been written");
 	    destination.longitude = ais_dest.new_dest_long;
@@ -165,11 +174,16 @@ void * translation_thread(void * dummy)
 			      *(boatData.position.longitude-destination.longitude);
 	current_pos_y =AV_EARTHRADIUS * (AV_PI/180) * (boatData.position.latitude-destination.latitude);
 
+	// distance to next stored destination point
+	dist_stored_dest_x =AV_EARTHRADIUS * cos((destination.latitude * AV_PI/180)) * (AV_PI/180)
+			      *(destination.Data[destination.destNr].longitude-destination.longitude);
+	dist_stored_dest_y =AV_EARTHRADIUS * (AV_PI/180) * (destination.Data[destination.destNr].latitude-destination.latitude);
 #ifdef DEBUG_GLOBSKIPPER
             rtx_message("the current global destpoint is number %d flags.global_locator = %d \n", destination.destNr, generalflags.global_locator);
 #endif
 
-	distance_boat_dest = sqrt(pow(current_pos_x,2) + pow(current_pos_y,2)); //because the destination is always in (0,0)!
+	distance_boat_dest = sqrt(pow(current_pos_x-dist_stored_dest_x,2) + pow(current_pos_y-dist_stored_dest_y,2)); 
+	distance_boat_dest_loc = sqrt(pow(current_pos_x,2) + pow(current_pos_y,2)); //because the destination is always in (0,0)!
 	//begin statemachine: /////////////////////////////////////////////////
 	switch(generalflags.global_locator)
 	{
@@ -178,19 +192,16 @@ void * translation_thread(void * dummy)
 		//check what wyp we are closest
 		i = 0;
 		destination.destNr = 0;
-		closest_distance = distance_boat_dest;
-		while((i<1000) && (destination.Data[i].type != AV_DEST_TYPE_NOMORE ))
+		while((i<AV_MAXNUM_DESTINATION) && (destination.Data[i].type != AV_DEST_TYPE_NOMORE ))
 		{
-
-#ifdef DEBUG_GLOBSKIPPER
-		    rtx_message("destNr zähler = %d, distanz zum bood = %f \n", i, AV_EARTHRADIUS*AV_PI/180.0
-				    *sqrt(pow(destination.Data[i].latitude - destination.latitude,2)
-				    + pow(cos(destination.latitude*AV_PI/180.0)*(destination.Data[i].longitude - destination.longitude),2));;
-#endif
-		    
+	    
 		    distance_arr[i] =   AV_EARTHRADIUS*AV_PI/180.0*sqrt(pow(boatData.position.latitude - destination.Data[i].latitude,2)
 				    + pow(cos(destination.latitude*AV_PI/180.0)*(boatData.position.longitude - destination.Data[i].longitude),2));
-		    if ( closest_distance > distance_arr[i])
+#ifdef DEBUG_GLOBSKIPPER
+		    rtx_message("destNr counter = %d, distance to boat = %f \n", i, distance_arr[i]);
+#endif
+	
+		    if ( closest_distance > distance_arr[i] || i == 0)
 		    {
 			closest_distance = distance_arr[i];
 
@@ -203,41 +214,48 @@ void * translation_thread(void * dummy)
 
 		    i++;
 		}
-		assert((destination.destNr < 1001) && (destination.destNr>=0));
+		assert((destination.destNr < (AV_MAXNUM_DESTINATION+1)) && (destination.destNr>=0));
 
-		for (p = 0; p < 3; p++)
-		{
-		    
-		    if ((distance_arr[destination.destNr +2 -p]  < 2.1*dest_dist)
-			    && ((destination.Data[destination.destNr +2 -p].type == AV_DEST_TYPE_OCEANWYP)
-				|| (destination.Data[destination.destNr +2 -p].type == AV_DEST_TYPE_END)))
-		    {
-
-			destination.longitude = destination.Data[destination.destNr +2 -p].longitude;
-			destination.latitude = destination.Data[destination.destNr +2 -p].latitude;
-			destination.destNr = (destination.destNr +2 -p);
-			destination.not_in_list = 0;
-			destination.skipper_index_call ++;
-			destinationData.t_writefrom(destination);
-
-#ifdef DEBUG_GLOBSKIPPER
-			rtx_message("locater: increased destination index to %d",destination.skipper_index_call);
-#endif
-			skipperflags.global_locator = AV_FLAGS_GLOBALSK_TRACKER;
-			skipperFlagData.t_writefrom(skipperflags);
-			break;
-		    }
-		    else if (p==2)
-		    {
+// 		for (p = 0; p < 3; p++)
+// 		{
+// 		    
+// 		    if ((distance_arr[destination.destNr +2 -p]  < 2.1*dest_dist)
+// 			    && ((destination.Data[destination.destNr +2 -p].type == AV_DEST_TYPE_OCEANWYP)
+// 				|| (destination.Data[destination.destNr +2 -p].type == AV_DEST_TYPE_END)))
+// 		    {
+// 
+// 			destination.longitude = destination.Data[destination.destNr +2 -p].longitude;
+// 			destination.latitude = destination.Data[destination.destNr +2 -p].latitude;
+// 			destination.destNr = (destination.destNr +2 -p);
+// 			destination.not_in_list = 0;
+// 			destination.skipper_index_call ++;
+// 			destinationData.t_writefrom(destination);
+// 
+// #ifdef DEBUG_GLOBSKIPPER
+// 			rtx_message("locater: increased destination index to %d",destination.skipper_index_call);
+// #endif
+// 			skipperflags.global_locator = AV_FLAGS_GLOBALSK_TRACKER;
+// 			skipperFlagData.t_writefrom(skipperflags);
+// 			break;
+// 		    }
+// 		    else if (p==2)
+// 		    {	
+if (AV_EARTHRADIUS*AV_PI/180.0*sqrt(pow(destination.Data[destination.destNr].latitude - destination.Data[destination.destNr+1].latitude,2)
+     + pow(cos(destination.latitude*AV_PI/180.0)*(destination.Data[destination.destNr].longitude - destination.Data[destination.destNr+1].longitude),2))
+      > distance_arr[destination.destNr+1])
+{
+    destination.destNr++;
+}
 			destination.longitude = destination.Data[destination.destNr].longitude;
 			destination.latitude = destination.Data[destination.destNr].latitude;
 			destination.skipper_index_call ++;
+// 			destination.destNr++;
 			destination.not_in_list = 0;
 			destinationData.t_writefrom(destination);
 			skipperflags.global_locator = AV_FLAGS_GLOBALSK_CLOSING;
 			skipperFlagData.t_writefrom(skipperflags);
-		    }
-		}
+// 		    }
+// 		}
 
 
 		break;
@@ -245,12 +263,23 @@ void * translation_thread(void * dummy)
 	    case AV_FLAGS_GLOBALSK_CLOSING:
 
 #ifdef DEBUG_GLOBSKIPPER
-		rtx_message("closing: distance to destination = %f \n", distance_boat_dest);
+		rtx_message("closing: distance to destination = %f \n", distance_boat_dest_loc);
+		rtx_message("closing: distance to stored destination = %f \n", distance_boat_dest);
 #endif
-		if(distance_boat_dest > 2.1*dest_dist)
+		if (dest_dist > distance_boat_dest)
 		{
-		    destination.longitude = boatData.position.longitude + 0.5 * (destination.longitude - boatData.position.longitude);
-		    destination.latitude = boatData.position.latitude + 0.5 * (destination.latitude - boatData.position.latitude);
+		    skipperflags.global_locator = AV_FLAGS_GLOBALSK_TRACKER;
+		    skipperFlagData.t_writefrom(skipperflags);
+		    destination.longitude = destination.Data[destination.destNr].longitude;
+		    destination.latitude = destination.Data[destination.destNr].latitude;
+		    destinationData.t_writefrom(destination);
+		    break;
+		}
+
+		if(distance_boat_dest_loc > 1.1*dest_dist || distance_boat_dest_loc < 300)
+		{
+		    destination.longitude = boatData.position.longitude + dest_dist/distance_boat_dest * (destination.Data[destination.destNr].longitude - boatData.position.longitude);
+		    destination.latitude = boatData.position.latitude + dest_dist/distance_boat_dest * (destination.Data[destination.destNr].latitude - boatData.position.latitude);
 		    destination.skipper_index_call ++;
 		    destination.not_in_list = 1;
 		    destinationData.t_writefrom(destination);
@@ -260,22 +289,7 @@ void * translation_thread(void * dummy)
 #endif
 		}
 
-		if(distance_boat_dest < dest_dist)
-		{
-		    skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
-		    skipperFlagData.t_writefrom(skipperflags);
-		}
-
-		break;
-		////////////////////////////////////////////////////////////////////////////
-	    case AV_FLAGS_GLOBALSK_TRACKER:
-
-#ifdef DEBUG_GLOBSKIPPER
-		rtx_message("tracker: distance to destination = %f \n",  distance_boat_dest);
-
-		rtx_message("destinationtype = %d  \n", destination.Data[destination.destNr].type);
-#endif
-		if((distance_boat_dest < 300) && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
+		if(distance_boat_dest < 300)
 		{
 		    destination.destNr += 1;
 		    assert((destination.destNr < 1000) && (destination.destNr>=0));
@@ -288,9 +302,36 @@ void * translation_thread(void * dummy)
 #ifdef DEBUG_GLOBSKIPPER
 		    rtx_message("tracker: increased destination index to %d",destination.skipper_index_call);
 #endif
+		}
+
+		break;
+		////////////////////////////////////////////////////////////////////////////
+	    case AV_FLAGS_GLOBALSK_TRACKER:
+
+#ifdef DEBUG_GLOBSKIPPER
+		rtx_message("tracker: distance to destination = %f \n",  distance_boat_dest_loc);
+
+		rtx_message("destinationtype = %d  \n", destination.Data[destination.destNr].type);
+#endif
+		if((distance_boat_dest < 300) && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
+		{
+		    destination.destNr += 1;
+		    assert((destination.destNr < 1000) && (destination.destNr>=0));
+		    destination.longitude = destination.Data[destination.destNr].longitude;
+		    destination.latitude = destination.Data[destination.destNr].latitude;
+		    destination.skipper_index_call ++;
+		    destination.not_in_list = 0;
+		    destinationData.t_writefrom(destination);
+		    
+		    skipperflags.global_locator = AV_FLAGS_GLOBALSK_CLOSING;
+		    skipperFlagData.t_writefrom(skipperflags);
+
+#ifdef DEBUG_GLOBSKIPPER
+		    rtx_message("tracker: increased destination index to %d",destination.skipper_index_call);
+#endif
 		}   
 
-		if(distance_boat_dest > 2.2*dest_dist)
+		if(distance_boat_dest_loc > 2.2*dest_dist)
 		{
 		    skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
 		    skipperFlagData.t_writefrom(skipperflags);
@@ -301,9 +342,9 @@ void * translation_thread(void * dummy)
 	    case AV_FLAGS_GLOBALSK_AVOIDANCE:
 
 #ifdef DEBUG_GLOBSKIPPER
-	rtx_message("avoidance: distance to destination = %f \n", distance_boat_dest);
+	rtx_message("avoidance: distance to destination = %f \n", distance_boat_dest_loc);
 #endif
-		if((distance_boat_dest < 200) || (distance_boat_dest > 2*dest_dist))
+		if((distance_boat_dest_loc < 200) || (distance_boat_dest_loc > 2*dest_dist))
 		{
 		    skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
 		    skipperFlagData.t_writefrom(skipperflags);
@@ -317,7 +358,7 @@ void * translation_thread(void * dummy)
 	rtx_message("survive: distance to destination = %f \n", distance_boat_dest);
 #endif
 
-		if((distance_boat_dest < 200) || (distance_boat_dest > 600))
+		if((distance_boat_dest_loc < 200) || (distance_boat_dest_loc > 600))
 		{
 		    skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
 		    skipperFlagData.t_writefrom(skipperflags);

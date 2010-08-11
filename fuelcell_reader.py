@@ -49,7 +49,7 @@ else:
         print "Sucessful.\n"
 
 # Open a serial connection to the fuel cell...
-sfc.serial_open("/dev/ttyUSB5",9600)
+sfc.serial_open("/dev/ttyUSB6",9600)
 
 # Sending a linefeed to the fuel cell to wake it up
 if debug > 0:

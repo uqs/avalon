@@ -16,6 +16,8 @@ killall skipper
 killall navigator
 killall poti
 killall aisEval
+killall launch
+killall launchagent
 
 sleep 5
 killall -9 flag-checker
@@ -35,3 +37,5 @@ killall -9 skipper
 killall -9 navigator
 killall -9 poti
 killall -9 aisEval
+killall -9 launch
+killall -9 launchagent

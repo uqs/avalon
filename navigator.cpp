@@ -150,6 +150,8 @@ void * translation_thread(void * dummy)
 	int arrayPointer = 0;
 	int p,q;
 	double difference, difference_start;
+	double distance_ratio;
+	double max_calc_distance = 5000; //[m]
 	int mapTheta_end_correct, mapTheta_start_correct;
 	int calculation_iterator = 1;
 	time_t start_time,end;
@@ -208,8 +210,17 @@ void * translation_thread(void * dummy)
 				transformation.y_start_transf = AV_EARTHRADIUS * (AV_PI/180)
 					*(transformation.latitude_start - destination.latitude);
 
-				transformation.x_end_transf = 0;
-				transformation.y_end_transf = 0;
+// 				if(sqrt(pow(transformation.x_start_transf,2) + pow(transformation.y_start_transf,2)) < max_calc_distance)
+// 				{
+				    transformation.x_end_transf = 0;
+				    transformation.y_end_transf = 0;
+// 				}
+// 				else
+// 				{
+// 				    distance_ratio = transformation.x_start_transf/transformation.y_start_transf;
+// 				    transformation.y_start = max_calc_distance / sqrt(pow(distance_ratio,2)+1);
+// 				    transformation.x_start = transformation.y_start * distance_ratio;
+// 				}
 
 
 				//calculating the offsets:
@@ -338,7 +349,7 @@ if (destination.not_in_list == 1)
     { next_dest_Nr--;}
 double alpha = atan2(cos(destination.latitude*AV_PI/180)*(destination.Data[next_dest_Nr].longitude-destination.longitude),(destination.Data[next_dest_Nr].latitude-destination.latitude));
 // 				
-				endTheta = alpha;//atan2((transformation.x_end - transformation.x_start),(transformation.y_end - transformation.y_start));
+				endTheta = atan2((transformation.x_end - transformation.x_start),(transformation.y_end - transformation.y_start));
 // rtx_message("theta_end: %f °, winddirection: %f °",endTheta*180/AV_PI, windDirection*180/AV_PI);
 // 				// if upwind
 // 				if (fabs(remainder((windDirection_orr - endTheta),2*AV_PI))== 0.0) // exactly upwind

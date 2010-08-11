@@ -34,7 +34,7 @@ DDX_STORE_TYPE(DestinationStruct,
 DDX_STORE_TYPE(DestinationData,
         struct {
 
-        DestinationStruct Data[1000];
+        DestinationStruct Data[100];
         double longitude;               //the current final dest for the navigator in meters
         double latitude; 
 

@@ -204,7 +204,7 @@ v_r_tot = sqrt((vel_app_rudder(1))^2 + (vel_app_rudder(2))^2);% + (vel(3,1)*1.7)
 d_water = atan2(vel_app_rudder(2)*0.01,vel_app_rudder(1));% 
 d_water = reminderRad(d_water);
 
-c_rudder_drag = 1.28*sin(abs(-d_water + alpha_rudder));
+% c_rudder_drag = 1.28*sin(abs(-d_water + alpha_rudder));
 
 incid_angle = -d_water + alpha_rudder;
 incid_angle = reminderRad(incid_angle);
@@ -219,7 +219,12 @@ format long
 % elseif abs(incid_angle) >= 90*pi/180 && abs(incid_angle) <= pi
 %     c_rudder_lift = 0;
 % end
-c_rudder_lift = 1.9*(1-exp(-abs(incid_angle)*9))-2.4*abs(incid_angle);
+c_rudder_drag = 0.1+0.3*incid_angle^2; % from Mario
+% c_rudder_lift = abs(abs(7.1*incid_angle) - 4*incid_angle^2 -abs(16.6*incid_angle^3)); % from Mario
+% c_rudder_drag = 0;%0.2+0.3*incid_angle^2; % from Mario
+% c_rudder_lift = abs(abs(7.1*incid_angle) - 4*incid_angle^2 -abs(16.6*incid_angle^3)); % from Mario
+c_rudder_lift = abs(.9*incid_angle);
+% c_rudder_lift = 1.9*(1-exp(-abs(incid_angle)*9))-2.4*abs(incid_angle);
 % [c_rudder_drag c_rudder_lift, incid_angle];
 if incid_angle > 0
     vorzeichenR = 1;
@@ -254,9 +259,11 @@ N_rudder = -Y_rudder*1.7;        % 2*Y_rudder ????    distance CoR to rudder-cen
 X = X_sail + X_current + X_wind + X_waves + X_rudder - X_damping;   
 Y = Y_sail + Y_current + Y_wind + Y_waves + Y_rudder - Y_damping;
 N = N_sail + N_current + N_wind + N_waves + N_rudder - N_damping;% -N_rudder
+N = N_rudder;
+N;
 % [aoa d_wind_r N_sail];
 % [N N_damping N_sail N_rudder];
-
+N_rudder;
 0;
 % N = 0.9*N;                                                              % 0.6 correction term by FJ   waves must be additive
 
@@ -273,9 +280,15 @@ Y_drag = [Y_drag F_lift_V_w];
 % I(3)            = I_z;
 vel_new         = vel;
 vel_new(3,1)    = delta_t/I(3)*N+vel(3,1);
+if vel_new(3,1)>0
+    vel_new(3,1)=min(vel_new(3,1),.09);
+else
+    vel_new(3,1)=max(vel_new(3,1),-.09);
+end
 vel_new(2,1)    = 1/(1+vel_new(3,1)*delta_t^2)*(Y/m*delta_t+vel(2,1)-delta_t^2*X/m);
 vel_new(1,1)    = delta_t*(X/m+vel_new(2,1)*vel_new(3,1))+vel(1,1);
 vel             = vel_new;
+vel([1:2])      = [6;0.03];
 vel_p           = [vel_p vel];
 
 pose(3)         = reminderRad(pose(3));

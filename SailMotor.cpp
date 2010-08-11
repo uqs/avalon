@@ -101,7 +101,8 @@ bool SailMotor::move_to_angle(float degrees, float reference, int& feedback, int
         position = (feedback / (AV_SAIL_TICKS_PER_DEGREE))-reference;
 
        // num_rounds = (feedback + 180 * AV_SAIL_TICKS_PER_DEGREE) / (360 * AV_SAIL_TICKS_PER_DEGREE);
-		num_rounds = (position+180.0*sign(position))/360.0;
+	//	num_rounds = (int)round((position+180.0*sign(position))/360.0);
+		num_rounds = (int)round((position)/360.0);
 		//rtx_message("num_ro: %d, feedback: %d", num_rounds, feedback);
 		//num_rounds = (position+180.0)/360.0;
 		position = remainder(position, 360.0);
@@ -113,6 +114,8 @@ bool SailMotor::move_to_angle(float degrees, float reference, int& feedback, int
 		// Go to position
         target = (int)round(AV_SAIL_TICKS_PER_DEGREE * (degrees + reference + num_rounds*360));
         epos_set_target_position(AV_SAIL_NODE_ID, target);
+//		rtx_message("num_ro: %d, position: %f, target: %f", num_rounds, position, target/AV_SAIL_TICKS_PER_DEGREE*1.0);
+		//rtx_message("current: %f; %d, goal: %f; %d", position, feedback, degrees, target);
 		epos_activate_position(AV_SAIL_NODE_ID);
 	}
 	else {

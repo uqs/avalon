@@ -161,7 +161,7 @@ void * translation_thread(void * dummy)
 
 		    /** bearing apparent:**/
 
-		    workingWind.bearing_app = remainder(workingWind.angle_of_attack_app + sailData.degrees_sail, 360.0);
+		    workingWind.bearing_app = remainder(workingWind.angle_of_attack_app + (sailData.degrees_sail), 360.0);
 
 		    /**bearing real:**/
 

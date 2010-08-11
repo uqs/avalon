@@ -146,7 +146,7 @@ void * sailmain_thread(void * dummy)
     bool reset_active = false;
     int num_rounds = 0;
     int num_ticks;
-    unsigned int reset_index = 0;
+    unsigned int reset_index = 100000;
 
     double angle;
 
@@ -160,7 +160,7 @@ void * sailmain_thread(void * dummy)
     potiData.t_writefrom(poti);
     
     // define reference sail angle
-    sailState.ref_sail = sailState.degrees_sail - poti.sail_angle_abs;
+    sailState.ref_sail += sailState.degrees_sail - poti.sail_angle_abs;
 	rtx_message("real: %f, poti: %f, ref: %f", sailState.degrees_sail, poti.sail_angle_abs, sailState.ref_sail);
     // Initialize sailState (Set everything to zero)
     //sailState.ref_sail = 0;
@@ -190,7 +190,7 @@ void * sailmain_thread(void * dummy)
 			// Go there!!
 			motor.move_to_angle(sail.degrees, sailState.ref_sail, feedback, num_rounds);
 			//sailState.degrees_sail =  feedback / AV_SAIL_TICKS_PER_DEGREE;
-            sailState.degrees_sail = remainder((feedback / (AV_SAIL_TICKS_PER_DEGREE)),360.0);
+            sailState.degrees_sail = remainder((feedback / (AV_SAIL_TICKS_PER_DEGREE)-sailState.ref_sail),360.0);
 			dataSailState.t_writefrom(sailState);
 //rtx_message("goal: %f actual: %f ref: %f", sail.degrees, sailState.degrees_sail,sailState.ref_sail);
             // Ask for Some of the Data and display
@@ -245,8 +245,8 @@ void * sailmain_thread(void * dummy)
 			// Reset Options (if requested by the Remote-Controller)
             if((sail.reset_request == 1 && !reset_active) || reset_index != flags.sail_reset_index)
             {
-                rtx_message("Resetting sail ... ");
-		sailState.ref_sail = sailState.degrees_sail - poti.sail_angle_abs;
+		sailState.ref_sail += sailState.degrees_sail - poti.sail_angle_abs;
+                rtx_message("Resetting sail: encoder: %f, poti: %f, reference: %f ", sailState.degrees_sail, poti.sail_angle_abs, sailState.ref_sail);
         //         sailState.ref_sail = sailState.degrees_sail;
                 reset_active = true;
 		reset_index = flags.sail_reset_index;

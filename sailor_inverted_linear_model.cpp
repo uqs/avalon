@@ -40,6 +40,14 @@ double sailor_inverted_linear_model(double heading_speed, double torque_des,
     }
     rudder_angle = remainder(incid_angle + d_water,360.);
 
+	if(rudder_angle > 18)
+	{
+		rudder_angle = 18;
+	}
+	else if (rudder_angle < -18)
+	{
+		rudder_angle = -18;
+	}
 
 	return rudder_angle;
 }

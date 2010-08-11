@@ -222,7 +222,7 @@ void * imu_production_thread(void * dummy)
 
 		imu.gyro.x=reply.getCalGyr().m_data[0];
 		imu.gyro.y=reply.getCalGyr().m_data[1];
-		imu.gyro.z=reply.getCalGyr().m_data[2];
+		imu.gyro.z=-180.0/AV_PI*reply.getCalGyr().m_data[2];
 
 		imu.acceleration.x=-reply.getCalAcc().m_data[0];
 		imu.acceleration.y=-reply.getCalAcc().m_data[1];

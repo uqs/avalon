@@ -248,20 +248,20 @@ void * translation_thread(void * dummy)
 	    FILE * thetafile;
 //	    thetafile = fopen("thetaplot.txt","a+");
            
- if(count < 500)
+ if(count < 5000)
  {	    
  	    thetafile = fopen("thetaplot.txt","a+");
  }
-if(count > 500 && count < 1000)
+if(count > 5000 && count < 10000)
  { 
    thetafile = fopen("thetaplot2.txt","a+");
  }
- if(count == 1000)
+ if(count == 10000)
  { 
    count = 0;
    thetafile = fopen("thetaplot.txt","w+");
  }
- if(count == 500)
+ if(count == 5000)
  { 
    thetafile = fopen("thetaplot2.txt","w+");
  }	    
@@ -359,7 +359,7 @@ if(count > 500 && count < 1000)
                                     u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
 				    // u = iter.sailor_main_iter_fn(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144, sailstate.degrees_sail*M_PI/180.0, wind_clean.global_direction_real*M_PI/180.0, imu.attitude.yaw*M_PI/180.0, wind_clean.speed*0.5144);
 			    }
-			    fprintf(thetafile,"norm: %f %f %f %f\n",theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left);
+			    fprintf(thetafile,"norm: %f %f %f %f %f %f\n",desired_heading.heading, imu.attitude.yaw,theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left);
 
 			    rudder.degrees_left = u;
 			    rudder.degrees_right = u;

@@ -184,8 +184,8 @@ end
 	vel(3,1)			  = 0.1;
         i=1;
 	t_elaps_old=0;
-    imu.position.latitude               = destData.Data(2).latitude;
-    imu.position.longitude              = destData.Data(2).longitude;
+    imu.position.latitude               = destData.Data(1).latitude;
+    imu.position.longitude              = destData.Data(1).longitude;
 %     while destData.Data(i).latitude ~=0
 %             X=ll2xy(destData.Data(i).longitude, destData.Data(i).latitude);
 %             dest_x_t(i) = X(1);
@@ -273,12 +273,12 @@ a(10)=toc;
 %     wp_x_loc=nonzeros(wp_x_glo)+dest_x(destData.destNr+1);
 %     wp_y_loc=nonzeros(wp_y_glo)+dest_y(destData.destNr+1);
 try
-    wp_x_loc=wp_x_glo+dest_x(destData.destNr+1);
-    wp_y_loc=wp_y_glo+dest_y(destData.destNr+1);
-    plot(pose_plot(:,1),pose_plot(:,2),'b',pose(2),pose(1),'b',wp_y_loc,wp_x_loc,'ko-',wp_y_loc(k),wp_x_loc(k),'ks',dest_y,dest_x,'or', dest_y(destData.destNr+1), dest_x(destData.destNr+1),'sr')
+    wp_x_loc=wp_x_glo;
+    wp_y_loc=wp_y_glo;
+    plot(pose_plot(:,1),pose_plot(:,2),'b',pose(2),pose(1),'b',wp_y_loc,wp_x_loc,'ko-',wp_y_loc(k),wp_x_loc(k),'ks',dest_y,dest_x,'or',0,0,'sr', dest_y(destData.destNr+1), dest_x(destData.destNr+1),'sr')
 %     axis(ax_lim)
 %     axis([-2500 2500 -3000 1500])
-axis([-6500 1500 -4000 5000])
+axis([-6500 6500 -4000 5000])
 %     axis('equal')
     drawnow;
     end
