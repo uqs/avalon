@@ -43,7 +43,7 @@
 #include "aisEval.h"
 
 //#define DEBUG_ISLAND
-// #define DEBUG_NAVIGATOR
+#define DEBUG_NAVIGATOR
 
 /**
  * Global variable for all DDX object
@@ -144,21 +144,19 @@ void * translation_thread(void * dummy)
 	LakeTransformation transformation;
 
 	int xSize, ySize;
-	double windDirection, windDirection_orr, windSpeed;
+	double windDirection, windSpeed;
 	double endTheta;
-	int next_dest_Nr = 0;
 	int arrayPointer = 0;
 	int p,q;
 	double difference, difference_start;
-	double distance_ratio;
-	double max_calc_distance = 5000; //[m]
 	int mapTheta_end_correct, mapTheta_start_correct;
 	int calculation_iterator = 1;
 	time_t start_time,end;
 	double timedif=10.0;
 	bool time_initializer = false;
 	unsigned int last_calc_index = 1234567; //TODO change to some decent number
-	unsigned int last_dest_index = 1234567;
+	unsigned int last_skip_index = 0;
+	unsigned int max_num_wyp = 0;
 
 	//initializing the answer index: 
 	dataNaviFlags.t_readto(naviflags,0,0);
@@ -170,6 +168,7 @@ void * translation_thread(void * dummy)
 		// Read the next data available, or wait at most 5 seconds
 		if (dataBoat.t_readto(boatData,10,1))
 		{
+			//             naviData.t_readto(boatData,0,0); //not necessary, isn't it?
 			waypointData.t_readto(waypoints,0,0);
 			dataFlags.t_readto(generalflags,0,0);
 			dataNaviFlags.t_readto(naviflags,0,0);
@@ -184,34 +183,40 @@ void * translation_thread(void * dummy)
 				time(&end);
 				timedif = difftime(end,start_time);
 			}
-			// do a new path calculation if the global_skipper is asking for
-			if(((last_calc_index != generalflags.navi_index_call) || (last_dest_index != destination.skipper_index_call))
+			// rtx_message("last_calc_ind: %d    navi_call_ind: %d\n",last_calc_index,generalflags.navi_index_call);
+			if(((last_calc_index != generalflags.navi_index_call) || (last_skip_index != generalflags.skip_index_dest_call))
 					&& (generalflags.autonom_navigation)) 
+				//&& (timedif > 7.0))  //if this is 1, then do the waypoint-calculation
 			{
-				if (last_dest_index != destination.skipper_index_call)
-				{
-				    rtx_message("newcalculation, reason: new destination point");
-				}
-
 				time_initializer = true;
-				rtx_message("new_path_calc!!!");
+				rtx_message("new_path_calc!!!\n");
 
 				//converting the current and end-state into a meter-coordinates:
 				transformation.longitude_start = boatData.position.longitude;
 				transformation.latitude_start = boatData.position.latitude;
 
+
 				//transformation into meter-coordinates:
-				// for the Djikstra, x and y are interchanged				
-				transformation.x_start_transf = AV_EARTHRADIUS 
+
+// 				transformation.longitude_start_transf = AV_EARTHRADIUS 
+// 					*cos((transformation.latitude_start * AV_PI/180))*(AV_PI/180)
+// 					*transformation.longitude_start;
+// 
+// 				transformation.latitude_start_transf = AV_EARTHRADIUS
+// 					*(AV_PI/180)*transformation.latitude_start;
+
+
+				
+				transformation.y_start_transf = AV_EARTHRADIUS 
 					*cos((destination.latitude * AV_PI/180))*(AV_PI/180)
 					*(transformation.longitude_start - destination.longitude);
 
-				transformation.y_start_transf = AV_EARTHRADIUS * (AV_PI/180)
+				transformation.x_start_transf = AV_EARTHRADIUS * (AV_PI/180)
 					*(transformation.latitude_start - destination.latitude);
 
-
-				transformation.x_end_transf = 0;
 				transformation.y_end_transf = 0;
+				transformation.x_end_transf = 0;
+
 
 
 				//calculating the offsets:
@@ -221,7 +226,10 @@ void * translation_thread(void * dummy)
 				rtx_message("start: %f %f m; end: %f %f m \n",transformation.x_start_transf, transformation.y_start_transf,
 						transformation.x_end_transf, transformation.y_end_transf);
 #endif 
-				// define the grid for the x-coodrinates
+				// rtx_message("start: %f %f m; end: %f %f m \n",transformation.longitude_start_transf+4.380225573914934e+06, transformation.latitude_start_transf-1.111949403453934e+06,
+				//                         destination.longitude+4.380225573914934e+06, destination.latitude-1.111949403453934e+06);
+
+// 				if ((destination.longitude - transformation.longitude_start_transf)>0)
 				if (transformation.x_start_transf < 0)
 				{
 					transformation.x_offset = (int)(transformation.x_start_transf) - transformation.x_iter_offset*AV_NAVI_GRID_SIZE;
@@ -236,6 +244,7 @@ void * translation_thread(void * dummy)
 				}
 
 				//the same procedure for the y-coordinates:
+// 				if ((destination.latitude - transformation.latitude_start_transf)>0)
 				if (transformation.y_start_transf < 0)
 				{
 					transformation.y_offset = transformation.y_start_transf - transformation.y_iter_offset*AV_NAVI_GRID_SIZE;
@@ -252,22 +261,15 @@ void * translation_thread(void * dummy)
 				xSize = (2*transformation.x_iter_offset + abs(transformation.x_end - transformation.x_start));
 				ySize = (2*transformation.y_iter_offset + abs(transformation.y_end - transformation.y_start));    
 
-				if((transformation.x_start == transformation.x_end && transformation.y_start == transformation.y_end)
-				    || (xSize>1000) || (ySize>1000))
+				if(transformation.x_start == transformation.x_end && transformation.y_start == transformation.y_end)
 				{
-					if((xSize>1000) || (ySize>1000))
-					{
-					    rtx_message("size too large!! xSize = %d, ySize = %d", xSize, ySize);
-					} else
-					{
-					    rtx_message("start and end have the same coordinates");
-					}
+					rtx_message("start and end have the same coordinates");
 					continue;
 				}
 
-#ifdef DEBUG_NAVIGATOR
+				#ifdef DEBUG_NAVIGATOR
 				rtx_message("2: xsize: %d, ysize %d; xstart = %d, xend = %d, ystart = %d, yend = %d \n",xSize, ySize, transformation.x_start, transformation.x_end, transformation.y_start, transformation.y_end);
-#endif
+				#endif
 
 				//initializing the grid:
 				UISpace vspace(0,100,xSize,
@@ -286,14 +288,12 @@ void * translation_thread(void * dummy)
 				///////////////////////////////////////////////////////////////////////////////////////
 
 				//transformation winddirection into correct mathematical direction:
-				windDirection 		= remainder(((-(cleanedWind.global_direction_real_long - 90))*(AV_PI / 180.0)),2*AV_PI);  //in rad and mathematically correct!!
-				windSpeed 		= cleanedWind.speed_long;    	//in knots
+				windDirection = remainder(((-(cleanedWind.global_direction_real_long - 90))*(AV_PI / 180.0)),2*AV_PI);  //in rad and mathematically correct!!
+				windSpeed = cleanedWind.speed_long;    	//in knots
 
-				windDirection_orr	= cleanedWind.global_direction_real_long*AV_PI/180;
-
-#ifdef DEBUG_NAVIGATOR
+				#ifdef DEBUG_NAVIGATOR
 				rtx_message("windspeed = %f, winddirection = %f\n",windSpeed,windDirection);
-#endif
+				#endif
 
 				///////////////////////////////////////////////////////////////////////////////////////////
 				//initialize some things:
@@ -304,65 +304,58 @@ void * translation_thread(void * dummy)
 
 				///////////////////////////////////////////////////////////////////////////////////////////
 				//calculating an appropriate endTheta:
+				//
+				endTheta = atan2((transformation.y_end - transformation.y_start),(transformation.x_end - transformation.x_start));
 
-				next_dest_Nr = destination.destNr+1;
-				if (destination.not_in_list == 1)
-				    { next_dest_Nr--;}
-				double alpha = atan2(cos(destination.latitude*AV_PI/180)*(destination.Data[next_dest_Nr].longitude-destination.longitude),(destination.Data[next_dest_Nr].latitude-destination.latitude));
-// 				
-				endTheta = atan2((transformation.x_end - transformation.x_start),(transformation.y_end - transformation.y_start));
-// rtx_message("theta_end: %f °, winddirection: %f °",endTheta*180/AV_PI, windDirection*180/AV_PI);
+				if (fabs(remainder((windDirection - endTheta),2*AV_PI))== 0.0)
+				{
+					endTheta = (- (AV_PI)/4); 
+				}
+				if ((fabs(remainder((windDirection - endTheta),2*AV_PI)) < (AV_PI/4 - 0.5*AV_PI/180)) &&  (remainder((windDirection - endTheta),2*AV_PI) > 0))
+				{
+					endTheta = (windDirection -  67.5*AV_PI/180);
+				}
+				if ((fabs(remainder((windDirection - endTheta),2*AV_PI)) < (AV_PI/4 - 0.5*AV_PI/180)) &&  (remainder((windDirection - endTheta),2*AV_PI) < 0))
+				{
+					endTheta =(windDirection +  67.5*AV_PI/180); //(AV_PI)*(1/4+1/NEIGHBORHOOD));
+				}
 
-				if (fabs(remainder((windDirection_orr - endTheta),2*AV_PI)) < (AV_SAILOR_MAX_HEIGHT_TO_WIND*AV_PI/180.0))
-				{ // upwind sailing
-				    if (remainder(alpha-windDirection_orr,2*AV_PI) > 0)
-				    {
-					endTheta = remainder(windDirection_orr + AV_SAILOR_MAX_HEIGHT_TO_WIND*AV_PI/180.0,2*AV_PI);
-				    } else
-				    {
-					endTheta = remainder(windDirection_orr - AV_SAILOR_MAX_HEIGHT_TO_WIND*AV_PI/180.0,2*AV_PI);
-				    }
-				}
-				if (fabs(remainder((windDirection_orr - endTheta),2*AV_PI)) > (AV_SAILOR_MAX_DOWNWIND_ANGLE*AV_PI/180.0))
-				{ // downwind sailing
-				    if (remainder(alpha-windDirection_orr-AV_PI,2*AV_PI) > 0)
-				    {
-					endTheta = remainder(windDirection_orr + AV_SAILOR_MAX_DOWNWIND_ANGLE*AV_PI/180.0,2*AV_PI);
-				    } else
-				    {
-					endTheta = remainder(windDirection_orr - AV_SAILOR_MAX_DOWNWIND_ANGLE*AV_PI/180.0,2*AV_PI);
-				    }
-				}
+				//if endTheta is out of range:
+				endTheta = remainder(endTheta,2*AV_PI);
 
 				///modifying the endTheta so its in our headingTable:
-				difference = AV_PI;
+				difference = AV_PI/2;
 				mapTheta_end_correct = 30; //more than it can ever be possible
 				for(p=0; p<16; p++)
 				{
-					if (fabs(remainder(headingTable16[p] - (AV_PI/2 - endTheta),2*AV_PI)) < difference)
+					if (fabs(remainder((headingTable16[p] - endTheta),2*AV_PI)) < difference)
 					{
-						difference = fabs(remainder(headingTable16[p] - (AV_PI/2 - endTheta),2*AV_PI));
+						difference = fabs(remainder((headingTable16[p] - endTheta),2*AV_PI));
 						mapTheta_end_correct = p;
 					}
 				}
-
 				//-----> theta at the end is mapTheta_end_correct!!
 #if 1
-				///modifying the startTheta so its in our headingTable:
+				//modifying the startTheta so its in our headingTable:
 				difference_start = AV_PI/2;
 				mapTheta_start_correct = 30; //more than it can ever be possible
 				for(q=0; q<16; q++)
 				{
-					if (fabs(remainder((headingTable16[q] - (AV_PI/2 - boatData.attitude.yaw*AV_PI/180)),2*AV_PI)) < difference_start)
+// 					if (fabs(remainder((headingTable16[q] - boatData.attitude.yaw*AV_PI/180),2*AV_PI)) < difference_start)
+// 					{
+// 						difference_start = fabs(remainder((headingTable16[q] - boatData.attitude.yaw*AV_PI/180),2*AV_PI));
+// 						mapTheta_start_correct = q;
+// 					}
+					if (fabs(remainder((headingTable16[q] + boatData.attitude.yaw*AV_PI/180-AV_PI/2),2*AV_PI)) < difference_start)
 					{
 						difference_start = fabs(remainder((headingTable16[q] + boatData.attitude.yaw*AV_PI/180-AV_PI/2),2*AV_PI));
 						mapTheta_start_correct = q;
 					}
 				}
 				//-----> theta at the start is mapTheta_start_correct!!
+// rtx_message("head_curr = %f  start_theta = %d head_table = %f\n",boatData.attitude.yaw, mapTheta_start_correct, headingTable16[mapTheta_start_correct]*180/AV_PI);
 #ifdef DEBUG_NAVIGATOR
-				rtx_message("start_theta = %f°  end_theta = %f° \n",headingTable16[mapTheta_start_correct]*180/AV_PI, headingTable16[mapTheta_end_correct]*180/AV_PI);
-				rtx_message("ind_start_theta = %d  ind_end_theta = %d \n",mapTheta_start_correct, mapTheta_end_correct);
+				rtx_message("start_theta = %d \n",mapTheta_start_correct);
 #endif
 #endif
 				//////////////////////////////////////////////////////////////////////////////////////////
@@ -376,8 +369,8 @@ void * translation_thread(void * dummy)
 				//Dijkstra3D::TransitionApplicator defaultTrans;
 				//Dijkstra3D::CellEvaluator defaultEval; // Default eval, all cell cost are 0
 
-				Dijkstra3D::Coordinate start(transformation.x_start, transformation.y_start, mapTheta_start_correct); //Achtung: changed to mapTheta_end!!!!
-				Dijkstra3D::Coordinate goal(transformation.x_end, transformation.y_end, mapTheta_end_correct);
+				Dijkstra3D::Coordinate start(transformation.y_start, transformation.x_start, mapTheta_start_correct); //Achtung: changed to mapTheta_end!!!!
+				Dijkstra3D::Coordinate goal(transformation.y_end, transformation.x_end, mapTheta_end_correct);
 				AV_lce_Eval tunnelEval(vspace,goal,start);           // Heuristic eval, back to A*
 
 				Dijkstra3D::PathFinder<navi3dCell> pfinder(vspace, tunnelEval, transXEval, 
@@ -399,7 +392,7 @@ void * translation_thread(void * dummy)
 				Dijkstra3D::ShortestPath::const_iterator it;
 
 				/////////////////////////////////////////////////////////////
-// 				FILE * pathfile;
+				FILE * pathfile;
 				char filename[20];
 #if 0
 				sprintf(filename,"path_%d",calculation_iterator);
@@ -413,26 +406,27 @@ void * translation_thread(void * dummy)
 				}
 				fclose(pathfile);
 #endif
-// 				sprintf(filename,"pathsolution_%d",calculation_iterator);
-// 				pathfile = fopen(filename,"w");
+				sprintf(filename,"pathsolution_%d",calculation_iterator);
+				pathfile = fopen(filename,"w");
 				////////////////////////////////////////////////////////////
 				//////////////writing the calculated waypoints into the store in an array
 				////////////////////////////////////////////////////////////
 
 				last_wyp_data.heading = headingTable16[mapTheta_start_correct]; 
 				arrayPointer = 0;
-
+// int coun=-1;
+// printf("theta start: %f     current heading: %f\n",last_wyp_data.heading*180/AV_PI,boatData.attitude.yaw);
 				for (it=path.begin();it!=path.end();it++) {
 #ifdef DEBUG_NAVIGATOR
-// 					printf("x and y (%d,%d) at curr(%d) position, heading = %f \n",it->x,it->y,arrayPointer,
-// 							(remainder((-(headingTable16[(it->theta)]*180/AV_PI)+90.0),360.0)));
-// 					printf("stupid difference: %f \n",
-// 							(last_wyp_data.heading - (remainder((-(headingTable16[(it->theta)]*180/AV_PI)+90.0),360.0))));
+					printf("x and y (%d,%d) at curr(%d) position, heading = %f \n",it->x,it->y,arrayPointer,
+							(remainder((-(headingTable16[(it->theta)]*180/AV_PI)+90.0),360.0)));
+					printf("stupid difference: %f \n",
+							(last_wyp_data.heading - (remainder((-(headingTable16[(it->theta)]*180/AV_PI)+90.0),360.0))));
 #endif
 					if(arrayPointer >= 100) break;
-
-					wyp_data.y = ((it->x)*AV_NAVI_GRID_SIZE+transformation.x_offset);
-					wyp_data.x = ((it->y)*AV_NAVI_GRID_SIZE+transformation.y_offset);
+// coun++;
+					wyp_data.y = ((it->x)*AV_NAVI_GRID_SIZE+transformation.y_offset);
+					wyp_data.x = ((it->y)*AV_NAVI_GRID_SIZE+transformation.x_offset);
 					wyp_data.heading =remainder((-(headingTable16[(it->theta)]*180/AV_PI)+90),360.0);
 					wyp_data.wyp_type = AV_WYP_TYPE_PASSBY;
 					wyp_data.windspeed = windSpeed;
@@ -445,7 +439,8 @@ void * translation_thread(void * dummy)
 						waypoints.Data[arrayPointer].x = wyp_data.x;
 						waypoints.Data[arrayPointer].y = wyp_data.y;
 
-// 						fprintf(pathfile,"%d %d %f\n",wyp_data.x,wyp_data.y, wyp_data.heading);
+						fprintf(pathfile,"%d %d %f\n",wyp_data.x,wyp_data.y, wyp_data.heading);/**//**/
+// rtx_message("count: %d",coun);
 						waypoints.Data[arrayPointer].heading = wyp_data.heading;
 						waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_PASSBY;
 						waypoints.Data[arrayPointer].passed = 1;
@@ -463,9 +458,10 @@ void * translation_thread(void * dummy)
 						printf("inserted into store: last wyp \n");
 #endif
 						waypoints.Data[arrayPointer].x = last_wyp_data.x;
-						waypoints.Data[arrayPointer].y = last_wyp_data.y;
-
-// 						fprintf(pathfile,"%d %d %f\n",last_wyp_data.x,last_wyp_data.y, last_wyp_data.heading);
+						waypoints.Data[arrayPointer].x = last_wyp_data.x;
+// rtx_message("count: %d",coun);
+// rtx_message("diff head: %f, head_curr: %f  head_last: %f",fabs(remainder(wyp_data.heading - last_wyp_data.heading, 360.)), wyp_data.heading,last_wyp_data.heading );
+						fprintf(pathfile,"%d %d %f\n",last_wyp_data.x,last_wyp_data.y, last_wyp_data.heading);
 
 						waypoints.Data[arrayPointer].heading = last_wyp_data.heading;
 						waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_PASSBY;
@@ -478,31 +474,35 @@ void * translation_thread(void * dummy)
 
 					last_wyp_data = wyp_data;
 				}
- 					
+
+// 				if (arrayPointer < max_num_wyp)
+// 				{
+// 				    for (q=arrayPointer;q<max_num_wyp;q++) {
+// 					
 				waypoints.Data[arrayPointer].x = last_wyp_data.x;
 				waypoints.Data[arrayPointer].y = last_wyp_data.y;
 				waypoints.Data[arrayPointer].heading = last_wyp_data.heading;
 
-// 				fprintf(pathfile,"%d %d %f\n",last_wyp_data.x,last_wyp_data.y, last_wyp_data.heading);
+
+				fprintf(pathfile,"%d %d %f\n",last_wyp_data.x,last_wyp_data.y, last_wyp_data.heading);
 				waypoints.Data[arrayPointer].wyp_type = AV_WYP_TYPE_END;
 				waypoints.Data[arrayPointer].passed = 0;
 				waypoints.Data[arrayPointer].windspeed = windSpeed;
 				waypoints.Data[arrayPointer].winddirection = remainder(-(windDirection - AV_PI/2),2*AV_PI)*180/AV_PI;
 
-// 				fclose(pathfile);
+
+				fclose(pathfile);
 				calculation_iterator++;
 				//finished with that string
 
 				last_calc_index = generalflags.navi_index_call;
-				last_dest_index = destination.skipper_index_call;
+				last_skip_index = generalflags.skip_index_dest_call;
 				naviflags.navi_index_answer = generalflags.navi_index_call;
-				naviflags.sail_reset_index++;
 				dataNaviFlags.t_writefrom(naviflags);
 				transformationData.t_writefrom(transformation);
 				waypointData.t_writefrom(waypoints);
 				time(&start_time);
-				rtx_message("path calc done\n");
-
+rtx_message("path calc done");
 			}
 
 		} else if (dataWindClean.hasTimedOut()) {
@@ -561,10 +561,10 @@ void setAisObstacles(ShipData ship, UISpace & map, LakeTransformation transforma
 {
 	int shipiterator, shiplat, shiplong;
 	int dangerpoint_x, dangerpoint_y;
-// 	FILE * islandplotter;
+	FILE * islandplotter;
 	char filename_islands[20];
-// 	sprintf(filename_islands,"ais_islands_%d",calculation_iterator);
-// 	islandplotter = fopen(filename_islands,"w");
+	sprintf(filename_islands,"ais_islands_%d",calculation_iterator);
+	islandplotter = fopen(filename_islands,"w");
 
 	for(shipiterator = 0; shipiterator < ship.shipCount; shipiterator++)
 	{
@@ -572,23 +572,23 @@ void setAisObstacles(ShipData ship, UISpace & map, LakeTransformation transforma
 		{
 			for(shiplat = -500; shiplat < 530; shiplat += AV_NAVI_GRID_SIZE)
 			{
-// 				dangerpoint_x = int (rint((ship.Data[shipiterator].longitude + shiplong - transformation.y_offset) 
-// 							/ AV_NAVI_GRID_SIZE));
-// 				dangerpoint_y = int (rint((ship.Data[shipiterator].latitude + shiplat - transformation.x_offset) 
-// 							/ AV_NAVI_GRID_SIZE));
+				dangerpoint_x = int (rint((ship.Data[shipiterator].longitude + shiplong - transformation.y_offset) 
+							/ AV_NAVI_GRID_SIZE));
+				dangerpoint_y = int (rint((ship.Data[shipiterator].latitude + shiplat - transformation.x_offset) 
+							/ AV_NAVI_GRID_SIZE));
 
 				if(map.contains(dangerpoint_x,dangerpoint_y,0))
 				{
 					//block that cell:
 					map(dangerpoint_x,dangerpoint_y,0).value = 40000;
-// 					fprintf(islandplotter,"%d %d \n",dangerpoint_x,dangerpoint_y);
+					fprintf(islandplotter,"%d %d \n",dangerpoint_x,dangerpoint_y);
 
 				}
 			}
 		}
 	}
 
-// 	fclose(islandplotter);
+	fclose(islandplotter);
 }
 void setIsland(const char *islandFile, UISpace & map, LakeTransformation transformation,int calculation_iterator)
 {
@@ -598,10 +598,10 @@ void setIsland(const char *islandFile, UISpace & map, LakeTransformation transfo
 	int m;
 	double longitude_curr_old, latitude_curr_old;
 	double longitude_curr, latitude_curr;
-// 	FILE * islandplotter;
+	FILE * islandplotter;
 	char filename_islands[20];
-// 	sprintf(filename_islands,"gnuplot_islands_%d",calculation_iterator);
-// 	islandplotter = fopen(filename_islands,"w");
+	sprintf(filename_islands,"gnuplot_islands_%d",calculation_iterator);
+	islandplotter = fopen(filename_islands,"w");
 
 	char currentLine[10000], *ptr;
 	if (island.is_open())
@@ -640,7 +640,7 @@ void setIsland(const char *islandFile, UISpace & map, LakeTransformation transfo
 				{
 					//block that cell:
 					map(newX,newY,0).value = 100000;
-// 					fprintf(islandplotter,"%d %d \n",newX,newY);
+					fprintf(islandplotter,"%d %d \n",newX,newY);
 #ifdef DEBUG_ISLAND
 					printf("if in setIslands went through\n");
 #endif
@@ -650,7 +650,7 @@ void setIsland(const char *islandFile, UISpace & map, LakeTransformation transfo
 		}
 	}
 	else std::cout << "Unable to open file";
-// 	fclose(islandplotter);
+	fclose(islandplotter);
 }
 ////////////////////////////////////////////////////////////////
 void prepareConnectivity16(Dijkstra3D::ConnectivityList & list) {

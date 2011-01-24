@@ -163,9 +163,8 @@ void * translation_thread(void * dummy)
     double check_angle;
     double dist_min;
     double dist_limit;
-    double dist_dest;
     double dist_test;
-    double add_dist_safe=200, add_angle_safe=5*AV_PI/180.0;
+    double add_dist_safe=200;
 
     std::vector<Obstacle> obst_p;
     std::vector<Obstacle> obst_p_start;
@@ -200,6 +199,7 @@ void * translation_thread(void * dummy)
 	    skipperFlagData.t_readto(skipperflags,0,0);
             dataImuClean.t_readto(imu_clean,0,0);
 
+	    // transform boat location into the local 2D map
 	    current_pos_x =AV_EARTHRADIUS * (AV_PI/180) * (boatData.position.latitude-destination.latitude);
 	    current_pos_y =AV_EARTHRADIUS * cos((destination.latitude * AV_PI/180)) * (AV_PI/180)
 			      *(boatData.position.longitude-destination.longitude);
@@ -230,8 +230,12 @@ void * translation_thread(void * dummy)
             }
 #endif
 
+	    // check for every boat, if Avalon is on collision course
 	    collision = false;
+	    if (ais.number_of_ships !=0)
+	    {
                 rtx_message("avalon's position (x,y) = (%f,%f) \n",current_pos_x, current_pos_y);
+	    }
 	    for (i = 0; i < ais.number_of_ships; i++)
             {
 		ship_pos_x 	= AV_EARTHRADIUS * (AV_PI/180) * (ais.Ship[i].latitude-destination.latitude);
@@ -258,7 +262,6 @@ void * translation_thread(void * dummy)
 
 		    speed_ship		= 0.5144444 * ais.Ship[i].speed_over_ground;
                    
-// rtx_message("avalon: x= %f y= %f, ship: x= %f y= %f  angle av-sh = %f \n", current_pos_x, current_pos_y, ship_pos_x,ship_pos_y, angle_avalon_ship*180/AV_PI);
 		    // take the average velocity over the last "num_speed_history" measurements
 		    speed_avalon	= 0.5144444 * sqrt(pow(imu_clean.velocity.x,2) + pow(imu_clean.velocity.y,2));
                     speed_avalon_all.insert(speed_avalon_all.begin(),speed_avalon);
@@ -268,8 +271,8 @@ void * translation_thread(void * dummy)
 		    for (l=0;l<speed_avalon_all.size();l++)
 		      {speed_avalon = speed_avalon + 1.0/speed_avalon_all.size()*speed_avalon_all[l];}
 
-// 		    speed_avalon_to_dest = speed_avalon*cos(angle_to_dest-heading_avalon); // TODO what velocity and angle do we take?
-		    speed_avalon_to_dest= speed_avalon;
+		    speed_avalon_to_dest = speed_avalon*cos(angle_to_dest-heading_avalon); // TODO what velocity and angle do we take?
+// 		    speed_avalon_to_dest= speed_avalon;
 
 		    heading_avalon	= boatData.attitude.yaw*AV_PI/180.0;
                     angle_avalon_ship	= atan2((ship_pos_y-current_pos_y) , (ship_pos_x-current_pos_x));
@@ -278,10 +281,10 @@ void * translation_thread(void * dummy)
 
 // rtx_message("velocity avalon abs: %f vel to dest: %f \n",speed_avalon,speed_to_dest);
 
-//                     vel_avalon_x	= cos(angle_to_dest) * speed_avalon_to_dest;
-//                     vel_avalon_y	= sin(angle_to_dest) * speed_avalon_to_dest;
-		    vel_avalon_x	= cos(heading_avalon) * speed_avalon_to_dest;
-                    vel_avalon_y	= sin(heading_avalon) * speed_avalon_to_dest;
+                    vel_avalon_x	= cos(angle_to_dest) * speed_avalon_to_dest;
+                    vel_avalon_y	= sin(angle_to_dest) * speed_avalon_to_dest;
+// 		    vel_avalon_x	= cos(heading_avalon) * speed_avalon_to_dest;
+//                     vel_avalon_y	= sin(heading_avalon) * speed_avalon_to_dest;
                     vel_ship_x		= cos(heading_ship) * speed_ship;
                     vel_ship_y		= sin(heading_ship) * speed_ship;
                     vel_relativ_x	= vel_avalon_x - vel_ship_x;
@@ -290,12 +293,14 @@ void * translation_thread(void * dummy)
 // rtx_message("avalon vel:  long= %f  lat= %f  total= %f  angle= %f", vel_avalon_long,vel_avalon_lat,speed_avalon_to_dest, angle_to_dest);
 // rtx_message("relativ vel: long= %lf lat= %lf", vel_avalon_long-vel_ship_long,vel_avalon_lat-vel_ship_lat);
 
-
+		    // define the minimal allowed distance between the other boat and Avalon  
                     ship_length		= 1;  // ship length, if not from AIS
                     threshold_radius	= 395;  // to be modified: additional safety distance
                     radius_relativ	= ship_length + 4 + threshold_radius;    // ship length + avalon_length + threshold_radius
                     dist_avalon_ship	= sqrt(pow(ship_pos_x - current_pos_x,2) + pow(ship_pos_y - current_pos_y,2));
 // rtx_message("dist to ship = %f \n", dist_avalon_ship);
+
+		    // if Avalon is to close to an other boat, the new desired heading is normal to the boats heading
 		    if (dist_avalon_ship<0.5*radius_relativ)
 		    {
 			if (remainder((AV_PI+angle_avalon_ship-heading_ship),2*AV_PI)<0)
@@ -303,6 +308,7 @@ void * translation_thread(void * dummy)
 			else
 			    {angle_safe = remainder(heading_ship+AV_PI*0.5,2*AV_PI);}
 
+			// calculate the new safe destination points 
 // rtx_message("angle_av_sh= %lf    head_sh= %lf     ang_safe= %lf\n", angle_avalon_ship*180/AV_PI,heading_ship*180/AV_PI,angle_safe*180/AV_PI);
 			ais_dest.new_dest_long 	= destination.latitude + (ship_pos_x+1.5*radius_relativ*cos(angle_safe))*180/(AV_PI*AV_EARTHRADIUS);
 			ais_dest.new_dest_lat 	= destination.longitude + (ship_pos_y+1.5*radius_relativ*sin(angle_safe))*180
@@ -313,7 +319,8 @@ void * translation_thread(void * dummy)
 
 			continue;
 		    }
-
+	    
+		    // check for collision
 		    angle_tang_rear	= remainder((angle_avalon_ship - asin(radius_relativ/dist_avalon_ship)),2*AV_PI);
 		    angle_tang_front	= remainder((angle_avalon_ship + asin(radius_relativ/dist_avalon_ship)),2*AV_PI);
 //  rtx_message("ang_rear: %f  ang_front: %f  ang_rel: %f",angle_tang_rear*180/AV_PI,angle_tang_front*180/AV_PI, angle_relativ*180/AV_PI);
@@ -337,7 +344,7 @@ void * translation_thread(void * dummy)
 	    obst_p_end.clear();
 	    obst_p_start.clear();
 
-	    // find the collision points with every ship in the vicinity
+	    
 	    for (i = 0; i < ais.number_of_ships; i++)
 	    {
 		ship_pos_x 	= AV_EARTHRADIUS * (AV_PI/180) * (ais.Ship[i].latitude-destination.latitude);
@@ -350,12 +357,13 @@ void * translation_thread(void * dummy)
                 rtx_message("distance avalon to ship number %d is %f meters\n",i+1,distance);
                 rtx_message("ship's position (x,y) = (%f,%f) \n",ship_pos_x, ship_pos_y);
 #endif
+		// if a ship is in the distance of sight, then a bound of forbidden headings is calculated
 		if ((distance < dist_of_sight) && (ais.Ship[i].speed_over_ground != 0.0)
 			&& ((ais.Ship[i].course_over_ground != 0.0) || (ais.Ship[i].heading != 0.0)))
 		{
 		    obst_p.clear();
 		    num_obstP=0;
-		    heading_ship = ais.Ship[i].heading*AV_PI/180.0;	// TODO degree or rad??
+		    heading_ship = ais.Ship[i].heading*AV_PI/180.0;
 		    if (heading_ship == 0.0)
 		    {
 			heading_ship = ais.Ship[i].course_over_ground*AV_PI/180.0;
@@ -377,14 +385,14 @@ void * translation_thread(void * dummy)
 		    speed_avalon = 0;
 		    for (l=0;l<speed_avalon_all.size();l++)
 		      {speed_avalon = speed_avalon + 1.0/speed_avalon_all.size()*speed_avalon_all[l];}
-// 		    speed_avalon_to_dest = speed_avalon*cos(angle_to_dest-heading_avalon); // TODO what velocity and angle do we take?
-		    speed_avalon_to_dest= speed_avalon;
+		    speed_avalon_to_dest = speed_avalon*cos(angle_to_dest-heading_avalon);
+// 		    speed_avalon_to_dest= speed_avalon;
 // rtx_message("velocity avalon abs: %f vel to dest: %f \n",speed_avalon,speed_to_dest);
 
-//                     vel_avalon_x	= cos(angle_to_dest) * speed_avalon_to_dest;
-//                     vel_avalon_y	= sin(angle_to_dest) * speed_avalon_to_dest;
-		    vel_avalon_x	= cos(heading_avalon) * speed_avalon_to_dest;
-                    vel_avalon_y	= sin(heading_avalon) * speed_avalon_to_dest;
+                    vel_avalon_x	= cos(angle_to_dest) * speed_avalon_to_dest;
+                    vel_avalon_y	= sin(angle_to_dest) * speed_avalon_to_dest;
+// 		    vel_avalon_x	= cos(heading_avalon) * speed_avalon_to_dest;
+//                     vel_avalon_y	= sin(heading_avalon) * speed_avalon_to_dest;
                     vel_ship_x		= cos(heading_ship) * speed_ship;
                     vel_ship_y		= sin(heading_ship) * speed_ship;
                     vel_relativ_x	= vel_avalon_x - vel_ship_x;

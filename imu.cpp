@@ -66,7 +66,7 @@ Cmt3 serial;
 
 // Storage for the command line arguments
 const char * varname = "imu";
-const char * portname = "/dev/xsensIMU"; // HE: made a udev rule for the IMU
+const char * portname = "/dev/ttyUSB0"; // HE: made a udev rule for the IMU
 const char * producerHelpStr = "All Data coming from the IMU";
 double frequency = 100;
 
@@ -181,7 +181,7 @@ void * imu_production_thread(void * dummy)
     double velocity_to_north, velocity_to_west;
 
 	Packet reply(1,0); /* 1 item, not xbus */
-
+FILE * imu_data;
 	if (serial.gotoMeasurement()){
 		EXIT_ERROR("goto measurement");}
 
@@ -200,11 +200,13 @@ void * imu_production_thread(void * dummy)
 		serial.waitForDataMessage(&reply);
 		/* TODO CP: handle errors here. If there is errors, it is very 
 		 * dangerous to write some false values in the imu variable */
-
+imu_data=fopen("imu_plot.txt","a+");
 		imu.attitude.roll=reply.getOriEuler().m_roll;   		// roll
 		imu.attitude.pitch=reply.getOriEuler().m_pitch;    		// pitch
 		imu.attitude.yaw=-remainder(reply.getOriEuler().m_yaw,360.0);    // yaw, Avalon-convention
 
+fprintf(imu_data,"%f %f %f %f %f \n",reply.getVelocity().m_data[0], reply.getVelocity().m_data[1], imu.attitude.yaw/100.0, imu.position.latitude, imu.position.longitude);
+fclose(imu_data);
 		imu.position.latitude=reply.getPositionLLA().m_data[0];
 		imu.position.longitude=reply.getPositionLLA().m_data[1];
 		imu.position.altitude=reply.getPositionLLA().m_data[2];

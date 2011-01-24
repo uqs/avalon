@@ -99,7 +99,7 @@ void * translation_thread(void * dummy)
 	Sailstate sailData;
 	double bearing_app_X, bearing_app_Y;
 	double speed_app_X, speed_app_Y;
-	int nenner, nenner_long;
+	int nenner, nenner_long, count=0;
     // int first_wind_sign;
     // bool firsttime=true;
 
@@ -127,6 +127,20 @@ void * translation_thread(void * dummy)
     }
 
     while (1) {
+
+
+	    FILE * windfile;
+
+ if(count < 10000)
+ {	    
+ 	    windfile = fopen("windplot.txt","a+");
+ }
+ if(count == 10000)
+ { 
+   count = 0;
+   windfile = fopen("windplot.txt","w+");
+ }
+count ++;	    
 	    // Read the next data available, or wait at most 5 seconds
 	    if (dataWind.t_readto(dirtyWind,10.0,1))
 	    {
@@ -167,10 +181,10 @@ void * translation_thread(void * dummy)
 
 		    bearing_app_X = dirtyWind.speed * cos(workingWind.bearing_app * AV_PI / 180.0 ); //attention: here we used apparent wind speed, is that correct????
 		    bearing_app_Y = dirtyWind.speed * sin(workingWind.bearing_app * AV_PI / 180.0 );
-
-		    workingWind.bearing_real = atan2((bearing_app_Y + boatData.velocity.y),(bearing_app_X - boatData.velocity.x));
-		    workingWind.bearing_real = remainder((workingWind.bearing_real * 180.0/AV_PI),360.0); 
-
+		    // with drift:
+// 		    workingWind.bearing_real = remainder(atan2((bearing_app_Y + boatData.velocity.y),(bearing_app_X - boatData.velocity.x))*180/AV_PI,360);
+		    // without drift
+		    workingWind.bearing_real = remainder(atan2((bearing_app_Y),(bearing_app_X - boatData.velocity.x))*180/AV_PI,360);
 		    /**global real:**/
 
 		    workingWind.global_direction_real = remainder((workingWind.bearing_real + boatData.attitude.yaw),360.0);
@@ -184,7 +198,10 @@ void * translation_thread(void * dummy)
 		    speed_app_X = dirtyWind.speed * cos(workingWind.bearing_app * AV_PI / 180.0);
 		    speed_app_Y = dirtyWind.speed * sin(workingWind.bearing_app * AV_PI / 180.0);
 // rtx_message("Windspeed in boat system: x= %f  y= %f",speed_app_X, speed_app_Y);
-		    workingWind.speed = sqrt(pow((speed_app_X - boatData.velocity.x),2) + pow((speed_app_Y + boatData.velocity.y),2));
+		     // with drift:
+// 		    workingWind.speed = sqrt(pow((speed_app_X - boatData.velocity.x),2) + pow((speed_app_Y + boatData.velocity.y),2));
+		    // without drift
+		    workingWind.speed = sqrt(pow((speed_app_X - boatData.velocity.x),2) + pow((speed_app_Y),2));
 
 		    /**doing the right thing with the new values to avoid leaps (-180 to 180) - for every value, there is two operations:**/
 
@@ -278,6 +295,8 @@ void * translation_thread(void * dummy)
 
 		    // Bring to store
 		    dataWindClean.t_writefrom(cleanedWind);
+		    
+		    fprintf(windfile,"%f %f %f %f %f %f \n", workingWind.global_direction_real,cleanedWind.global_direction_real, cleanedWind.global_direction_real_long, workingWind.speed, cleanedWind.speed, cleanedWind.speed_long);
 
 	    }
 

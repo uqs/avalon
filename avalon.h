@@ -30,14 +30,20 @@
 // Settings for WindCleaner
 /////////////////////////////
 
-#define AV_CLEAN_LENGTH				2 		// number of last windData to be considered int between 3 and 99
-#define AV_CLEAN_LENGTH_LONG	    2 		// number of last windData to be considered for navigator input
+#define AV_CLEAN_LENGTH				50 		// number of last windData to be considered int between 3 and 99
+#define AV_CLEAN_LENGTH_LONG	    90 		// number of last windData to be considered for navigator input
 
 /////////////////////////////
 // Settings for destination input
 /////////////////////////////
 
 #define AV_MAXNUM_DESTINATION		100
+
+/////////////////////////////
+// Settings for boat model
+/////////////////////////////
+
+#define AV_MODEL_LIN_COEFF  		0.9
 
 /////////////////////////////
 // Settings for input devices
@@ -109,7 +115,6 @@
 //#define AV_SAILMAIN_CONTROLCENTER
 
 #define AV_SAILMAIN_KEEPALIVE_LOGFILE                   // TODO HE: Should only by defined if filesystem is RW!!!!!!!!
-
 //////////////////////
 // Settings for Sailor
 //////////////////////
