@@ -403,23 +403,16 @@ void * translation_thread(void * dummy)
 			     || (remainder(heading_prev_to_next_wyp-heading_to_next_wyp+0.1,2*AV_PI)<0 && (remainder(heading_curr_to_next_wyp-heading_to_next_wyp+0.04,2*AV_PI)<0)))
 				&& fabs(dist_curr_wyp) > 400.0 && (waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END)))
                         {
-// #ifdef DEBUG_SKIPPER
-                            rtx_message("normalnavi: switching to newcalculation state; reason:");
 			    if(fabs(dir_wind_mean - waypoints.Data[current_wyp].winddirection) > 10.0)
                             {
                                 rtx_message("wind has changed");
                             }
- /*
-			    if ((waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END) && (dist_curr_wyp < 80.0))
-			    {
-				rtx_message("reached last waypoint");
-			    }*/
+			    
                             if (fabs(dist_solltrajectory) > 100.0)
                             {
                                 rtx_message("dist_solltrajectory too bigi (%f meters) ",dist_solltrajectory);
                             }
 
-// #endif
                             naviflags.navi_state = AV_FLAGS_NAVI_NEWCALCULATION;
                             naviflags.navi_index_call ++;
                             dataNaviFlags.t_writefrom(naviflags);
