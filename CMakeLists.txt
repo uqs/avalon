@@ -101,20 +101,20 @@ TARGET_LINK_LIBRARIES(skipper2 ddxx ddx rtx pthread rt )
 ADD_EXECUTABLE(navigator navigator.cpp)
 TARGET_LINK_LIBRARIES(navigator ddxx ddx rtx pthread rt )
 
-ADD_EXECUTABLE(simulator simulator.cpp)
-TARGET_LINK_LIBRARIES(simulator ddxx ddx rtx pthread rt )
+#ADD_EXECUTABLE(simulator simulator.cpp)
+#TARGET_LINK_LIBRARIES(simulator ddxx ddx rtx pthread rt )
 
-ADD_EXECUTABLE(obstacle_converter obstacle_converter.cpp)
-TARGET_LINK_LIBRARIES(obstacle_converter)
+#ADD_EXECUTABLE(obstacle_converter obstacle_converter.cpp)
+#TARGET_LINK_LIBRARIES(obstacle_converter)
 
 ADD_EXECUTABLE(destination_converter destination_converter.cpp)
 TARGET_LINK_LIBRARIES(destination_converter ddxx ddx rtx pthread rt) 
 
-ADD_EXECUTABLE(dtom dtom.cpp)
-TARGET_LINK_LIBRARIES(dtom)
+#ADD_EXECUTABLE(dtom dtom.cpp)
+#TARGET_LINK_LIBRARIES(dtom)
 
-ADD_EXECUTABLE(mtod mtod.cpp)
-TARGET_LINK_LIBRARIES(mtod)
+#ADD_EXECUTABLE(mtod mtod.cpp)
+#TARGET_LINK_LIBRARIES(mtod)
 
 #ADD_EXECUTABLE(rootsolver_test rootsolver_test.cpp sailor_main_iter_fn.cpp sailor_rudder_iter_fn.cpp)
 #TARGET_LINK_LIBRARIES(rootsolver_test gsl gslcblas rtx)

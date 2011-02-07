@@ -985,7 +985,7 @@ int CPC_GetCANState(int handle)
 	return -1;
 }
 
-char *cpcLibVersion = CPC_LIB_VERSION;
+char *cpcLibVersion = "2.42";
 char *cpcLibSerial = CPC_LIB_SERIAL;
 char *infoSourceBummer = "unknown source";
 char *infoTypeBummer = "unknown type";
