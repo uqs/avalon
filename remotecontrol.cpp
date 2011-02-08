@@ -233,25 +233,27 @@ void * translation_thread(void * dummy)
 			}
 
 			//--------------------------------------------------------------------------------------------------------------------
-			//Increas / Decrease desired heading 90 degres (to test step responses of the sailor) [inserted 100620 by gbu]
+			//Increas / Decrease desired heading 90 degrees (to test step responses of the sailor) [inserted 100620 by gbu]
 			//TODO: change button 15 to something decent 
-#if 0
-			if(joystick.buttons[3] && joystick.buttons[15] && flags.man_in_charge == AV_FLAGS_MIC_SAILOR && flags.navi_state == AV_FLAGS_NAVI_IDLE)
+#if 1
+			if(joystick.buttons[3] && joystick.buttons[15] && flags.state == AV_FLAGS_ST_DOCK)
 			{
 				dataDesiredHeading.t_readto(desired_heading,0,0);
-				desired_heading.heading -= 90.0;
+				desired_heading.heading -= 60.0;
 				desired_heading.heading = remainder(desired_heading.heading, 360.0);
 				dataDesiredHeading.t_writefrom(desired_heading);
 			}
-			if(joystick.buttons[4] && joystick.buttons[15] && flags.man_in_charge == AV_FLAGS_MIC_SAILOR && flags.navi_state == AV_FLAGS_NAVI_IDLE)
+			if(joystick.buttons[4] && joystick.buttons[15] && flags.state == AV_FLAGS_ST_DOCK)
 			{
 				dataDesiredHeading.t_readto(desired_heading,0,0);
-				desired_heading.heading += 90.0;
+				desired_heading.heading += 60.0;
 				desired_heading.heading = remainder(desired_heading.heading, 360.0);
 				dataDesiredHeading.t_writefrom(desired_heading);
 			}
 #endif
 			//---------------------------------------------------------------------------------------------------------------------
+			//
+#if 0			//homing of rudders and sail is now done autmatically
 			//
 			// Request Rudder reset (buttons 2 and 8 respectivly 9)
 			if(joystick.buttons[1] && joystick.buttons[7] && !leftreset_pressed)
@@ -288,6 +290,7 @@ void * translation_thread(void * dummy)
 				sail.reset_request = 0;
 				sailreset_pressed = false;
 			}
+#endif
 
 			// Emergency Stop (Motion of boom)
 			if(joystick.buttons[10] && !stop_pressed)
