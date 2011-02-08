@@ -54,6 +54,9 @@ Starting all the Programms (on laptop)
 
     $ store -catalog 192.168.1.2 &
     $ ddxjoystick -sample 0.01 &
+    (if joystick is reckognised on an usb port, that has to be specified:
+    $ ddxjoystick -dev /dev/usb.... -sample 0.01 &
+    )
 
 Starting all the Programms (on MainPC)
 --------------------------------------
