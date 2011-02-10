@@ -317,7 +317,7 @@ if(count > 5000 && count < 10000)
                 speed = 0.5144*sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
                 u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
 
-                fprintf(thetafile,"%f %f %f %f %f %f %d\n",desired_heading.heading, imu.attitude.yaw, theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left,flags.state);
+                fprintf(thetafile,"%d %f %f %f %f %f %f %d\n",count, desired_heading.heading, imu.attitude.yaw, theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left,flags.state);
 
 			    rudder.degrees_left = u;
 			    rudder.degrees_right = u;

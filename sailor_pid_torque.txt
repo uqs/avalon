@@ -1,5 +1,5 @@
-torque/P   10 
-torque/I   0
+torque/P   1
+torque/I   0.1
 torque/Imin	-200.0
 torque/Imax 200.0
 torque/D    0

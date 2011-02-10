@@ -21,22 +21,22 @@ double sailor_inverted_linear_model(double heading_speed, double torque_des,
     double dist_rudder_CenterOfRotation = 1.7;
 
     double max_rudder_decrease_factor;
-    double v_r_tot;
+    double v_r_tot; //in m/s
     double d_water;
     double incid_angle;
     double rudder_angle;
 
     //v_r_tot	= sqrt((speed_x*speed_x) + ((speed_y - dist_rudder_CenterOfRotation*heading_speed)*(speed_y - dist_rudder_CenterOfRotation*heading_speed)));
-    v_r_tot = speed_x * 0.514;
+    v_r_tot = speed_x;
    // d_water     = atan2((speed_y - dist_rudder_CenterOfRotation*heading_speed),speed_x)*180/AV_PI; 
     d_water	= 0;
     rudder_angle = torque_des / (AV_MODEL_LIN_COEFF*dist_rudder_CenterOfRotation*dens_water*v_r_tot*v_r_tot*A_rudder) *180/AV_PI;
 
-    if(v_r_tot < 2.0)
+    if(v_r_tot < 1.0)
     {
-        max_rudder_decrease_factor = v_r_tot * (1.0 - 10.0 / AV_MAX_RUDDER_ANGLE)*0.5 + (10.0 / AV_MAX_RUDDER_ANGLE);
+        max_rudder_decrease_factor = v_r_tot * (1.0 - 10.0 / AV_MAX_RUDDER_ANGLE) + (10.0 / AV_MAX_RUDDER_ANGLE);
     }
-    else if( v_r_tot >= 2.0)
+    else if( v_r_tot >= 1.0)
     {
         max_rudder_decrease_factor = 1.0;
     }
