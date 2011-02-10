@@ -167,7 +167,7 @@ void * translation_thread(void * dummy)
 	rcFlags rcflags;
 	imuData imu;
 	DesiredHeading desired_heading;
-	bool pressed = false, stop_pressed = false, sailreset_pressed = false;
+	bool pressed = false, stop_pressed = false, sailreset_pressed = false, hdgch_pressed = false;
 	bool leftreset_pressed = false, rightreset_pressed = false, sailing_pressed = false;
 	bool rc_pressed = false, energysaving_pressed = false, oceansailing_pressed = false;
 	bool emergency = false, motionstop = false;
@@ -217,14 +217,14 @@ void * translation_thread(void * dummy)
 
 			// 	Desired_heading steering via 4/5 buttons in sailing mode (only
 			// 	if navigator is idle
-			if(joystick.buttons[3] && flags.man_in_charge == AV_FLAGS_MIC_SAILOR && flags.navi_state == AV_FLAGS_NAVI_IDLE)
+			if(joystick.buttons[3] && flags.man_in_charge == AV_FLAGS_MIC_SAILOR && flags.navi_state == AV_FLAGS_NAVI_IDLE && flags.state != AV_FLAGS_ST_DOCK)
 			{
 				dataDesiredHeading.t_readto(desired_heading,0,0);
 				desired_heading.heading -= AV_DESHEADSTICK_4_5_SENSITIVITY;
 				desired_heading.heading = remainder(desired_heading.heading, 360.0);
 				dataDesiredHeading.t_writefrom(desired_heading);
 			}
-			if(joystick.buttons[4] && flags.man_in_charge == AV_FLAGS_MIC_SAILOR && flags.navi_state == AV_FLAGS_NAVI_IDLE)
+			if(joystick.buttons[4] && flags.man_in_charge == AV_FLAGS_MIC_SAILOR && flags.navi_state == AV_FLAGS_NAVI_IDLE && flags.state != AV_FLAGS_ST_DOCK)
 			{
 				dataDesiredHeading.t_readto(desired_heading,0,0);
 				desired_heading.heading += AV_DESHEADSTICK_4_5_SENSITIVITY;
@@ -233,23 +233,28 @@ void * translation_thread(void * dummy)
 			}
 
 			//--------------------------------------------------------------------------------------------------------------------
-			//Increas / Decrease desired heading 90 degrees (to test step responses of the sailor) [inserted 100620 by gbu]
-			//TODO: change button 15 to something decent 
+			//Increas / Decrease desired heading 60 degrees (to test step responses of the sailor) [inserted 100620 by gbu]
 #if 1
-			if(joystick.buttons[3] && joystick.buttons[15] && flags.state == AV_FLAGS_ST_DOCK)
+			if(joystick.buttons[3] && joystick.buttons[0] && flags.state == AV_FLAGS_ST_DOCK && !hdgch_pressed)
 			{
+                hdgch_pressed = true;
 				dataDesiredHeading.t_readto(desired_heading,0,0);
 				desired_heading.heading -= 60.0;
 				desired_heading.heading = remainder(desired_heading.heading, 360.0);
 				dataDesiredHeading.t_writefrom(desired_heading);
 			}
-			if(joystick.buttons[4] && joystick.buttons[15] && flags.state == AV_FLAGS_ST_DOCK)
+            else if(joystick.buttons[4] && joystick.buttons[0] && flags.state == AV_FLAGS_ST_DOCK && !hdgch_pressed)
 			{
+                hdgch_pressed = true;
 				dataDesiredHeading.t_readto(desired_heading,0,0);
 				desired_heading.heading += 60.0;
 				desired_heading.heading = remainder(desired_heading.heading, 360.0);
 				dataDesiredHeading.t_writefrom(desired_heading);
 			}
+            else if(!joystick.buttons[0] && flags.state == AV_FLAGS_ST_DOCK)
+            {
+                hdgch_pressed = false;
+            }
 #endif
 			//---------------------------------------------------------------------------------------------------------------------
 			//
@@ -323,6 +328,8 @@ void * translation_thread(void * dummy)
 				motionstop = false;
 				rcflags.man_in_charge = AV_FLAGS_MIC_SAILOR;
 				rcflags.sailorstate_requested = AV_FLAGS_ST_DOCK;
+				desired_heading.heading = imu.attitude.yaw;
+				dataDesiredHeading.t_writefrom(desired_heading);
 				rcflags.autonom_navigation = 0;
 			}
 			else

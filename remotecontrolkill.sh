@@ -1,4 +1,5 @@
 #!/bin/bash
+killall keepalive
 killall flag-checker
 killall remotecontrol
 killall porttracker
@@ -20,6 +21,7 @@ killall launch
 killall launchagent
 
 sleep 5
+killall -9 keepalive
 killall -9 flag-checker
 killall -9 remotecontrol
 killall -9 porttracker

@@ -30,24 +30,27 @@ cmake_force:
 SHELL = /bin/sh
 
 # The CMake executable.
-CMAKE_COMMAND = /usr/bin/cmake
+CMAKE_COMMAND = /usr/local/bin/cmake
 
 # The command to remove a file.
-RM = /usr/bin/cmake -E remove -f
+RM = /usr/local/bin/cmake -E remove -f
+
+# The program to use to edit the cache.
+CMAKE_EDIT_COMMAND = /usr/local/bin/ccmake
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/gbuesser/avalon
+CMAKE_SOURCE_DIR = /home/castor/avalon
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/gbuesser/avalon
+CMAKE_BINARY_DIR = /home/castor/avalon
 
 #=============================================================================
 # Targets provided globally by CMake.
 
 # Special rule for the target edit_cache
 edit_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running interactive CMake command-line interface..."
-	/usr/bin/cmake -i .
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake cache editor..."
+	/usr/local/bin/ccmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : edit_cache
 
 # Special rule for the target edit_cache
@@ -57,19 +60,19 @@ edit_cache/fast: edit_cache
 # Special rule for the target install
 install: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
-	/usr/bin/cmake -P cmake_install.cmake
+	/usr/local/bin/cmake -P cmake_install.cmake
 .PHONY : install
 
 # Special rule for the target install
 install/fast: preinstall/fast
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
-	/usr/bin/cmake -P cmake_install.cmake
+	/usr/local/bin/cmake -P cmake_install.cmake
 .PHONY : install/fast
 
 # Special rule for the target install/local
 install/local: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
-	/usr/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+	/usr/local/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
 .PHONY : install/local
 
 # Special rule for the target install/local
@@ -79,7 +82,7 @@ install/local/fast: install/local
 # Special rule for the target install/strip
 install/strip: preinstall
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
-	/usr/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+	/usr/local/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
 .PHONY : install/strip
 
 # Special rule for the target install/strip
@@ -98,7 +101,7 @@ list_install_components/fast: list_install_components
 # Special rule for the target rebuild_cache
 rebuild_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+	/usr/local/bin/cmake -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
 .PHONY : rebuild_cache
 
 # Special rule for the target rebuild_cache
@@ -107,14 +110,14 @@ rebuild_cache/fast: rebuild_cache
 
 # The main all target
 all: cmake_check_build_system
-	cd /home/gbuesser/avalon && $(CMAKE_COMMAND) -E cmake_progress_start /home/gbuesser/avalon/CMakeFiles /home/gbuesser/avalon/cmt/CMakeFiles/progress.make
-	cd /home/gbuesser/avalon && $(MAKE) -f CMakeFiles/Makefile2 cmt/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/gbuesser/avalon/CMakeFiles 0
+	cd /home/castor/avalon && $(CMAKE_COMMAND) -E cmake_progress_start /home/castor/avalon/CMakeFiles /home/castor/avalon/cmt/CMakeFiles/progress.make
+	cd /home/castor/avalon && $(MAKE) -f CMakeFiles/Makefile2 cmt/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/castor/avalon/CMakeFiles 0
 .PHONY : all
 
 # The main clean target
 clean:
-	cd /home/gbuesser/avalon && $(MAKE) -f CMakeFiles/Makefile2 cmt/clean
+	cd /home/castor/avalon && $(MAKE) -f CMakeFiles/Makefile2 cmt/clean
 .PHONY : clean
 
 # The main clean target
@@ -123,22 +126,22 @@ clean/fast: clean
 
 # Prepare targets for installation.
 preinstall: all
-	cd /home/gbuesser/avalon && $(MAKE) -f CMakeFiles/Makefile2 cmt/preinstall
+	cd /home/castor/avalon && $(MAKE) -f CMakeFiles/Makefile2 cmt/preinstall
 .PHONY : preinstall
 
 # Prepare targets for installation.
 preinstall/fast:
-	cd /home/gbuesser/avalon && $(MAKE) -f CMakeFiles/Makefile2 cmt/preinstall
+	cd /home/castor/avalon && $(MAKE) -f CMakeFiles/Makefile2 cmt/preinstall
 .PHONY : preinstall/fast
 
 # clear depends
 depend:
-	cd /home/gbuesser/avalon && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
+	cd /home/castor/avalon && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 1
 .PHONY : depend
 
 # Convenience name for target.
 cmt/CMakeFiles/cmt.dir/rule:
-	cd /home/gbuesser/avalon && $(MAKE) -f CMakeFiles/Makefile2 cmt/CMakeFiles/cmt.dir/rule
+	cd /home/castor/avalon && $(MAKE) -f CMakeFiles/Makefile2 cmt/CMakeFiles/cmt.dir/rule
 .PHONY : cmt/CMakeFiles/cmt.dir/rule
 
 # Convenience name for target.
@@ -147,7 +150,7 @@ cmt: cmt/CMakeFiles/cmt.dir/rule
 
 # fast build rule for target.
 cmt/fast:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/build
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/build
 .PHONY : cmt/fast
 
 cmt1.o: cmt1.cpp.o
@@ -155,7 +158,7 @@ cmt1.o: cmt1.cpp.o
 
 # target to build an object file
 cmt1.cpp.o:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmt1.cpp.o
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmt1.cpp.o
 .PHONY : cmt1.cpp.o
 
 cmt1.i: cmt1.cpp.i
@@ -163,7 +166,7 @@ cmt1.i: cmt1.cpp.i
 
 # target to preprocess a source file
 cmt1.cpp.i:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmt1.cpp.i
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmt1.cpp.i
 .PHONY : cmt1.cpp.i
 
 cmt1.s: cmt1.cpp.s
@@ -171,7 +174,7 @@ cmt1.s: cmt1.cpp.s
 
 # target to generate assembly for a file
 cmt1.cpp.s:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmt1.cpp.s
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmt1.cpp.s
 .PHONY : cmt1.cpp.s
 
 cmt2.o: cmt2.cpp.o
@@ -179,7 +182,7 @@ cmt2.o: cmt2.cpp.o
 
 # target to build an object file
 cmt2.cpp.o:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmt2.cpp.o
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmt2.cpp.o
 .PHONY : cmt2.cpp.o
 
 cmt2.i: cmt2.cpp.i
@@ -187,7 +190,7 @@ cmt2.i: cmt2.cpp.i
 
 # target to preprocess a source file
 cmt2.cpp.i:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmt2.cpp.i
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmt2.cpp.i
 .PHONY : cmt2.cpp.i
 
 cmt2.s: cmt2.cpp.s
@@ -195,7 +198,7 @@ cmt2.s: cmt2.cpp.s
 
 # target to generate assembly for a file
 cmt2.cpp.s:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmt2.cpp.s
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmt2.cpp.s
 .PHONY : cmt2.cpp.s
 
 cmt3.o: cmt3.cpp.o
@@ -203,7 +206,7 @@ cmt3.o: cmt3.cpp.o
 
 # target to build an object file
 cmt3.cpp.o:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmt3.cpp.o
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmt3.cpp.o
 .PHONY : cmt3.cpp.o
 
 cmt3.i: cmt3.cpp.i
@@ -211,7 +214,7 @@ cmt3.i: cmt3.cpp.i
 
 # target to preprocess a source file
 cmt3.cpp.i:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmt3.cpp.i
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmt3.cpp.i
 .PHONY : cmt3.cpp.i
 
 cmt3.s: cmt3.cpp.s
@@ -219,7 +222,7 @@ cmt3.s: cmt3.cpp.s
 
 # target to generate assembly for a file
 cmt3.cpp.s:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmt3.cpp.s
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmt3.cpp.s
 .PHONY : cmt3.cpp.s
 
 cmtmessage.o: cmtmessage.cpp.o
@@ -227,7 +230,7 @@ cmtmessage.o: cmtmessage.cpp.o
 
 # target to build an object file
 cmtmessage.cpp.o:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmtmessage.cpp.o
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmtmessage.cpp.o
 .PHONY : cmtmessage.cpp.o
 
 cmtmessage.i: cmtmessage.cpp.i
@@ -235,7 +238,7 @@ cmtmessage.i: cmtmessage.cpp.i
 
 # target to preprocess a source file
 cmtmessage.cpp.i:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmtmessage.cpp.i
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmtmessage.cpp.i
 .PHONY : cmtmessage.cpp.i
 
 cmtmessage.s: cmtmessage.cpp.s
@@ -243,7 +246,7 @@ cmtmessage.s: cmtmessage.cpp.s
 
 # target to generate assembly for a file
 cmtmessage.cpp.s:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmtmessage.cpp.s
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmtmessage.cpp.s
 .PHONY : cmtmessage.cpp.s
 
 cmtpacket.o: cmtpacket.cpp.o
@@ -251,7 +254,7 @@ cmtpacket.o: cmtpacket.cpp.o
 
 # target to build an object file
 cmtpacket.cpp.o:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmtpacket.cpp.o
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmtpacket.cpp.o
 .PHONY : cmtpacket.cpp.o
 
 cmtpacket.i: cmtpacket.cpp.i
@@ -259,7 +262,7 @@ cmtpacket.i: cmtpacket.cpp.i
 
 # target to preprocess a source file
 cmtpacket.cpp.i:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmtpacket.cpp.i
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmtpacket.cpp.i
 .PHONY : cmtpacket.cpp.i
 
 cmtpacket.s: cmtpacket.cpp.s
@@ -267,7 +270,7 @@ cmtpacket.s: cmtpacket.cpp.s
 
 # target to generate assembly for a file
 cmtpacket.cpp.s:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmtpacket.cpp.s
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmtpacket.cpp.s
 .PHONY : cmtpacket.cpp.s
 
 cmtscan.o: cmtscan.cpp.o
@@ -275,7 +278,7 @@ cmtscan.o: cmtscan.cpp.o
 
 # target to build an object file
 cmtscan.cpp.o:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmtscan.cpp.o
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmtscan.cpp.o
 .PHONY : cmtscan.cpp.o
 
 cmtscan.i: cmtscan.cpp.i
@@ -283,7 +286,7 @@ cmtscan.i: cmtscan.cpp.i
 
 # target to preprocess a source file
 cmtscan.cpp.i:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmtscan.cpp.i
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmtscan.cpp.i
 .PHONY : cmtscan.cpp.i
 
 cmtscan.s: cmtscan.cpp.s
@@ -291,7 +294,7 @@ cmtscan.s: cmtscan.cpp.s
 
 # target to generate assembly for a file
 cmtscan.cpp.s:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmtscan.cpp.s
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/cmtscan.cpp.s
 .PHONY : cmtscan.cpp.s
 
 xsens_std.o: xsens_std.cpp.o
@@ -299,7 +302,7 @@ xsens_std.o: xsens_std.cpp.o
 
 # target to build an object file
 xsens_std.cpp.o:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/xsens_std.cpp.o
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/xsens_std.cpp.o
 .PHONY : xsens_std.cpp.o
 
 xsens_std.i: xsens_std.cpp.i
@@ -307,7 +310,7 @@ xsens_std.i: xsens_std.cpp.i
 
 # target to preprocess a source file
 xsens_std.cpp.i:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/xsens_std.cpp.i
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/xsens_std.cpp.i
 .PHONY : xsens_std.cpp.i
 
 xsens_std.s: xsens_std.cpp.s
@@ -315,7 +318,7 @@ xsens_std.s: xsens_std.cpp.s
 
 # target to generate assembly for a file
 xsens_std.cpp.s:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/xsens_std.cpp.s
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/xsens_std.cpp.s
 .PHONY : xsens_std.cpp.s
 
 xsens_time.o: xsens_time.cpp.o
@@ -323,7 +326,7 @@ xsens_time.o: xsens_time.cpp.o
 
 # target to build an object file
 xsens_time.cpp.o:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/xsens_time.cpp.o
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/xsens_time.cpp.o
 .PHONY : xsens_time.cpp.o
 
 xsens_time.i: xsens_time.cpp.i
@@ -331,7 +334,7 @@ xsens_time.i: xsens_time.cpp.i
 
 # target to preprocess a source file
 xsens_time.cpp.i:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/xsens_time.cpp.i
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/xsens_time.cpp.i
 .PHONY : xsens_time.cpp.i
 
 xsens_time.s: xsens_time.cpp.s
@@ -339,7 +342,7 @@ xsens_time.s: xsens_time.cpp.s
 
 # target to generate assembly for a file
 xsens_time.cpp.s:
-	cd /home/gbuesser/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/xsens_time.cpp.s
+	cd /home/castor/avalon && $(MAKE) -f cmt/CMakeFiles/cmt.dir/build.make cmt/CMakeFiles/cmt.dir/xsens_time.cpp.s
 .PHONY : xsens_time.cpp.s
 
 # Help Target
@@ -390,6 +393,6 @@ help:
 # No rule that depends on this can have commands that come from listfiles
 # because they might be regenerated.
 cmake_check_build_system:
-	cd /home/gbuesser/avalon && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
+	cd /home/castor/avalon && $(CMAKE_COMMAND) -H$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR) --check-build-system CMakeFiles/Makefile.cmake 0
 .PHONY : cmake_check_build_system
 

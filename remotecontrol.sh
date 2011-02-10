@@ -4,17 +4,18 @@
 ./porttracker
 ./ruddermain -side left &
 ./ruddermain -side right &
-./sailmain &
+#./sailmain &
 ./imu &
 ./imucleaner &
 ./windsensor &
 ./windcleaner &
 ./sailor_transitions &
-#./sailor_statemachine &
-launch -c launch.conf &
+./sailor_statemachine &
+#./keepalive ./sailor_statemachine &
+#launch -c launch.conf &
 #./destination_converter &
 #./global_skipper &
-./skipper &
-./navigator &
+#./skipper &
+#./navigator &
 #./poti &
 #.:/aisEval &

@@ -244,7 +244,7 @@ void * translation_thread(void * dummy)
 //                     desired_heading_while_no_tack_or_jibe = imu.attitude.yaw;
 //                 }
 //                 desired_heading.heading = desired_heading_while_no_tack_or_jibe;
-//
+//             } 
 
 	    FILE * thetafile;
 // 	    FILE * thetaplot;
@@ -267,10 +267,10 @@ if(count > 5000 && count < 10000)
  { 
    thetafile = fopen("thetaplot2.txt","w+");
  }	    
-            switch(flags.state)
+ switch(flags.state)
 	    {
 		    case AV_FLAGS_ST_IDLE:
-	    FILE * thetafile;
+	    //FILE * thetafile;
 			    rtx_timer_sleep(0.1);
 			    last_state = AV_FLAGS_ST_IDLE;
 			    continue;   // don't do anything
@@ -310,29 +310,21 @@ if(count > 5000 && count < 10000)
 
 			    /* evaluate rudder-torquei: */
 			    theta_dot_des = rtx_pid_eval(thetapid, remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0);
-                            torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
-                            rudder.torque_des = torque_des;
+                torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
+                rudder.torque_des = torque_des;
 
-			    /* calling the linear model: */
-                            speed = 0.5144*sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
-                            if (speed <= 0.3)
-                            {
-                                    u = 0;
-                            }
-                            else if((speed > 0.3) && (speed < 0.9))
-                            {
-                                    u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des*0.05, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
-                            }
-                            else if(speed >= 0.9) 
-                            {
-                                    u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
-			    }
+                /* calling the linear model: */
+                speed = 0.5144*sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
+                u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
 
-			    fprintf(thetafile,"%f %f %f %f %f %f %d\n",desired_heading.heading, imu.attitude.yaw, theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left,flags.state);
+                fprintf(thetafile,"%f %f %f %f %f %f %d\n",desired_heading.heading, imu.attitude.yaw, theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left,flags.state);
 
 			    rudder.degrees_left = u;
 			    rudder.degrees_right = u;
 			    last_state = AV_FLAGS_ST_DOCK;
+                rtx_message("theta_difference: %f, theta_dot_des: %f, torque_des: %f, rudder_degrees: %f, speed: %f \n ",
+                        (remainder(desired_heading.heading - imu.attitude.yaw, 360.0)),theta_dot_des, torque_des, rudder.degrees_left,speed);
+
 			    break;
 
 
@@ -832,7 +824,6 @@ if(count > 5000 && count < 10000)
 	    }
 
 	    fclose(thetafile);
-// 	    fclose(thetaplot);
             // Bring to store
 count++;
             dataRudder.t_writefrom(rudder);
@@ -857,7 +848,7 @@ count++;
         rtx_message("Timeout while reading ImuClean data.\n");
         }
 
-        // rtx_timer_sleep(0.1);
+        //rtx_timer_sleep(0.1);
     }
     return NULL;
 }

@@ -99,7 +99,7 @@ void * translation_thread(void * dummy)
             {
                 // my_filter = rtx_filter_init_from_file("imucleanerparams.txt");
                 // my_filter = rtx_filter_smooth1(0.5);
-                velocity_x_filter = rtx_filter_median_init(70);
+                velocity_x_filter = rtx_filter_median_init(500);
                 velocity_y_filter = rtx_filter_median_init(100);
                 velocity_z_filter = rtx_filter_median_init(100);
                 roll_filter = rtx_filter_median_init(100);

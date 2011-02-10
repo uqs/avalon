@@ -43,7 +43,7 @@
 // Settings for boat model
 /////////////////////////////
 
-#define AV_MODEL_LIN_COEFF  		0.9
+#define AV_MODEL_LIN_COEFF  		0.09
 
 /////////////////////////////
 // Settings for input devices
@@ -70,7 +70,7 @@
 /////////////////////////////
 
 // Rudder
-#define AV_MAX_RUDDER_ANGLE			    30.0
+#define AV_MAX_RUDDER_ANGLE			    40.0
 #define AV_RUDDER_TICKS_PER_DEGREE	    (-1583)	        // Convert Ticks to degrees (rudder)
 #define AV_NOF_RUDDER_EPOS			    2	            // How many Epos on the Rudders?
 #define AV_MAX_RUDDER_CURRENT		    10000	        // mA max per Rudder EPOS
