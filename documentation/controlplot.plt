@@ -1,0 +1,1 @@
+plot 'thetaplot.txt' u 1:2 title 'heading_des' w l, 'thetaplot.txt' u 1:3 title 'yaw' w l, 'thetaplot.txt' u 1:4 title 'theta_dot_des' w l, 'thetaplot.txt' u 1:5 title 'gyro' w l, 'thetaplot.txt' u 1:6 title 'torque_des' w l, 'thetaplot.txt' u 1:7 title 'rudder' w l
