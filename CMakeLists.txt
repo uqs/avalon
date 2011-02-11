@@ -93,8 +93,8 @@ TARGET_LINK_LIBRARIES(global_skipper ddxx ddx rtx pthread rt)
 ADD_EXECUTABLE(navigator navigator.cpp)
 TARGET_LINK_LIBRARIES(navigator ddxx ddx rtx pthread rt )
 
-#ADD_EXECUTABLE(simulator simulator.cpp)
-#TARGET_LINK_LIBRARIES(simulator ddxx ddx rtx pthread rt )
+ADD_EXECUTABLE(wind_faker wind_faker.cpp)
+TARGET_LINK_LIBRARIES(wind_faker ddxx ddx rtx pthread rt )
 
 #ADD_EXECUTABLE(obstacle_converter obstacle_converter.cpp)
 #TARGET_LINK_LIBRARIES(obstacle_converter)
