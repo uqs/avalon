@@ -148,7 +148,10 @@ void * translation_thread(void * dummy)
 
             cleanedwind.speed_long = 10; //knots
             cleanedwind.global_direction_real = 150; //45; //remainder((rand() % 360),360); //generate winddirection;
+            cleanedwind.global_direction_app = cleanedwind.global_direction_real;
+            cleanedwind.global_direction_real_long = cleanedwind.global_direction_real;
             cleanedwind.bearing_real = remainder((cleanedwind.global_direction_real - boatData.attitude.yaw),360); //45; //remainder((rand() % 360),360); //generate winddirection;
+            cleanedwind.bearing_app = cleanedwind.bearing_real;
             dataWindClean.t_writefrom(cleanedwind);
         }
 
