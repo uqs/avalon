@@ -1,7 +1,0 @@
-rudder/P    0.01 
-rudder/I    1
-rudder/Imin	-20.0
-rudder/Imax 20.0
-rudder/D    0
-rudder/min  -15.0
-rudder/max  15.0
