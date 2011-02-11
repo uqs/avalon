@@ -1,2 +1,0 @@
-#x y knots angle(degree) knots(+6h) angle(+6h)
-

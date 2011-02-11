@@ -62,9 +62,6 @@ TARGET_LINK_LIBRARIES(sailor_statemachine ddxx ddx rtx pthread rt)
 ADD_EXECUTABLE(sailmain sailmain.cpp SailMotor.cpp)
 TARGET_LINK_LIBRARIES(sailmain ddxx ddx rtx epos can-serial pthread rt )
 
-ADD_EXECUTABLE(sailmain_keepalive sailmain_keepalive.cpp)
-TARGET_LINK_LIBRARIES(sailmain_keepalive ddxx ddx rtx pthread rt )
-
 # Commented out while I don't have cmt 
  ADD_EXECUTABLE(imu imu.cpp)
  TARGET_LINK_LIBRARIES(imu ddxx ddx rtx pthread rt cmt -fno-stack-protector)
@@ -78,9 +75,6 @@ TARGET_LINK_LIBRARIES(imucleaner ddxx ddx rtx pthread rt )
 ADD_EXECUTABLE(flag-checker flag-checker.cpp)
 TARGET_LINK_LIBRARIES(flag-checker ddxx ddx rtx pthread rt )
 
-ADD_EXECUTABLE(testaufruf testaufruf.cpp)
-TARGET_LINK_LIBRARIES(testaufruf ddxx ddx rtx pthread rt )
-
 # ADD_EXECUTABLE(failure failure.cpp)
 # TARGET_LINK_LIBRARIES(failure ddxx ddx rtx pthread rt )
 
@@ -93,9 +87,6 @@ TARGET_LINK_LIBRARIES(skipper ddxx ddx rtx pthread rt )
 ADD_EXECUTABLE(global_skipper global_skipper.cpp)
 TARGET_LINK_LIBRARIES(global_skipper ddxx ddx rtx pthread rt)
 #TARGET_LINK_LIBRARIES(global_skipper ddxx ddx rtx pthread rt efence )
-
-ADD_EXECUTABLE(skipper2 skipper2.cpp)
-TARGET_LINK_LIBRARIES(skipper2 ddxx ddx rtx pthread rt )
 
 ## new files with Dijkstra:
 
