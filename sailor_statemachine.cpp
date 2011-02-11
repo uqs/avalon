@@ -285,16 +285,13 @@ if(count > 5000 && count < 10000)
 
 			    //To test the PID-Parameters, this state only does rudder-control
 
-			    /* Torque: */
+			    /* Torque & Theta_dot initialization: */
 			    if(last_state != flags.state) // initialize only when newly in this state
 			    {
 				    myparamstream = rtx_param_open("sailor_pid_torque.txt", 0, NULL); //NULL = errorfunction
 				    mypid = rtx_pid_init(mypid, myparamstream, "torque", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(mypid);
-			    }
-			    /* Theta_dot: */
-			    if(last_state != flags.state) // initialize only when newly in this state
-			    {
+
 				    paramstream_theta_dot = rtx_param_open("sailor_pid_theta_dot.txt", 0, NULL); //NULL = errorfunction
 				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(thetapid);
@@ -302,14 +299,14 @@ if(count > 5000 && count < 10000)
 
 			    /* evaluate rudder-torquei: */
 			    theta_dot_des = rtx_pid_eval(thetapid, remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0);
-                torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
-                rudder.torque_des = torque_des;
+          torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
+          rudder.torque_des = torque_des;
 
-                /* calling the linear model: */
-                speed = 0.5144*sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
-                u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
+          /* calling the linear model: */
+          speed = 0.5144*sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
+          u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
 
-                fprintf(thetafile,"%d %f %f %f %f %f %f %d\n",count, desired_heading.heading, imu.attitude.yaw, theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left,flags.state);
+          fprintf(thetafile,"%d %f %f %f %f %f %f %d\n",count, desired_heading.heading, imu.attitude.yaw, theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left,flags.state);
 
 			    rudder.degrees_left = u;
 			    rudder.degrees_right = u;
@@ -339,57 +336,42 @@ if(count > 5000 && count < 10000)
 				    sail.degrees = sign_wanted_sail_angle * AV_SAILOR_UPWIND_MIN_SAIL_DEGREES;
 			    }
 
-			    /* Torque: */
+			    /* Torque & Theta_dot initialization: */
 			    if(last_state != flags.state) // initialize only when newly in this state
 			    {
 				    myparamstream = rtx_param_open("sailor_pid_torque.txt", 0, NULL); //NULL = errorfunction
 				    mypid = rtx_pid_init(mypid, myparamstream, "torque", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(mypid);
-			    }
-			    /* Theta_dot: */
-			    if(last_state != flags.state) // initialize only when newly in this state
-			    {
+
 				    paramstream_theta_dot = rtx_param_open("sailor_pid_theta_dot.txt", 0, NULL); //NULL = errorfunction
 				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(thetapid);
 			    }
-  
-			    /// compensate drift, at the moment not done since the drift assumption is to inaccurate!!
-// 			    if(imu_clean.velocity.x > 0.5) // below 0.5kn it probably doesn't make sense to compensate drift
-// 			    {
-// 				    desired_heading.heading = remainder(desired_heading.heading + atan2(imu_clean.velocity.y, imu_clean.velocity.x)*180/AV_PI,360.0);
-// 			    }
-// 			    e = desired_heading.heading - imu.attitude.yaw;
-// 			    if(fabs(e) > 180)
-// 			    {
-// 				    imu.attitude.yaw = 0;
-// 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
-// 			    }
-// rtx_message("norm: des_head: %f actual_head: %f delta_head: %f",desired_heading.heading, imu.attitude.yaw,remainder(imu.attitude.yaw-desired_heading.heading,360.));
+
+			    /* evaluate rudder-torquei: */
 			    theta_dot_des = rtx_pid_eval(thetapid, remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0);
-                           
-                            // theta_dot_des = imu.theta_star;
-                            torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
-                            rudder.torque_des = torque_des;
+          torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
+          rudder.torque_des = torque_des;
 
-                            speed = 0.5144*sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
-                            if (speed <= 0.3)
-                            {
-                                    u = 0;//rtx_pid_eval(rudderpid, imu.attitude.yaw, desired_heading.heading, 0)*sign(imu.velocity.x);
-                            }
-                            else if((speed > 0.3) && (speed < 0.9))
-                            {
-                                    u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des*0.05, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
-                                    //u = -iter.sailor_main_iter_fn(imu.gyro.z*M_PI/180.0, torque_des*0.05, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144, sailstate.degrees_sail*M_PI/180.0, wind_clean.global_direction_real*M_PI/180.0, imu.attitude.yaw*M_PI/180.0, wind_clean.speed*0.5144); 
-                            }
-                            else if(speed >= 0.9) 
-                            {
-                                    u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
-				    // u = iter.sailor_main_iter_fn(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144, sailstate.degrees_sail*M_PI/180.0, wind_clean.global_direction_real*M_PI/180.0, imu.attitude.yaw*M_PI/180.0, wind_clean.speed*0.5144);
-			    }
+          /* calling the linear model: */
+          speed = 0.5144*sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
+          u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
 
-			    fprintf(thetafile,"%f %f %f %f %f %f %d\n",desired_heading.heading, imu.attitude.yaw, theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left,flags.state);
-// 			    fprintf(thetaplot,"%f %f %f %f %f \n",desired_heading.heading, imu.attitude.yaw, theta_dot_des, imu.gyro.z, u);
+          fprintf(thetafile,"%d %f %f %f %f %f %f %d\n",count, desired_heading.heading, imu.attitude.yaw, theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left,flags.state);
+
+          /// compensate drift, at the moment not done since the drift assumption is to inaccurate!!
+          // 			    if(imu_clean.velocity.x > 0.5) // below 0.5kn it probably doesn't make sense to compensate drift
+          // 			    {
+          // 				    desired_heading.heading = remainder(desired_heading.heading + atan2(imu_clean.velocity.y, imu_clean.velocity.x)*180/AV_PI,360.0);
+          // 			    }
+          // 			    e = desired_heading.heading - imu.attitude.yaw;
+          // 			    if(fabs(e) > 180)
+          // 			    {
+          // 				    imu.attitude.yaw = 0;
+          // 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
+          // 			    }
+          // rtx_message("norm: des_head: %f actual_head: %f delta_head: %f",desired_heading.heading, imu.attitude.yaw,remainder(imu.attitude.yaw-desired_heading.heading,360.));
+
 
 			    rudder.degrees_left = u;
 			    rudder.degrees_right = u;
@@ -415,50 +397,39 @@ if(count > 5000 && count < 10000)
 				    sail.degrees = sign_wanted_sail_angle * AV_SAILOR_UPWIND_MIN_SAIL_DEGREES;
 			    }
 
-			    /* Torque: */
+			    /* Torque & Theta_dot initialization: */
 			    if(last_state != flags.state) // initialize only when newly in this state
 			    {
 				    myparamstream = rtx_param_open("sailor_pid_torque.txt", 0, NULL); //NULL = errorfunction
 				    mypid = rtx_pid_init(mypid, myparamstream, "torque", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(mypid);
-			    }
 
-			    /* Theta_dot: */
-			    if(last_state != flags.state) // initialize only when newly in this state
-			    {
 				    paramstream_theta_dot = rtx_param_open("sailor_pid_theta_dot.txt", 0, NULL); //NULL = errorfunction
 				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(thetapid);
 			    }
+
 			    // redefine desired heading to stay "close to the wind":
 			    desired_heading.heading = remainder(wind_clean.global_direction_real - sign_wanted_sail_angle * AV_SAILOR_MAX_HEIGHT_TO_WIND, 360.0);
-// 			    e = desired_heading.heading - imu.attitude.yaw;
-// 			    if(fabs(e) > 180) //TODO: check: why not remainder???
-// 			    {
-// 				    imu.attitude.yaw = 0;
-// 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
-// 			    }
-// rtx_message("down: des_head: %f actual_head: %f delta_head: %f",desired_heading.heading, imu.attitude.yaw,remainder(imu.attitude.yaw-desired_heading.heading,360.));
-                            theta_dot_des = rtx_pid_eval(thetapid, remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0) ;
-                            torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
-                            rudder.torque_des = torque_des;      
-                            
-                            speed = 0.5144*sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
-                            if (speed <= 0.3)
-                            {
-                                    u = 0;//rtx_pid_eval(rudderpid, imu.attitude.yaw, desired_heading.heading, 0)*sign(imu.velocity.x);
-                            }
-                            else if((speed > 0.3) && (speed < 0.9))
-                            {
-                                    u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des*0.05, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
-                                    //u = -iter.sailor_main_iter_fn(imu.gyro.z*M_PI/180.0, torque_des*0.05, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144, sailstate.degrees_sail*M_PI/180.0, wind_clean.global_direction_real*M_PI/180.0, imu.attitude.yaw*M_PI/180.0, wind_clean.speed*0.5144); 
-                            }
-                            else if(speed >= 0.9) 
-                            {
-                                    u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
-				    // u = iter.sailor_main_iter_fn(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144, sailstate.degrees_sail*M_PI/180.0, wind_clean.global_direction_real*M_PI/180.0, imu.attitude.yaw*M_PI/180.0, wind_clean.speed*0.5144);
-			    }                 
-			    fprintf(thetafile,"%f %f %f %f %f %f %d\n",desired_heading.heading, imu.attitude.yaw, theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left,flags.state);
+
+			    /* evaluate rudder-torquei: */
+			    theta_dot_des = rtx_pid_eval(thetapid, remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0);
+          torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
+          rudder.torque_des = torque_des;
+
+          /* calling the linear model: */
+          speed = 0.5144*sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
+          u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
+
+          fprintf(thetafile,"%d %f %f %f %f %f %f %d\n",count, desired_heading.heading, imu.attitude.yaw, theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left,flags.state);
+
+          // 			    e = desired_heading.heading - imu.attitude.yaw;
+          // 			    if(fabs(e) > 180) //TODO: check: why not remainder???
+          // 			    {
+          // 				    imu.attitude.yaw = 0;
+          // 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
+          // 			    }
+          // rtx_message("down: des_head: %f actual_head: %f delta_head: %f",desired_heading.heading, imu.attitude.yaw,remainder(imu.attitude.yaw-desired_heading.heading,360.));
 			    
 			    rudder.degrees_left = u;
 			    rudder.degrees_right = u;
@@ -483,50 +454,39 @@ if(count > 5000 && count < 10000)
 			    }
 			    sail.degrees = sign_wanted_sail_angle * AV_SAILOR_DOWNWIND_SAIL_DEGREES;
 
-			    /* Torque: */
+			    /* Torque & Theta_dot initialization: */
 			    if(last_state != flags.state) // initialize only when newly in this state
 			    {
 				    myparamstream = rtx_param_open("sailor_pid_torque.txt", 0, NULL); //NULL = errorfunction
 				    mypid = rtx_pid_init(mypid, myparamstream, "torque", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(mypid);
-			    }
 
-			    /* Theta_dot: */
-			    if(last_state != flags.state) // initialize only when newly in this state
-			    {
 				    paramstream_theta_dot = rtx_param_open("sailor_pid_theta_dot.txt", 0, NULL); //NULL = errorfunction
 				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(thetapid);
 			    }
+
 			    // redefine desired heading to stay fixed to the wind:
 			    desired_heading.heading = remainder(wind_clean.global_direction_real - sign_wanted_sail_angle * AV_SAILOR_MAX_DOWNWIND_ANGLE, 360.0);
-// 			    e = desired_heading.heading - imu.attitude.yaw;
-// 			    if(fabs(e) > 180) // take care of +-180 thing
-// 			    {
-// 				    imu.attitude.yaw = 0;
-// 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
-// 			    }
-// rtx_message("down: des_head: %f actual_head: %f delta_head: %f",desired_heading.heading, imu.attitude.yaw,remainder(imu.attitude.yaw-desired_heading.heading,360.));
-			    theta_dot_des = rtx_pid_eval(thetapid, remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0) ;
-                            torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
-                            rudder.torque_des = torque_des;                            
-			 
-                            speed = 0.5144*sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
-                            if (speed <= 0.3)
-                            {
-                                    u = 0;//rtx_pid_eval(rudderpid, imu.attitude.yaw, desired_heading.heading, 0)*sign(imu.velocity.x);
-                            }
-                            else if((speed > 0.3) && (speed < 0.9))
-                            {
-                                    u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des*0.05, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
-                                    //u = -iter.sailor_main_iter_fn(imu.gyro.z*M_PI/180.0, torque_des*0.05, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144, sailstate.degrees_sail*M_PI/180.0, wind_clean.global_direction_real*M_PI/180.0, imu.attitude.yaw*M_PI/180.0, wind_clean.speed*0.5144); 
-                            }
-                            else if(speed >= 0.9) 
-                            {
-                                    u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
-				    // u = iter.sailor_main_iter_fn(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144, sailstate.degrees_sail*M_PI/180.0, wind_clean.global_direction_real*M_PI/180.0, imu.attitude.yaw*M_PI/180.0, wind_clean.speed*0.5144);
-			    }
-			    fprintf(thetafile,"%f %f %f %f %f %f %d\n",desired_heading.heading, imu.attitude.yaw, theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left,flags.state);
+
+			    /* evaluate rudder-torquei: */
+			    theta_dot_des = rtx_pid_eval(thetapid, remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0);
+          torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
+          rudder.torque_des = torque_des;
+
+          /* calling the linear model: */
+          speed = 0.5144*sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
+          u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
+
+          fprintf(thetafile,"%d %f %f %f %f %f %f %d\n",count, desired_heading.heading, imu.attitude.yaw, theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left,flags.state);
+
+          // 			    e = desired_heading.heading - imu.attitude.yaw;
+          // 			    if(fabs(e) > 180) // take care of +-180 thing
+          // 			    {
+          // 				    imu.attitude.yaw = 0;
+          // 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
+          // 			    }
+          // rtx_message("down: des_head: %f actual_head: %f delta_head: %f",desired_heading.heading, imu.attitude.yaw,remainder(imu.attitude.yaw-desired_heading.heading,360.));
 
 			    rudder.degrees_left = u;
 			    rudder.degrees_right = u;
@@ -544,21 +504,18 @@ if(count > 5000 && count < 10000)
 // 						sign(remainder(imu.attitude.yaw - wind_clean.global_direction_real,360.0)),360.0);
 				    sign_wanted_sail_angle_after_tack = -sign(wind_clean.bearing_app);
 			    }
-			    /* Torque: */
+			    /* Torque & Theta_dot initialization: */
 			    if(last_state != flags.state) // initialize only when newly in this state
 			    {
 				    myparamstream = rtx_param_open("sailor_pid_torque.txt", 0, NULL); //NULL = errorfunction
 				    mypid = rtx_pid_init(mypid, myparamstream, "torque", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(mypid);
-			    }
 
-			    /* Theta_dot: */
-			    if(last_state != flags.state) // initialize only when newly in this state
-			    {
 				    paramstream_theta_dot = rtx_param_open("sailor_pid_theta_dot.txt", 0, NULL); //NULL = errorfunction
 				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(thetapid);
 			    }
+
 			    /* Sail: */
 			    // if heading is still on 'wrong' side:
 			    if(remainder((wind_global_pre_tack - imu.attitude.yaw),360.0) * sign_wanted_sail_angle_after_tack < 0)
@@ -569,37 +526,18 @@ if(count > 5000 && count < 10000)
 			    {
 				    sail.degrees = sign_wanted_sail_angle_after_tack * AV_SAILOR_UPWIND_MIN_SAIL_DEGREES;
 			    }
+
 			    /* Rudder: */
-			    //u = sign_wanted_sail_angle * 45.0 * sign(imu.velocity.x);
+			    /* evaluate rudder-torquei: */
+			    theta_dot_des = rtx_pid_eval(thetapid, remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0);
+          torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
+          rudder.torque_des = torque_des;
 
-			    /* the following is only for Q-tacks instead of jibes */
-			    //imu.attitude.yaw = remainder((imu.attitude.yaw - wind_global_pre_tack),360.0);
-			    //desired_heading_after_tack = remainder((desired_heading_after_tack - wind_global_pre_tack),360.0);
-			    /* end Q-tacks... */
+          /* calling the linear model: */
+          speed = 0.5144*sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
+          u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
 
-			    // Attention: if() mit e is missing(see normal sailing...) probably not needed though !!!!!!!!
-			    // u = rtx_pid_eval(mypid, imu.attitude.yaw, desired_heading_after_tack, 0) * sign(imu.velocity.x);
-
-			    theta_dot_des = rtx_pid_eval(thetapid,remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0) ;
-                            torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t                            
-                            rudder.torque_des = torque_des;
-                             
-                            speed = 0.5144*sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
-                            if (speed <= 0.3)
-                            {
-                                    u = 0;//rtx_pid_eval(rudderpid, imu.attitude.yaw, desired_heading.heading, 0)*sign(imu.velocity.x);
-                            }
-                            else if((speed > 0.3) && (speed < 0.9))
-                            {
-                                    u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des*0.05, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
-                                    //u = -iter.sailor_main_iter_fn(imu.gyro.z*M_PI/180.0, torque_des*0.05, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144, sailstate.degrees_sail*M_PI/180.0, wind_clean.global_direction_real*M_PI/180.0, imu.attitude.yaw*M_PI/180.0, wind_clean.speed*0.5144); 
-                            }
-                            else if(speed >= 0.9) 
-                            {
-                                    u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
-				    // u = iter.sailor_main_iter_fn(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144, sailstate.degrees_sail*M_PI/180.0, wind_clean.global_direction_real*M_PI/180.0, imu.attitude.yaw*M_PI/180.0, wind_clean.speed*0.5144);
-			    }
-			    fprintf(thetafile,"%f %f %f %f %f %f %d\n",desired_heading.heading, imu.attitude.yaw, theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left,flags.state);
+          fprintf(thetafile,"%d %f %f %f %f %f %f %d\n",count, desired_heading.heading, imu.attitude.yaw, theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left,flags.state);
 
 			    rudder.degrees_left = u;
 			    rudder.degrees_right = u;
@@ -629,17 +567,13 @@ if(count > 5000 && count < 10000)
 				    sail.degrees = 180.0; // set to front
 			    }
 
-			    /* Torque: */
+			    /* Torque & Theta_dot initialization: */
 			    if(last_state != flags.state) // initialize only when newly in this state
 			    {
 				    myparamstream = rtx_param_open("sailor_pid_torque.txt", 0, NULL); //NULL = errorfunction
 				    mypid = rtx_pid_init(mypid, myparamstream, "torque", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(mypid);
-			    }
 
-			    /* Theta_dot: */
-			    if(last_state != flags.state) // initialize only when newly in this state
-			    {
 				    paramstream_theta_dot = rtx_param_open("sailor_pid_theta_dot.txt", 0, NULL); //NULL = errorfunction
 				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(thetapid);
@@ -659,34 +593,25 @@ if(count > 5000 && count < 10000)
                                                             * (fabs(sailstate.degrees_sail) - 180.0) / (fabs(sail_pre_jibe) - 180.0)),360.0);
 			    }
 
-// 			    e = desired_heading.heading - imu.attitude.yaw;
-// 			    if(fabs(e) > 180) // +-180 thing...
-// 			    {
-// 				    imu.attitude.yaw = 0;
-// 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
-// 
-// 			    }
+          // 			    e = desired_heading.heading - imu.attitude.yaw;
+          // 			    if(fabs(e) > 180) // +-180 thing...
+          // 			    {
+          // 				    imu.attitude.yaw = 0;
+          // 				    desired_heading.heading = fabs(360.0 - fabs(e)) * sign(-e);
+          // 
+          // 			    }
 
-                            theta_dot_des = rtx_pid_eval(thetapid,remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0) ;
-                            torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
-                            rudder.torque_des = torque_des;          
 
-                            speed = 0.5144*sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
-                            if (speed <= 0.3)
-                            {
-                                    u = 0;//rtx_pid_eval(rudderpid, imu.attitude.yaw, desired_heading.heading, 0)*sign(imu.velocity.x);
-                            }
-                            else if((speed > 0.3) && (speed < 0.9))
-                            {
-                                    u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des*0.05, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
-                                    //u = -iter.sailor_main_iter_fn(imu.gyro.z*M_PI/180.0, torque_des*0.05, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144, sailstate.degrees_sail*M_PI/180.0, wind_clean.global_direction_real*M_PI/180.0, imu.attitude.yaw*M_PI/180.0, wind_clean.speed*0.5144); 
-                            }
-                            else if(speed >= 0.9) 
-                            {
-                                    u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
-				    // u = iter.sailor_main_iter_fn(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144, sailstate.degrees_sail*M_PI/180.0, wind_clean.global_direction_real*M_PI/180.0, imu.attitude.yaw*M_PI/180.0, wind_clean.speed*0.5144);
-			    }
-			    fprintf(thetafile,"%f %f %f %f %f %f %d\n",desired_heading.heading, imu.attitude.yaw, theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left,flags.state);
+          /* evaluate rudder-torquei: */
+          theta_dot_des = rtx_pid_eval(thetapid, remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0);
+          torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
+          rudder.torque_des = torque_des;
+
+          /* calling the linear model: */
+          speed = 0.5144*sqrt((imu_clean.velocity.x*imu_clean.velocity.x) + (imu_clean.velocity.y*imu_clean.velocity.y));
+          u = sailor_inverted_linear_model(imu.gyro.z*M_PI/180.0, torque_des, imu_clean.velocity.x*0.5144, -imu_clean.velocity.y*0.5144);
+
+          fprintf(thetafile,"%d %f %f %f %f %f %f %d\n",count, desired_heading.heading, imu.attitude.yaw, theta_dot_des,imu.gyro.z,torque_des,rudder.degrees_left,flags.state);
 
 			    rudder.degrees_left = u;
 			    rudder.degrees_right = u;
