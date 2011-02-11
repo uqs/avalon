@@ -240,7 +240,8 @@ void * translation_thread(void * dummy)
                          * AV_SAILOR_TACK_HYSTERESIS - wind_clean.global_direction_real),360.0) < 0))
                 {
 // rtx_message("head= %f   wind_dir= %f    des_head= %f",imu.attitude.yaw, wind_clean.global_direction_real, desired_heading.heading);
-                    if(tacktimeout_diff > 20.0) // next tack only if 20 seconds after the previous
+                    //if(tacktimeout_diff > 20.0) // next tack only if 20 seconds after the previous
+                    if(1) // next tack only if 20 seconds after the previous
                     {
                         sailorflags.state = AV_FLAGS_ST_TACK;
                         time(&tackendtimeout_start); // start the timer
@@ -267,7 +268,8 @@ void * translation_thread(void * dummy)
                          * remainder((desired_heading.heading - sign(remainder(desired_heading.heading - wind_clean.global_direction_real,360.0))
 					 * AV_SAILOR_JIBE_HYSTERESIS - wind_clean.global_direction_real),360.0) < 0) && (sign(sailstate.degrees_sail)*sign(wind_clean.bearing_real)>0))
                 {
-                    if(jibetimeout_diff > 20.0) // next jibe only if 20 seconds after the previous
+                    //if(jibetimeout_diff > 20.0) // next jibe only if 20 seconds after the previous
+                    if(1) // next jibe only if 20 seconds after the previous
                     {
                         sailorflags.state = AV_FLAGS_ST_JIBE;
                         //sailorflags.state = AV_FLAGS_ST_TACK;
@@ -338,7 +340,8 @@ void * translation_thread(void * dummy)
                         * remainder((desired_heading.heading + sign(remainder(desired_heading.heading - wind_clean.global_direction_real,360.0))
                         * AV_SAILOR_TACK_HYSTERESIS - wind_clean.global_direction_real),360.0) < 0))
                 {
-                    if(tacktimeout_diff > 20.0) // next tack only if 20 seconds after the previous
+                    //if(tacktimeout_diff > 20.0) // next tack only if 20 seconds after the previous
+                    if(1) // next tack only if 20 seconds after the previous
                     {
                         sailorflags.state = AV_FLAGS_ST_TACK;
                         time(&tackendtimeout_start); // start the timer
@@ -389,7 +392,8 @@ void * translation_thread(void * dummy)
                         * remainder((desired_heading.heading - sign(remainder(desired_heading.heading - wind_clean.global_direction_real,360.0))
                         * AV_SAILOR_JIBE_HYSTERESIS - wind_clean.global_direction_real),360.0) < 0))
                 {
-                    if(jibetimeout_diff > 20.0) // next jibe only if 20 seconds after the previous
+                    //if(jibetimeout_diff > 20.0) // next jibe only if 20 seconds after the previous
+                    if(1) // next jibe only if 20 seconds after the previous
                     {
                         sailorflags.state = AV_FLAGS_ST_JIBE;
                         time(&jibeendtimeout_start); // start the timer, will kick boat out of JIBE after x seconds
