@@ -45,8 +45,6 @@
 #include "imu.h"
 #include "imucleaner.h"
 #include "desired_course.h"
-//#include "sailor_rudder_iter_fn.h"
-//#include "sailor_main_iter_class.h"
 
 /**
  * Global variable for all DDX object
@@ -187,10 +185,8 @@ void * translation_thread(void * dummy)
     double e;  // the current error
     RtxPid* mypid = NULL;
     RtxPid* thetapid = NULL;
-    RtxPid* rudderpid = NULL;
     RtxParamStream* myparamstream = NULL;
     RtxParamStream* paramstream_theta_dot = NULL;
-    RtxParamStream* paramstream_rudder = NULL;
 
     int sign_wanted_sail_angle = 1; // 1 or -1 depending on port or starboard driving
     int sign_wanted_rudder_angle = 1; // 1 or -1 depending on port or starboard driving before maneuver
@@ -247,9 +243,6 @@ void * translation_thread(void * dummy)
 //             } 
 
 	    FILE * thetafile;
-// 	    FILE * thetaplot;
-//	    thetafile = fopen("thetaplot.txt","a+");
-//            thetaplot=fopen("theta_plot.txt","a+");
  if(count < 5000)
  {	    
  	    thetafile = fopen("thetaplot.txt","a+");
@@ -270,7 +263,6 @@ if(count > 5000 && count < 10000)
  switch(flags.state)
 	    {
 		    case AV_FLAGS_ST_IDLE:
-	    //FILE * thetafile;
 			    rtx_timer_sleep(0.1);
 			    last_state = AV_FLAGS_ST_IDLE;
 			    continue;   // don't do anything
@@ -361,13 +353,6 @@ if(count > 5000 && count < 10000)
 				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(thetapid);
 			    }
-			    /* Rudder: */ // at low speed
-			    if(last_state != flags.state) // initialize only when newly in this state
-			    {
-				    paramstream_rudder = rtx_param_open("sailor_pidparams_old.txt", 0, NULL); //NULL = errorfunction
-				    rudderpid = rtx_pid_init(rudderpid, paramstream_rudder, "rudder", 0.01, 0); //0.01=dt
-				    rtx_pid_integral_enable(rudderpid);
-			    }
   
 			    /// compensate drift, at the moment not done since the drift assumption is to inaccurate!!
 // 			    if(imu_clean.velocity.x > 0.5) // below 0.5kn it probably doesn't make sense to compensate drift
@@ -445,13 +430,6 @@ if(count > 5000 && count < 10000)
 				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(thetapid);
 			    }
-			    /* Rudder: */ // at low speed
-			    if(last_state != flags.state) // initialize only when newly in this state
-			    {
-				    paramstream_rudder = rtx_param_open("sailor_pidparams_old.txt", 0, NULL); //NULL = errorfunction
-				    rudderpid = rtx_pid_init(rudderpid, paramstream_rudder, "rudder", 0.01, 0); //0.01=dt
-				    rtx_pid_integral_enable(rudderpid);
-			    }
 			    // redefine desired heading to stay "close to the wind":
 			    desired_heading.heading = remainder(wind_clean.global_direction_real - sign_wanted_sail_angle * AV_SAILOR_MAX_HEIGHT_TO_WIND, 360.0);
 // 			    e = desired_heading.heading - imu.attitude.yaw;
@@ -520,13 +498,6 @@ if(count > 5000 && count < 10000)
 				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(thetapid);
 			    }
-			    /* Rudder: */ // at low speed
-			    if(last_state != flags.state) // initialize only when newly in this state
-			    {
-				    paramstream_rudder = rtx_param_open("sailor_pidparams_old.txt", 0, NULL); //NULL = errorfunction
-				    rudderpid = rtx_pid_init(rudderpid, paramstream_rudder, "rudder", 0.01, 0); //0.01=dt
-				    rtx_pid_integral_enable(rudderpid);
-			    }
 			    // redefine desired heading to stay fixed to the wind:
 			    desired_heading.heading = remainder(wind_clean.global_direction_real - sign_wanted_sail_angle * AV_SAILOR_MAX_DOWNWIND_ANGLE, 360.0);
 // 			    e = desired_heading.heading - imu.attitude.yaw;
@@ -587,13 +558,6 @@ if(count > 5000 && count < 10000)
 				    paramstream_theta_dot = rtx_param_open("sailor_pid_theta_dot.txt", 0, NULL); //NULL = errorfunction
 				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(thetapid);
-			    }
-			    /* Rudder: */ // at low speed
-			    if(last_state != flags.state) // initialize only when newly in this state
-			    {
-				    paramstream_rudder = rtx_param_open("sailor_pidparams_old.txt", 0, NULL); //NULL = errorfunction
-				    rudderpid = rtx_pid_init(rudderpid, paramstream_rudder, "rudder", 0.01, 0); //0.01=dt
-				    rtx_pid_integral_enable(rudderpid);
 			    }
 			    /* Sail: */
 			    // if heading is still on 'wrong' side:
@@ -680,13 +644,7 @@ if(count > 5000 && count < 10000)
 				    thetapid = rtx_pid_init(thetapid, paramstream_theta_dot, "theta_dot", 0.01, 0); //0.01=dt
 				    rtx_pid_integral_enable(thetapid);
 			    }
-			    /* Rudder: */ // at low speed
-			    if(last_state != flags.state) // initialize only when newly in this state
-			    {
-				    paramstream_rudder = rtx_param_open("sailor_pidparams_old.txt", 0, NULL); //NULL = errorfunction
-				    rudderpid = rtx_pid_init(rudderpid, paramstream_rudder, "rudder", 0.01, 0); //0.01=dt
-				    rtx_pid_integral_enable(rudderpid);
-			    }
+
 			    if(sailstate.degrees_sail * sign_wanted_sail_angle <= 0) // Sail already on correct side
 			    {
 				    // desiredheading in function of sailstate.degrees_sail...
