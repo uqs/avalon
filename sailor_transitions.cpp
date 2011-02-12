@@ -472,8 +472,8 @@ void * translation_thread(void * dummy)
                 {
                     // set desired heading after jibe all the way to "the other side"
                     wind_global_pre_jibe = wind_clean.global_direction_real;
-                    desired_heading_after_jibe = fabs(remainder((wind_clean.global_direction_real
-                                    + AV_SAILOR_MAX_DOWNWIND_ANGLE * sign(wind_clean.bearing_real)),360.0));
+                    desired_heading_after_jibe = remainder((wind_clean.global_direction_real ////TODO fabs is weird!!!
+                                    + AV_SAILOR_MAX_DOWNWIND_ANGLE * sign(wind_clean.bearing_real)),360.0);
                     desired_bearing_after_jibe = remainder((wind_global_pre_jibe - desired_heading_after_jibe),360.0);
                     sign_wanted_sail_angle = sign(desired_bearing_after_jibe); // +1 for wind from starboard, -1 for port
                     wanted_sail_angle_after_jibe = sign_wanted_sail_angle * AV_SAILOR_DOWNWIND_SAIL_DEGREES;
