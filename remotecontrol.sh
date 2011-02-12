@@ -4,11 +4,12 @@
 ./porttracker
 ./ruddermain -side left &
 ./ruddermain -side right &
-#./sailmain &
+./sailmain &
 ./imu &
 ./imucleaner &
-./windsensor &
-./windcleaner &
+#./windsensor &
+#./windcleaner &
+./wind_faker &
 ./sailor_transitions &
 ./sailor_statemachine &
 #./keepalive ./sailor_statemachine &
@@ -17,5 +18,5 @@
 #./global_skipper &
 #./skipper &
 #./navigator &
-#./poti &
+./poti &
 #.:/aisEval &

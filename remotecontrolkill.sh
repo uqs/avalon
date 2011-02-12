@@ -9,6 +9,7 @@ killall imu
 killall imucleaner
 killall windsensor
 killall windcleaner
+killall wind_faker
 killall sailor_transitions
 killall sailor_statemachine
 killall destination_converter
@@ -30,6 +31,7 @@ killall -9 sailmain
 killall -9 imu
 killall -9 imucleaner
 killall -9 windsensor
+killall -9 wind_faker
 killall -9 windcleaner
 killall -9 sailor_transitions
 killall -9 sailor_statemachine

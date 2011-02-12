@@ -132,7 +132,7 @@ void * translation_thread(void * dummy)
     Sailstate sailstate;
     WindCleanData wind_clean;
     imuData imu;
-	imuCleanData imu_clean;
+    imuCleanData imu_clean;
     DesiredHeading desired_heading;
     double desired_heading_after_tack;
     double desired_heading_after_jibe;
@@ -183,8 +183,8 @@ void * translation_thread(void * dummy)
             case AV_FLAGS_ST_IDLE: //current state IDLE
                 switch(flags.state_requested)
                 {
-					case 0:
-						break;
+                    case 0:
+                        break;
                     case AV_FLAGS_ST_IDLE:
                         break;
                     case AV_FLAGS_ST_DOCK:
@@ -205,8 +205,8 @@ void * translation_thread(void * dummy)
             case AV_FLAGS_ST_DOCK: //current state DOCK
                 switch(flags.state_requested)
                 {
-					case 0:
-						break;
+                    case 0:
+                        break;
                     case AV_FLAGS_ST_DOCK:
                         break;
                     case AV_FLAGS_ST_IDLE:
@@ -226,21 +226,22 @@ void * translation_thread(void * dummy)
 
             case AV_FLAGS_ST_NORMALSAILING: //current state NORMALSAILING
                 // to UPWINDSAILING
-// rtx_message("desired_head= %lf   wind_clean= %lf \n",desired_heading.heading,wind_clean.global_direction_real );
-		if(fabs(remainder((desired_heading.heading - wind_clean.global_direction_real),360.0)) <= (AV_SAILOR_MAX_HEIGHT_TO_WIND-5))
+                // rtx_message("desired_head= %lf   wind_clean= %lf \n",desired_heading.heading,wind_clean.global_direction_real );
+                if(fabs(remainder((desired_heading.heading - wind_clean.global_direction_real),360.0)) <= (AV_SAILOR_MAX_HEIGHT_TO_WIND-5))
                 {
                     sailorflags.state = AV_FLAGS_ST_UPWINDSAILING;
                 }
                 // to TACK
                 time(&tacktimeout_currenttime);
                 tacktimeout_diff = difftime(tacktimeout_currenttime, tacktimeout_start); // yields time in [s]
-                if((fabs(wind_clean.bearing_real) < 90.0) 
-                        && (remainder((imu.attitude.yaw - wind_clean.global_direction_real),360.0) 
-                         * remainder((desired_heading.heading + sign(remainder(desired_heading.heading - wind_clean.global_direction_real,360.0))
-                         * AV_SAILOR_TACK_HYSTERESIS - wind_clean.global_direction_real),360.0) < 0))
+                if((sign(remainder((desired_heading.heading - imu.attitude.yaw),360.0))
+                            * sign(remainder((remainder((wind_clean.global_direction_real),360.0) - imu.attitude.yaw),360.0)) > 0)
+                        && (fabs(remainder((desired_heading.heading - imu.attitude.yaw),360.0)) 
+                            > (fabs(remainder((remainder((wind_clean.global_direction_real),360.0) - imu.attitude.yaw),360.0)) + AV_SAILOR_TACK_HYSTERESIS)))
                 {
-// rtx_message("head= %f   wind_dir= %f    des_head= %f",imu.attitude.yaw, wind_clean.global_direction_real, desired_heading.heading);
-                    if(tacktimeout_diff > 20.0) // next tack only if 20 seconds after the previous
+                    // rtx_message("head= %f   wind_dir= %f    des_head= %f",imu.attitude.yaw, wind_clean.global_direction_real, desired_heading.heading);
+                    //if(tacktimeout_diff > 20.0) // next tack only if 20 seconds after the previous
+                    if(1) // next tack only if 20 seconds after the previous
                     {
                         sailorflags.state = AV_FLAGS_ST_TACK;
                         time(&tackendtimeout_start); // start the timer
@@ -256,18 +257,19 @@ void * translation_thread(void * dummy)
 
                 if(fabs(remainder((desired_heading.heading - wind_clean.global_direction_real),360.0)) >= AV_SAILOR_MAX_DOWNWIND_ANGLE)
                 {
-// rtx_message("NORM2UPW  des_head: %f   wind_dir: %f", desired_heading.heading, wind_clean.global_direction_real);
+                    // rtx_message("NORM2UPW  des_head: %f   wind_dir: %f", desired_heading.heading, wind_clean.global_direction_real);
                     sailorflags.state = AV_FLAGS_ST_DOWNWINDSAILING;
                 }
                 // to JIBE
                 time(&jibetimeout_currenttime);
                 jibetimeout_diff = difftime(jibetimeout_currenttime, jibetimeout_start); // yields time in [s]
-                if((fabs(wind_clean.bearing_real) > 90.0)
-                        && (remainder((imu.attitude.yaw - wind_clean.global_direction_real),360.0) 
-                         * remainder((desired_heading.heading - sign(remainder(desired_heading.heading - wind_clean.global_direction_real,360.0))
-					 * AV_SAILOR_JIBE_HYSTERESIS - wind_clean.global_direction_real),360.0) < 0) && (sign(sailstate.degrees_sail)*sign(wind_clean.bearing_real)>0))
+                if((sign(remainder((desired_heading.heading - imu.attitude.yaw),360.0))
+                            * sign(remainder((remainder((wind_clean.global_direction_real + 180.0),360.0) - imu.attitude.yaw),360.0)) > 0)
+                        && (fabs(remainder((desired_heading.heading - imu.attitude.yaw),360.0)) 
+                            > (fabs(remainder((remainder((wind_clean.global_direction_real + 180.0),360.0) - imu.attitude.yaw),360.0)) + AV_SAILOR_JIBE_HYSTERESIS)))
                 {
-                    if(jibetimeout_diff > 20.0) // next jibe only if 20 seconds after the previous
+                    //if(jibetimeout_diff > 20.0) // next jibe only if 20 seconds after the previous
+                    if(1) // next jibe only if 20 seconds after the previous
                     {
                         sailorflags.state = AV_FLAGS_ST_JIBE;
                         //sailorflags.state = AV_FLAGS_ST_TACK;
@@ -305,8 +307,8 @@ void * translation_thread(void * dummy)
                 }
                 switch(flags.state_requested)
                 {
-					case 0:
-						break;
+                    case 0:
+                        break;
                     case AV_FLAGS_ST_NORMALSAILING:
                         break;
                     case AV_FLAGS_ST_IDLE:
@@ -335,10 +337,11 @@ void * translation_thread(void * dummy)
                 tacktimeout_diff = difftime(tacktimeout_currenttime, tacktimeout_start); // yields time in [s]
                 if((fabs(wind_clean.bearing_real) < 90.0) 
                         && (remainder((imu.attitude.yaw - wind_clean.global_direction_real),360.0) 
-                        * remainder((desired_heading.heading + sign(remainder(desired_heading.heading - wind_clean.global_direction_real,360.0))
-                        * AV_SAILOR_TACK_HYSTERESIS - wind_clean.global_direction_real),360.0) < 0))
+                            * remainder((desired_heading.heading + sign(remainder(desired_heading.heading - wind_clean.global_direction_real,360.0))
+                                    * AV_SAILOR_TACK_HYSTERESIS - wind_clean.global_direction_real),360.0) < 0))
                 {
-                    if(tacktimeout_diff > 20.0) // next tack only if 20 seconds after the previous
+                    //if(tacktimeout_diff > 20.0) // next tack only if 20 seconds after the previous
+                    if(1) // next tack only if 20 seconds after the previous
                     {
                         sailorflags.state = AV_FLAGS_ST_TACK;
                         time(&tackendtimeout_start); // start the timer
@@ -353,8 +356,8 @@ void * translation_thread(void * dummy)
 
                 switch(flags.state_requested)
                 {
-					case 0:
-						break;
+                    case 0:
+                        break;
                     case AV_FLAGS_ST_UPWINDSAILING:
                         break;
                     case AV_FLAGS_ST_IDLE:
@@ -375,7 +378,7 @@ void * translation_thread(void * dummy)
                 last_state = AV_FLAGS_ST_UPWINDSAILING;
                 break;
 
-             case AV_FLAGS_ST_DOWNWINDSAILING: //current state DOWNWINDSAILING
+            case AV_FLAGS_ST_DOWNWINDSAILING: //current state DOWNWINDSAILING
                 // to NORMALSAILING
                 if(fabs(remainder((desired_heading.heading - wind_clean.global_direction_real),360.0)) < AV_SAILOR_MAX_DOWNWIND_ANGLE)
                 {
@@ -386,10 +389,11 @@ void * translation_thread(void * dummy)
                 jibetimeout_diff = difftime(jibetimeout_currenttime, jibetimeout_start); // yields time in [s]
                 if((fabs(wind_clean.bearing_real) > 90.0)
                         && (remainder((imu.attitude.yaw - wind_clean.global_direction_real),360.0) 
-                        * remainder((desired_heading.heading - sign(remainder(desired_heading.heading - wind_clean.global_direction_real,360.0))
-                        * AV_SAILOR_JIBE_HYSTERESIS - wind_clean.global_direction_real),360.0) < 0))
+                            * remainder((desired_heading.heading - sign(remainder(desired_heading.heading - wind_clean.global_direction_real,360.0))
+                                    * AV_SAILOR_JIBE_HYSTERESIS - wind_clean.global_direction_real),360.0) < 0))
                 {
-                    if(jibetimeout_diff > 20.0) // next jibe only if 20 seconds after the previous
+                    //if(jibetimeout_diff > 20.0) // next jibe only if 20 seconds after the previous
+                    if(1) // next jibe only if 20 seconds after the previous
                     {
                         sailorflags.state = AV_FLAGS_ST_JIBE;
                         time(&jibeendtimeout_start); // start the timer, will kick boat out of JIBE after x seconds
@@ -403,8 +407,8 @@ void * translation_thread(void * dummy)
                 }
                 switch(flags.state_requested)
                 {
-					case 0:
-						break;
+                    case 0:
+                        break;
                     case AV_FLAGS_ST_UPWINDSAILING:
                         break;
                     case AV_FLAGS_ST_IDLE:
@@ -425,22 +429,22 @@ void * translation_thread(void * dummy)
                 last_state = AV_FLAGS_ST_DOWNWINDSAILING;
                 break;
 
-           case AV_FLAGS_ST_TACK: //current state TACK
+            case AV_FLAGS_ST_TACK: //current state TACK
                 if(last_state != flags.state) //only when new in this state
                 {
                     desired_heading_after_tack = remainder(wind_clean.global_direction_real 
-                                - AV_SAILOR_MAX_HEIGHT_TO_WIND * sign(remainder(imu.attitude.yaw 
-                                - wind_clean.global_direction_real,360.0)),360.0);
+                            - AV_SAILOR_MAX_HEIGHT_TO_WIND * sign(remainder(imu.attitude.yaw 
+                                    - wind_clean.global_direction_real,360.0)),360.0);
                     wind_global_pre_tack = wind_clean.global_direction_real; // for HEADINGCHANGE
                 }
-// rtx_message("des_head = %f, head = %f \n",desired_heading_after_tack,imu.attitude.yaw);
+                // rtx_message("des_head = %f, head = %f \n",desired_heading_after_tack,imu.attitude.yaw);
                 time(&tackendtimeout_currenttime);
                 tackendtimeout_diff = difftime(tackendtimeout_currenttime, tackendtimeout_start); // yields time in [s]
                 // to NORMALSAILING
                 if((fabs(remainder((desired_heading_after_tack - imu.attitude.yaw),360.0)) < AV_SAILOR_EPSILON_TACK)
                         || (tackendtimeout_diff > AV_SAILOR_TACK_END_TIMEOUT))
                 {
-// rtx_message("change to normalsailing");
+                    // rtx_message("change to normalsailing");
                     sailorflags.state = AV_FLAGS_ST_NORMALSAILING;
                     time(&tacktimeout_start); // start the timer
                 }
@@ -468,27 +472,27 @@ void * translation_thread(void * dummy)
                 {
                     // set desired heading after jibe all the way to "the other side"
                     wind_global_pre_jibe = wind_clean.global_direction_real;
-                    desired_heading_after_jibe = fabs(remainder((wind_clean.global_direction_real
-                                    + AV_SAILOR_MAX_DOWNWIND_ANGLE * sign(wind_clean.bearing_real)),360.0));
+                    desired_heading_after_jibe = remainder((wind_clean.global_direction_real ////TODO fabs is weird!!!
+                                + AV_SAILOR_MAX_DOWNWIND_ANGLE * sign(wind_clean.bearing_real)),360.0);
                     desired_bearing_after_jibe = remainder((wind_global_pre_jibe - desired_heading_after_jibe),360.0);
                     sign_wanted_sail_angle = sign(desired_bearing_after_jibe); // +1 for wind from starboard, -1 for port
                     wanted_sail_angle_after_jibe = sign_wanted_sail_angle * AV_SAILOR_DOWNWIND_SAIL_DEGREES;
                 }
-// rtx_message("des_head_af = %f   des_bear_af = %f   sail_ang_af = %f   head = %f",desired_heading_after_jibe,desired_bearing_after_jibe, wanted_sail_angle_after_jibe, imu.attitude.yaw);
+                // rtx_message("des_head_af = %f   des_bear_af = %f   sail_ang_af = %f   head = %f",desired_heading_after_jibe,desired_bearing_after_jibe, wanted_sail_angle_after_jibe, imu.attitude.yaw);
                 // to NORMALSAILING
                 time(&jibeendtimeout_currenttime);
                 jibeendtimeout_diff = difftime(jibeendtimeout_currenttime, jibeendtimeout_start); // yields time in [s]
                 if((fabs(remainder((wanted_sail_angle_after_jibe - sailstate.degrees_sail),360.0)) < AV_SAILOR_EPSILON_JIBE)
                         || (jibeendtimeout_diff > AV_SAILOR_JIBE_END_TIMEOUT))
                 {
-// rtx_message("to normal sailing; head= %f", imu.attitude.yaw);
+                    // rtx_message("to normal sailing; head= %f", imu.attitude.yaw);
                     sailorflags.state = AV_FLAGS_ST_NORMALSAILING;
                     time(&jibetimeout_start); // start the timer
                 }
                 switch(flags.state_requested)
                 {
-					case 0:
-						break;
+                    case 0:
+                        break;
                     case AV_FLAGS_ST_IDLE:
                         sailorflags.state = AV_FLAGS_ST_IDLE;
                         break;
@@ -507,8 +511,8 @@ void * translation_thread(void * dummy)
             case AV_FLAGS_ST_MAXENERGYSAVING: // current state MAXENERGYSAVING
                 switch(flags.state_requested)
                 {
-					case 0:
-						break;
+                    case 0:
+                        break;
                     case AV_FLAGS_ST_MAXENERGYSAVING:
                         break;
                     case AV_FLAGS_ST_IDLE:
@@ -566,8 +570,8 @@ void * translation_thread(void * dummy)
                 }
                 switch(flags.state_requested)
                 {
-					case 0:
-						break;
+                    case 0:
+                        break;
                     case AV_FLAGS_ST_HEADINGCHANGE:
                         break;
                     case AV_FLAGS_ST_MAXENERGYSAVING:
@@ -664,25 +668,25 @@ int main (int argc, const char * argv[])
     DOC(DDX_STORE_REGISTER_TYPE (store.getId(), sailorFlags));
     DOC(DDX_STORE_REGISTER_TYPE (store.getId(), WindCleanData));
     DOC(DDX_STORE_REGISTER_TYPE (store.getId(), Sailstate));
-	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), imuData));
+    DOC(DDX_STORE_REGISTER_TYPE (store.getId(), imuData));
     DOC(DDX_STORE_REGISTER_TYPE (store.getId(), DesiredHeading));
-	DOC(DDX_STORE_REGISTER_TYPE (store.getId(), imuCleanData));
+    DOC(DDX_STORE_REGISTER_TYPE (store.getId(), imuCleanData));
 
     // Connect to existing variables, or create new variables
     DOB(store.registerVariable(dataFlags, varname_flags, "Flags"));
     DOB(store.registerVariable(dataSailorFlags, varname_sailorflags, "sailorFlags"));
     DOB(store.registerVariable(dataWindClean, varname_windDataClean, "WindCleanData"));
     DOB(store.registerVariable(dataSailState, varname_sailstate, "Sailstate"));
-	DOB(store.registerVariable(dataImu, varname_imu, "imuData"));
+    DOB(store.registerVariable(dataImu, varname_imu, "imuData"));
     DOB(store.registerVariable(dataDesiredHeading, varname_desiredheading, "DesiredHeading"));
-	DOB(store.registerVariable(dataImuClean, varname_imuClean, "imuCleanData"));
+    DOB(store.registerVariable(dataImuClean, varname_imuClean, "imuCleanData"));
 
     // Start the working thread
     DOP(th = rtx_thread_create ("Sailor Transitions thread", 0,
-                                RTX_THREAD_SCHED_OTHER, RTX_THREAD_PRIO_MIN, 0,
-                                RTX_THREAD_CANCEL_DEFERRED,
-                                translation_thread, NULL,
-                                NULL, NULL));
+                RTX_THREAD_SCHED_OTHER, RTX_THREAD_PRIO_MIN, 0,
+                RTX_THREAD_CANCEL_DEFERRED,
+                translation_thread, NULL,
+                NULL, NULL));
 
     // Wait for Ctrl-C
     DOC (rtx_main_wait_shutdown (0));
