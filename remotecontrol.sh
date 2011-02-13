@@ -16,7 +16,7 @@
 #launch -c launch.conf &
 #./destination_converter &
 ./global_skipper &
-#./skipper &
-#./navigator &
+./skipper &
+./navigator &
 ./poti &
 #.:/aisEval &

@@ -35,7 +35,8 @@
 #include "desired_course.h"
 //#include "weatherdata.h"
 
-// #define DEBUG_SKIPPER
+#define DEBUG_SKIPPER
+//#define DEBUG_SKIPPER_HEAVY
 
 /**
  * Global variable for all DDX object
@@ -362,9 +363,6 @@ void * translation_thread(void * dummy)
 #ifdef DEBUG_SKIPPER
                     rtx_message("normalnavi: dist to next trajectory: %f meters\n", dist_next_trajectory);
                     rtx_message("normalnavi: dist to curr wyp: %f meters\n", dist_curr_wyp);
-		    rtx_message("current_wyp = %d, dist = %f  dx = %f dy = %f \n",current_wyp,dist_curr_wyp, 
-				    waypoints.Data[current_wyp].x - current_pos_x, 
-				    waypoints.Data[current_wyp].y - current_pos_y);
 #endif
                     //go through all the conditions and take measures:
                     //
@@ -393,7 +391,7 @@ void * translation_thread(void * dummy)
                         last_state = AV_FLAGS_NAVI_NORMALNAVIGATION;
                     }
 
-#ifdef DEBUG_SKIPPER
+#ifdef DEBUG_SKIPPER_HEAVY
                     rtx_message("heading_curr_to_next: %f; heading_to_next: %f; course_prev_to_next: %f; \n",heading_curr_to_next_wyp*180/AV_PI,
 				    heading_to_next_wyp*180/AV_PI,heading_prev_to_next_wyp*180/AV_PI);
 #endif

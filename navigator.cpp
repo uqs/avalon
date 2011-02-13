@@ -190,11 +190,18 @@ void * translation_thread(void * dummy)
 			{
 				if (last_dest_index != destination.skipper_index_call)
 				{
+#ifdef DEBUG_NAVIGATOR_EASY
 				    rtx_message("newcalculation, reason: new destination point");
+#endif
 				}
+#ifdef DEBUG_NAVIGATOR_EASY
+                else
+                {
+                    rtx_message("Newcalculation, reason: skipper");
+                }
+#endif
 
 				time_initializer = true;
-				rtx_message("new_path_calc!!!");
 
 				//converting the current and end-state into a meter-coordinates:
 				transformation.longitude_start = boatData.position.longitude;
@@ -311,7 +318,7 @@ void * translation_thread(void * dummy)
 				double alpha = atan2(cos(destination.latitude*AV_PI/180)*(destination.Data[next_dest_Nr].longitude-destination.longitude),(destination.Data[next_dest_Nr].latitude-destination.latitude));
 // 				
 				endTheta = atan2((transformation.x_end - transformation.x_start),(transformation.y_end - transformation.y_start));
-// rtx_message("theta_end: %f °, winddirection: %f °",endTheta*180/AV_PI, windDirection*180/AV_PI);
+                // rtx_message("theta_end: %f °, winddirection: %f °",endTheta*180/AV_PI, windDirection*180/AV_PI);
 
 				if (fabs(remainder((windDirection_orr - endTheta),2*AV_PI)) < (AV_SAILOR_MAX_HEIGHT_TO_WIND*AV_PI/180.0))
 				{ // upwind sailing
@@ -501,7 +508,9 @@ void * translation_thread(void * dummy)
 				transformationData.t_writefrom(transformation);
 				waypointData.t_writefrom(waypoints);
 				time(&start_time);
-				rtx_message("path calc done\n");
+#ifdef DEBUG_NAVIGATOR_EASY
+                rtx_message("path calc done\n");
+#endif`
 
 			}
 
