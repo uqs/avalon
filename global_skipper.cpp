@@ -30,7 +30,8 @@
 #include "destination.h"
 
 
-// #define DEBUG_GLOBSKIPPER
+#define DEBUG_GLOBSKIPPER_EASY
+//#define DEBUG_GLOBSKIPPER
 
 /**
  * Global variable for all DDX object
@@ -122,6 +123,7 @@ void * translation_thread(void * dummy)
     double distance_boat_dest_loc;
     double distance_boat_dest;
     double closest_distance;
+    double testheading;
 
     //initializing the call index
     skipperFlagData.t_readto(skipperflags,0,0);
@@ -179,7 +181,8 @@ void * translation_thread(void * dummy)
 			      *(destination.Data[destination.destNr].longitude-destination.longitude);
 	dist_stored_dest_y =AV_EARTHRADIUS * (AV_PI/180) * (destination.Data[destination.destNr].latitude-destination.latitude);
 #ifdef DEBUG_GLOBSKIPPER
-            rtx_message("the current global destpoint is number %d flags.global_locator = %d \n", destination.destNr, generalflags.global_locator);
+    testheading = remainder(atan2(-current_pos_y,-current_pos_x)*180.0/AV_PI,360.0);
+    rtx_message("Beginning: testheading to glob wyp: %f", testheading);
 #endif
 
 	distance_boat_dest = sqrt(pow(current_pos_x-dist_stored_dest_x,2) + pow(current_pos_y-dist_stored_dest_y,2)); 
@@ -198,7 +201,7 @@ void * translation_thread(void * dummy)
 		    distance_arr[i] =   AV_EARTHRADIUS*AV_PI/180.0*sqrt(pow(boatData.position.latitude - destination.Data[i].latitude,2)
 				    + pow(cos(destination.latitude*AV_PI/180.0)*(boatData.position.longitude - destination.Data[i].longitude),2));
 #ifdef DEBUG_GLOBSKIPPER
-		    rtx_message("destNr counter = %d, distance to boat = %f \n", i, distance_arr[i]);
+		    rtx_message("Locator: destNr counter = %d, distance to boat = %f \n", i, distance_arr[i]);
 #endif
 	
 		    if ( closest_distance > distance_arr[i] || i == 0)
@@ -208,7 +211,7 @@ void * translation_thread(void * dummy)
 			destination.destNr = i;
 
 #ifdef DEBUG_GLOBSKIPPER
-			rtx_message("destNr definitiv = %d \n", destination.destNr);
+			rtx_message("Locator: destNr definitiv = %d \n", destination.destNr);
 #endif
 		    } 
 
@@ -231,6 +234,9 @@ void * translation_thread(void * dummy)
 		destinationData.t_writefrom(destination);
 		skipperflags.global_locator = AV_FLAGS_GLOBALSK_CLOSING;
 		skipperFlagData.t_writefrom(skipperflags);
+#ifdef DEBUG_GLOBSKIPPER
+        rtx_message("Locator End: destData[]: %f / %f",destination.Data[destination.destNr].latitude,destination.Data[destination.destNr].longitude);
+#endif
 
 		break;
 		/////////////////////////////////////////////////////////////////////////7    
@@ -253,7 +259,7 @@ void * translation_thread(void * dummy)
 		}
 
 		// if the distance to the current destination point is to large or small, a new current destination point is calculated
-		if(distance_boat_dest_loc > 1.1*dest_dist || distance_boat_dest_loc < 300)
+		if(distance_boat_dest_loc > 1.1*dest_dist || distance_boat_dest_loc < AV_GLOBALSKI_MIN_DIST_CURR_GLOB_WYP)
 		{
 		    destination.longitude = boatData.position.longitude + dest_dist/distance_boat_dest * (destination.Data[destination.destNr].longitude - boatData.position.longitude);
 		    destination.latitude = boatData.position.latitude + dest_dist/distance_boat_dest * (destination.Data[destination.destNr].latitude - boatData.position.latitude);
@@ -262,7 +268,7 @@ void * translation_thread(void * dummy)
 		    destinationData.t_writefrom(destination);
 
 #ifdef DEBUG_GLOBSKIPPER
-		    rtx_message("closing: increased destination index to %d",destination.skipper_index_call);
+		    rtx_message("closing: generating new glob_dest, da zu weit weg!!! increased destination index to %d",destination.skipper_index_call);
 #endif
 		}
 		
@@ -286,12 +292,10 @@ void * translation_thread(void * dummy)
 		////////////////////////////////////////////////////////////////////////////
 	    case AV_FLAGS_GLOBALSK_TRACKER:
 // in this case, Avalon tries to reach the original stored destination point
-#ifdef DEBUG_GLOBSKIPPER
-		rtx_message("tracker: distance to destination = %f \n",  distance_boat_dest_loc);
-
-		rtx_message("destinationtype = %d  \n", destination.Data[destination.destNr].type);
+#ifdef DEBUG_GLOBSKIPPER_EASY
+		rtx_message("Tracker: distance to destination = %f, destNr = %d ",  distance_boat_dest_loc, destination.destNr);
 #endif
-		if((distance_boat_dest < 300) && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
+		if((distance_boat_dest < AV_GLOBALSKI_MIN_DIST_CURR_GLOB_WYP) && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
 		{
 		    destination.destNr += 1;
 		    assert((destination.destNr < 1000) && (destination.destNr>=0));

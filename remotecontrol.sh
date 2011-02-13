@@ -15,7 +15,7 @@
 #./keepalive ./sailor_statemachine &
 #launch -c launch.conf &
 #./destination_converter &
-#./global_skipper &
+./global_skipper &
 #./skipper &
 #./navigator &
 ./poti &
