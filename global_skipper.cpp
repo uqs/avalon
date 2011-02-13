@@ -123,7 +123,6 @@ void * translation_thread(void * dummy)
     double distance_boat_dest_loc;
     double distance_boat_dest;
     double closest_distance;
-    double testheading;
     double last_global_wyp_longitude = 0.0;
     double last_global_wyp_latitude = 0.0;
     double vec_from_curr_to_last_wyp_x = 0.0; // in m
@@ -186,18 +185,14 @@ void * translation_thread(void * dummy)
 	current_pos_y =AV_EARTHRADIUS * (AV_PI/180) * (boatData.position.latitude-destination.latitude);
 
     // calculate vector from current to last global waypoint
-	vec_from_curr_to_last_x =AV_EARTHRADIUS * cos((destination.latitude * AV_PI/180)) * (AV_PI/180)
+	vec_from_curr_to_last_wyp_x =AV_EARTHRADIUS * cos((destination.latitude * AV_PI/180)) * (AV_PI/180)
 			      *(last_global_wyp_longitude - destination.longitude);
-	vec_from_curr_to_last_y =AV_EARTHRADIUS * (AV_PI/180) * (last_global_wyp_latitude - destination.latitude);
+	vec_from_curr_to_last_wyp_y =AV_EARTHRADIUS * (AV_PI/180) * (last_global_wyp_latitude - destination.latitude);
 
 	// distance to the next stored destination point
 	dist_stored_dest_x =AV_EARTHRADIUS * cos((destination.latitude * AV_PI/180)) * (AV_PI/180)
 			      *(destination.Data[destination.destNr].longitude-destination.longitude);
 	dist_stored_dest_y =AV_EARTHRADIUS * (AV_PI/180) * (destination.Data[destination.destNr].latitude-destination.latitude);
-#ifdef DEBUG_GLOBSKIPPER
-    testheading = remainder(atan2(-current_pos_y,-current_pos_x)*180.0/AV_PI,360.0);
-    rtx_message("Beginning: testheading to glob wyp: %f", testheading);
-#endif
 
     // if we pass the current global waypoint without actually getting inside
     // the tolerance circle, we want to go to the next waypoint:
@@ -207,8 +202,8 @@ void * translation_thread(void * dummy)
 
     // calculate angle between the vectors from boat to current waypoint and
     // from last waypoint to current waypoint
-    angle_btw_boat_and_currwyp_and_lastwyp = acos((current_pos_x * vec_from_curr_to_last_x + current_pos_y * vec_from_curr_to_last_y)
-            /(distance_boat_dest_loc * sqrt(vec_from_curr_to_last_x * vec_from_curr_to_last_x + vec_from_curr_to_last_y * vec_from_curr_to_last_y)));
+    angle_btw_boat_and_currwyp_and_lastwyp = acos((current_pos_x * vec_from_curr_to_last_wyp_x + current_pos_y * vec_from_curr_to_last_wyp_y)
+            /(distance_boat_dest_loc * sqrt(vec_from_curr_to_last_wyp_x * vec_from_curr_to_last_wyp_x + vec_from_curr_to_last_wyp_y * vec_from_curr_to_last_wyp_y)));
 
 	//begin statemachine: /////////////////////////////////////////////////
 	switch(generalflags.global_locator)
