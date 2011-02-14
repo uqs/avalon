@@ -30,7 +30,7 @@
 #include "destination.h"
 
 
-#define DEBUG_GLOBSKIPPER_EASY
+//#define DEBUG_GLOBSKIPPER_EASY
 //#define DEBUG_GLOBSKIPPER
 
 /**
@@ -204,6 +204,9 @@ void * translation_thread(void * dummy)
     // from last waypoint to current waypoint
     angle_btw_boat_and_currwyp_and_lastwyp = acos((current_pos_x * vec_from_curr_to_last_wyp_x + current_pos_y * vec_from_curr_to_last_wyp_y)
             /(distance_boat_dest_loc * sqrt(vec_from_curr_to_last_wyp_x * vec_from_curr_to_last_wyp_x + vec_from_curr_to_last_wyp_y * vec_from_curr_to_last_wyp_y)));
+#ifdef DEBUG_GLOBSKIPPER_EASY
+    rtx_message("Beginning: Notorious Angle: %f ",angle_btw_boat_and_currwyp_and_lastwyp*180.0/AV_PI);
+#endif
 
 	//begin statemachine: /////////////////////////////////////////////////
 	switch(generalflags.global_locator)
@@ -263,9 +266,9 @@ void * translation_thread(void * dummy)
 		/////////////////////////////////////////////////////////////////////////7    
 	    case AV_FLAGS_GLOBALSK_CLOSING:
 
-#ifdef DEBUG_GLOBSKIPPER
-		rtx_message("closing: distance to destination = %f \n", distance_boat_dest_loc);
-		rtx_message("closing: distance to stored destination = %f \n", distance_boat_dest);
+#ifdef DEBUG_GLOBSKIPPER_EASY
+		rtx_message("Closing: distance to destination = %f \n", distance_boat_dest_loc);
+		rtx_message("Closing: distance to stored destination = %f \n", distance_boat_dest);
 #endif
 		// if the distance to the stored destination point is smaller then the previous defined distance
 		// then Avalon tries to reach the stored destination point

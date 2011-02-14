@@ -232,8 +232,8 @@ void * translation_thread(void * dummy)
             }
 	    
 #ifdef DEBUG_SKIPPER
-	    rtx_message("next WP: x= %lf, y= %lf head= %f",waypoints.Data[current_wyp].x,
-			    waypoints.Data[current_wyp].y, waypoints.Data[current_wyp].heading);
+            rtx_message("next WP: x= %lf, y= %lf head= %f",waypoints.Data[current_wyp].x,
+                    waypoints.Data[current_wyp].y, waypoints.Data[current_wyp].heading);
 #endif
 
             //write the current desired heading to store:
@@ -370,7 +370,7 @@ void * translation_thread(void * dummy)
                     if(waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END)
                     {
 #ifdef DEBUG_SKIPPER
-                        rtx_message("normalnavi: going into goal approach mode\n");
+                        rtx_message("normalnavi: approaching the last calculated waypoint ");
 #endif
                         naviflags.navi_state = AV_FLAGS_NAVI_GOAL_APPROACH;
                         last_state = AV_FLAGS_NAVI_NORMALNAVIGATION;
@@ -403,12 +403,12 @@ void * translation_thread(void * dummy)
                         {
 			    if(fabs(dir_wind_mean - waypoints.Data[current_wyp].winddirection) > 10.0)
                             {
-                                rtx_message("wind has changed");
+                                rtx_message("normalnavi-------->newcalc: wind has changed");
                             }
 			    
                             if (fabs(dist_solltrajectory) > 100.0)
                             {
-                                rtx_message("dist_solltrajectory too bigi (%f meters) ",dist_solltrajectory);
+                                rtx_message("normalnavi-------->newcalc: dist_solltrajectory too bigi (%f meters) ",dist_solltrajectory);
                             }
 
                             naviflags.navi_state = AV_FLAGS_NAVI_NEWCALCULATION;
