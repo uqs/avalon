@@ -66,7 +66,7 @@ Cmt3 serial;
 
 // Storage for the command line arguments
 const char * varname = "imu";
-const char * portname = "/dev/ttyUSB0"; // HE: made a udev rule for the IMU
+const char * portname = "/dev/xsensIMU"; // HE: made a udev rule for the IMU
 const char * producerHelpStr = "All Data coming from the IMU";
 double frequency = 100;
 
