@@ -17,7 +17,7 @@
 DDX_STORE_TYPE(imuCleanData,
 		struct
         {
-			struct {double roll;} attitude; // in °
+			struct {double roll; double pitch; double yaw;} attitude; // in °
 
 			struct {double x; double y; double z; double drift;} velocity; // velocity in knots
 		}

@@ -70,22 +70,27 @@ void * translation_thread(void * dummy)
 {
 	imuData imu;
 	imuCleanData imu_clean;
-
-    imuCleanData imu_last; // was of type imuData, but should work like this also...
+    imuCleanData imu_last;
 
     RtxFilter* velocity_x_filter = NULL;
     RtxFilter* velocity_y_filter = NULL;
     RtxFilter* velocity_z_filter = NULL;
     RtxFilter* roll_filter = NULL;
+    RtxFilter* pitch_filter = NULL;
+    RtxFilter* yaw_filter = NULL;
     bool firsttime = true;
     
     imu_clean.attitude.roll = 0.0;
+    imu_clean.attitude.pitch = 0.0;
+    imu_clean.attitude.yaw = 0.0;
     imu_clean.velocity.x = 0.0;
     imu_clean.velocity.y = 0.0;
     imu_clean.velocity.z = 0.0;
     imu_clean.velocity.drift = 0.0;
 
     imu_last.attitude.roll = 0.0;
+    imu_last.attitude.pitch = 0.0;
+    imu_last.attitude.yaw = 0.0;
     imu_last.velocity.x = 0.0;
     imu_last.velocity.y = 0.0;
     imu_last.velocity.z = 0.0;
@@ -103,22 +108,43 @@ void * translation_thread(void * dummy)
                 velocity_y_filter = rtx_filter_median_init(100);
                 velocity_z_filter = rtx_filter_median_init(100);
                 roll_filter = rtx_filter_median_init(100);
+                pitch_filter = rtx_filter_median_init(100);
+                yaw_filter = rtx_filter_median_init(100);
                 firsttime = false;
             }
-#if 0
+
             /**doing the right thing with the new values to avoid leaps (-180 to 180) - for every value, there is two operations:**/
-            if(fabs(remainder(imu_last.velocity.y,360.0) - imu.velocity.y) > 180.0)
+            // roll:
+            if(fabs(remainder(imu_last.attitude.roll,360.0) - imu.attitude.roll) > 180.0)
             {
-                imu.velocity.y += sign(remainder(imu_last.velocity.y,360.0)) * 360.0;
+                imu.attitude.roll += sign(remainder(imu_last.attitude.roll,360.0)) * 360.0;
             }
-            imu.velocity.y += (imu_last.velocity.y - remainder(imu_last.velocity.y,360.0));
-#endif
+            imu.attitude.roll += (imu_last.attitude.roll - remainder(imu_last.attitude.roll,360.0));
+            // pitch:
+            if(fabs(remainder(imu_last.attitude.pitch,360.0) - imu.attitude.pitch) > 180.0)
+            {
+                imu.attitude.pitch += sign(remainder(imu_last.attitude.pitch,360.0)) * 360.0;
+            }
+            imu.attitude.pitch += (imu_last.attitude.pitch - remainder(imu_last.attitude.pitch,360.0));
+            // yaw:
+            if(fabs(remainder(imu_last.attitude.yaw,360.0) - imu.attitude.yaw) > 180.0)
+            {
+                imu.attitude.yaw += sign(remainder(imu_last.attitude.yaw,360.0)) * 360.0;
+            }
+            imu.attitude.yaw += (imu_last.attitude.yaw - remainder(imu_last.attitude.yaw,360.0));
+
+            // save the new data in imu_last for the next iteration:
+            imu_last.attitude.roll = imu.attitude.roll;
+            imu_last.attitude.pitch = imu.attitude.pitch;
+            imu_last.attitude.yaw = imu.attitude.yaw;
 
             // Evaluate Filter Function
             imu_clean.velocity.x = rtx_filter_median_step(velocity_x_filter, imu.velocity.x);
             imu_clean.velocity.y = rtx_filter_median_step(velocity_y_filter, imu.velocity.y);
             imu_clean.velocity.z = rtx_filter_median_step(velocity_z_filter, imu.velocity.z);
-            imu_clean.attitude.roll = rtx_filter_median_step(roll_filter, imu.attitude.roll); // assuming roll is never +-180...
+            imu_clean.attitude.roll = rtx_filter_median_step(roll_filter, imu.attitude.roll);
+            imu_clean.attitude.pitch = rtx_filter_median_step(pitch_filter, imu.attitude.pitch);
+            imu_clean.attitude.yaw = rtx_filter_median_step(yaw_filter, imu.attitude.yaw);
 
             // calculate additional values
             // drift probably not needed anymore, because IMU gives values in
