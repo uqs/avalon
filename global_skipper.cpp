@@ -30,7 +30,8 @@
 #include "destination.h"
 
 
-// #define DEBUG_GLOBSKIPPER
+//#define DEBUG_GLOBSKIPPER_EASY
+//#define DEBUG_GLOBSKIPPER
 
 /**
  * Global variable for all DDX object
@@ -122,6 +123,11 @@ void * translation_thread(void * dummy)
     double distance_boat_dest_loc;
     double distance_boat_dest;
     double closest_distance;
+    double last_global_wyp_longitude = 0.0;
+    double last_global_wyp_latitude = 0.0;
+    double vec_from_curr_to_last_wyp_x = 0.0; // in m
+    double vec_from_curr_to_last_wyp_y = 0.0; // in m
+    double angle_btw_boat_and_currwyp_and_lastwyp = 0.0; // in rad
 
     //initializing the call index
     skipperFlagData.t_readto(skipperflags,0,0);
@@ -161,6 +167,10 @@ void * translation_thread(void * dummy)
 	if ((generalflags.global_locator == ais_dest.global_skipper_flag) && (ais_dest.ais_dest_index != ais_dest_index_last))
 	{
 	    rtx_message("aisflag has been written");
+        // save the last waypoint in a temporary variable:
+        last_global_wyp_longitude = destination.longitude;
+        last_global_wyp_latitude = destination.latitude;
+
 	    destination.longitude = ais_dest.new_dest_long;
 	    destination.latitude = ais_dest.new_dest_lat;
 	    destination.skipper_index_call ++;
@@ -174,16 +184,30 @@ void * translation_thread(void * dummy)
 			      *(boatData.position.longitude-destination.longitude);
 	current_pos_y =AV_EARTHRADIUS * (AV_PI/180) * (boatData.position.latitude-destination.latitude);
 
+    // calculate vector from current to last global waypoint
+	vec_from_curr_to_last_wyp_x =AV_EARTHRADIUS * cos((destination.latitude * AV_PI/180)) * (AV_PI/180)
+			      *(last_global_wyp_longitude - destination.longitude);
+	vec_from_curr_to_last_wyp_y =AV_EARTHRADIUS * (AV_PI/180) * (last_global_wyp_latitude - destination.latitude);
+
 	// distance to the next stored destination point
 	dist_stored_dest_x =AV_EARTHRADIUS * cos((destination.latitude * AV_PI/180)) * (AV_PI/180)
 			      *(destination.Data[destination.destNr].longitude-destination.longitude);
 	dist_stored_dest_y =AV_EARTHRADIUS * (AV_PI/180) * (destination.Data[destination.destNr].latitude-destination.latitude);
-#ifdef DEBUG_GLOBSKIPPER
-            rtx_message("the current global destpoint is number %d flags.global_locator = %d \n", destination.destNr, generalflags.global_locator);
-#endif
+
+    // if we pass the current global waypoint without actually getting inside
+    // the tolerance circle, we want to go to the next waypoint:
 
 	distance_boat_dest = sqrt(pow(current_pos_x-dist_stored_dest_x,2) + pow(current_pos_y-dist_stored_dest_y,2)); 
 	distance_boat_dest_loc = sqrt(pow(current_pos_x,2) + pow(current_pos_y,2)); //because the destination is always in (0,0)!
+
+    // calculate angle between the vectors from boat to current waypoint and
+    // from last waypoint to current waypoint
+    angle_btw_boat_and_currwyp_and_lastwyp = acos((current_pos_x * vec_from_curr_to_last_wyp_x + current_pos_y * vec_from_curr_to_last_wyp_y)
+            /(distance_boat_dest_loc * sqrt(vec_from_curr_to_last_wyp_x * vec_from_curr_to_last_wyp_x + vec_from_curr_to_last_wyp_y * vec_from_curr_to_last_wyp_y)));
+#ifdef DEBUG_GLOBSKIPPER_EASY
+    rtx_message("Beginning: Notorious Angle: %f ",angle_btw_boat_and_currwyp_and_lastwyp*180.0/AV_PI);
+#endif
+
 	//begin statemachine: /////////////////////////////////////////////////
 	switch(generalflags.global_locator)
 	{
@@ -198,7 +222,7 @@ void * translation_thread(void * dummy)
 		    distance_arr[i] =   AV_EARTHRADIUS*AV_PI/180.0*sqrt(pow(boatData.position.latitude - destination.Data[i].latitude,2)
 				    + pow(cos(destination.latitude*AV_PI/180.0)*(boatData.position.longitude - destination.Data[i].longitude),2));
 #ifdef DEBUG_GLOBSKIPPER
-		    rtx_message("destNr counter = %d, distance to boat = %f \n", i, distance_arr[i]);
+		    rtx_message("Locator: destNr counter = %d, distance to boat = %f \n", i, distance_arr[i]);
 #endif
 	
 		    if ( closest_distance > distance_arr[i] || i == 0)
@@ -208,7 +232,7 @@ void * translation_thread(void * dummy)
 			destination.destNr = i;
 
 #ifdef DEBUG_GLOBSKIPPER
-			rtx_message("destNr definitiv = %d \n", destination.destNr);
+			rtx_message("Locator: destNr definitiv = %d \n", destination.destNr);
 #endif
 		    } 
 
@@ -223,6 +247,9 @@ void * translation_thread(void * dummy)
 		    destination.destNr++;
 		}
 
+        // save the last waypoint in a temporary variable:
+        last_global_wyp_longitude = destination.longitude;
+        last_global_wyp_latitude = destination.latitude;
 		// write the current destination point to the store
 		destination.longitude = destination.Data[destination.destNr].longitude;
 		destination.latitude = destination.Data[destination.destNr].latitude;
@@ -231,14 +258,17 @@ void * translation_thread(void * dummy)
 		destinationData.t_writefrom(destination);
 		skipperflags.global_locator = AV_FLAGS_GLOBALSK_CLOSING;
 		skipperFlagData.t_writefrom(skipperflags);
+#ifdef DEBUG_GLOBSKIPPER
+        rtx_message("Locator End: destData[]: %f / %f",destination.Data[destination.destNr].latitude,destination.Data[destination.destNr].longitude);
+#endif
 
 		break;
 		/////////////////////////////////////////////////////////////////////////7    
 	    case AV_FLAGS_GLOBALSK_CLOSING:
 
-#ifdef DEBUG_GLOBSKIPPER
-		rtx_message("closing: distance to destination = %f \n", distance_boat_dest_loc);
-		rtx_message("closing: distance to stored destination = %f \n", distance_boat_dest);
+#ifdef DEBUG_GLOBSKIPPER_EASY
+		rtx_message("Closing: distance to destination = %f \n", distance_boat_dest_loc);
+		rtx_message("Closing: distance to stored destination = %f \n", distance_boat_dest);
 #endif
 		// if the distance to the stored destination point is smaller then the previous defined distance
 		// then Avalon tries to reach the stored destination point
@@ -246,6 +276,10 @@ void * translation_thread(void * dummy)
 		{
 		    skipperflags.global_locator = AV_FLAGS_GLOBALSK_TRACKER;
 		    skipperFlagData.t_writefrom(skipperflags);
+            // save the last waypoint in a temporary variable:
+            last_global_wyp_longitude = destination.longitude;
+            last_global_wyp_latitude = destination.latitude;
+
 		    destination.longitude = destination.Data[destination.destNr].longitude;
 		    destination.latitude = destination.Data[destination.destNr].latitude;
 		    destinationData.t_writefrom(destination);
@@ -253,8 +287,12 @@ void * translation_thread(void * dummy)
 		}
 
 		// if the distance to the current destination point is to large or small, a new current destination point is calculated
-		if(distance_boat_dest_loc > 1.1*dest_dist || distance_boat_dest_loc < 300)
+		if(distance_boat_dest_loc > 1.1*dest_dist || distance_boat_dest_loc < AV_GLOBALSKI_MIN_DIST_CURR_GLOB_WYP)
 		{
+            // save the last waypoint in a temporary variable:
+            last_global_wyp_longitude = destination.longitude;
+            last_global_wyp_latitude = destination.latitude;
+
 		    destination.longitude = boatData.position.longitude + dest_dist/distance_boat_dest * (destination.Data[destination.destNr].longitude - boatData.position.longitude);
 		    destination.latitude = boatData.position.latitude + dest_dist/distance_boat_dest * (destination.Data[destination.destNr].latitude - boatData.position.latitude);
 		    destination.skipper_index_call ++;
@@ -262,7 +300,7 @@ void * translation_thread(void * dummy)
 		    destinationData.t_writefrom(destination);
 
 #ifdef DEBUG_GLOBSKIPPER
-		    rtx_message("closing: increased destination index to %d",destination.skipper_index_call);
+		    rtx_message("closing: generating new glob_dest, da zu weit weg!!! increased destination index to %d",destination.skipper_index_call);
 #endif
 		}
 		
@@ -286,15 +324,18 @@ void * translation_thread(void * dummy)
 		////////////////////////////////////////////////////////////////////////////
 	    case AV_FLAGS_GLOBALSK_TRACKER:
 // in this case, Avalon tries to reach the original stored destination point
-#ifdef DEBUG_GLOBSKIPPER
-		rtx_message("tracker: distance to destination = %f \n",  distance_boat_dest_loc);
-
-		rtx_message("destinationtype = %d  \n", destination.Data[destination.destNr].type);
+#ifdef DEBUG_GLOBSKIPPER_EASY
+		rtx_message("Tracker: distance to destination = %f, destNr = %d ",  distance_boat_dest_loc, destination.destNr);
 #endif
-		if((distance_boat_dest < 300) && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END))
+		if((distance_boat_dest < AV_GLOBALSKI_MIN_DIST_CURR_GLOB_WYP) && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END)
+                || (destination.destNr > 0 && angle_btw_boat_and_currwyp_and_lastwyp > AV_PI / 2.0))
 		{
 		    destination.destNr += 1;
 		    assert((destination.destNr < 1000) && (destination.destNr>=0));
+            // save the last waypoint in a temporary variable:
+            last_global_wyp_longitude = destination.longitude;
+            last_global_wyp_latitude = destination.latitude;
+
 		    destination.longitude = destination.Data[destination.destNr].longitude;
 		    destination.latitude = destination.Data[destination.destNr].latitude;
 		    destination.skipper_index_call ++;

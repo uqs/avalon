@@ -335,10 +335,10 @@ void * translation_thread(void * dummy)
                 // to TACK
                 time(&tacktimeout_currenttime);
                 tacktimeout_diff = difftime(tacktimeout_currenttime, tacktimeout_start); // yields time in [s]
-                if((fabs(wind_clean.bearing_real) < 90.0) 
-                        && (remainder((imu.attitude.yaw - wind_clean.global_direction_real),360.0) 
-                            * remainder((desired_heading.heading + sign(remainder(desired_heading.heading - wind_clean.global_direction_real,360.0))
-                                    * AV_SAILOR_TACK_HYSTERESIS - wind_clean.global_direction_real),360.0) < 0))
+                if((sign(remainder((desired_heading.heading - imu.attitude.yaw),360.0))
+                            * sign(remainder((remainder((wind_clean.global_direction_real),360.0) - imu.attitude.yaw),360.0)) > 0)
+                        && (fabs(remainder((desired_heading.heading - imu.attitude.yaw),360.0)) 
+                            > (fabs(remainder((remainder((wind_clean.global_direction_real),360.0) - imu.attitude.yaw),360.0)) + AV_SAILOR_TACK_HYSTERESIS)))
                 {
                     //if(tacktimeout_diff > 20.0) // next tack only if 20 seconds after the previous
                     if(1) // next tack only if 20 seconds after the previous
@@ -387,10 +387,10 @@ void * translation_thread(void * dummy)
                 // to JIBE
                 time(&jibetimeout_currenttime);
                 jibetimeout_diff = difftime(jibetimeout_currenttime, jibetimeout_start); // yields time in [s]
-                if((fabs(wind_clean.bearing_real) > 90.0)
-                        && (remainder((imu.attitude.yaw - wind_clean.global_direction_real),360.0) 
-                            * remainder((desired_heading.heading - sign(remainder(desired_heading.heading - wind_clean.global_direction_real,360.0))
-                                    * AV_SAILOR_JIBE_HYSTERESIS - wind_clean.global_direction_real),360.0) < 0))
+                if((sign(remainder((desired_heading.heading - imu.attitude.yaw),360.0))
+                            * sign(remainder((remainder((wind_clean.global_direction_real + 180.0),360.0) - imu.attitude.yaw),360.0)) > 0)
+                        && (fabs(remainder((desired_heading.heading - imu.attitude.yaw),360.0)) 
+                            > (fabs(remainder((remainder((wind_clean.global_direction_real + 180.0),360.0) - imu.attitude.yaw),360.0)) + AV_SAILOR_JIBE_HYSTERESIS)))
                 {
                     //if(jibetimeout_diff > 20.0) // next jibe only if 20 seconds after the previous
                     if(1) // next jibe only if 20 seconds after the previous

@@ -35,7 +35,8 @@
 #include "desired_course.h"
 //#include "weatherdata.h"
 
-// #define DEBUG_SKIPPER
+#define DEBUG_SKIPPER
+//#define DEBUG_SKIPPER_HEAVY
 
 /**
  * Global variable for all DDX object
@@ -231,8 +232,8 @@ void * translation_thread(void * dummy)
             }
 	    
 #ifdef DEBUG_SKIPPER
-	    rtx_message("next WP: x= %lf, y= %lf head= %f",waypoints.Data[current_wyp].x,
-			    waypoints.Data[current_wyp].y, waypoints.Data[current_wyp].heading);
+            rtx_message("next WP: x= %lf, y= %lf head= %f",waypoints.Data[current_wyp].x,
+                    waypoints.Data[current_wyp].y, waypoints.Data[current_wyp].heading);
 #endif
 
             //write the current desired heading to store:
@@ -362,9 +363,6 @@ void * translation_thread(void * dummy)
 #ifdef DEBUG_SKIPPER
                     rtx_message("normalnavi: dist to next trajectory: %f meters\n", dist_next_trajectory);
                     rtx_message("normalnavi: dist to curr wyp: %f meters\n", dist_curr_wyp);
-		    rtx_message("current_wyp = %d, dist = %f  dx = %f dy = %f \n",current_wyp,dist_curr_wyp, 
-				    waypoints.Data[current_wyp].x - current_pos_x, 
-				    waypoints.Data[current_wyp].y - current_pos_y);
 #endif
                     //go through all the conditions and take measures:
                     //
@@ -372,7 +370,7 @@ void * translation_thread(void * dummy)
                     if(waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END)
                     {
 #ifdef DEBUG_SKIPPER
-                        rtx_message("normalnavi: going into goal approach mode\n");
+                        rtx_message("normalnavi: approaching the last calculated waypoint ");
 #endif
                         naviflags.navi_state = AV_FLAGS_NAVI_GOAL_APPROACH;
                         last_state = AV_FLAGS_NAVI_NORMALNAVIGATION;
@@ -393,7 +391,7 @@ void * translation_thread(void * dummy)
                         last_state = AV_FLAGS_NAVI_NORMALNAVIGATION;
                     }
 
-#ifdef DEBUG_SKIPPER
+#ifdef DEBUG_SKIPPER_HEAVY
                     rtx_message("heading_curr_to_next: %f; heading_to_next: %f; course_prev_to_next: %f; \n",heading_curr_to_next_wyp*180/AV_PI,
 				    heading_to_next_wyp*180/AV_PI,heading_prev_to_next_wyp*180/AV_PI);
 #endif
@@ -405,12 +403,12 @@ void * translation_thread(void * dummy)
                         {
 			    if(fabs(dir_wind_mean - waypoints.Data[current_wyp].winddirection) > 10.0)
                             {
-                                rtx_message("wind has changed");
+                                rtx_message("normalnavi-------->newcalc: wind has changed");
                             }
 			    
                             if (fabs(dist_solltrajectory) > 100.0)
                             {
-                                rtx_message("dist_solltrajectory too bigi (%f meters) ",dist_solltrajectory);
+                                rtx_message("normalnavi-------->newcalc: dist_solltrajectory too bigi (%f meters) ",dist_solltrajectory);
                             }
 
                             naviflags.navi_state = AV_FLAGS_NAVI_NEWCALCULATION;

@@ -217,7 +217,8 @@ struct AV_TransEval : public Dijkstra3D::TransitionEvaluator
 
             /////////////////////////////////////
             /**calculating the currentSpeed**/
-            if (alpha[i]<(M_PI/4-0.05) || alpha[i] > 155*AV_PI/180)
+            //if (alpha[i]<(M_PI/4-0.05) || alpha[i] > 155*AV_PI/180) 
+            if (alpha[i]<(30 *AV_PI/180) || alpha[i] > 165*AV_PI/180) //new values after zh-lake tests
             {
                 currentSpeed[i]=0.0;
             }
