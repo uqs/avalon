@@ -110,8 +110,8 @@ class ControlFrame(wx.Frame):
 		self.speeddata = [0]
 		self.pos_longitude = []
 		self.pos_latitude = []
-		self.wyp_longitude = []
-		self.wyp_latitude = []
+		self.wyp_longitude = [0.0]
+		self.wyp_latitude = [0.0]
 		self.logtime = [0]
 
 		self.plot_count = 0
@@ -216,7 +216,7 @@ class ControlFrame(wx.Frame):
 				array(self.wyp_latitude),
 				linewidth = 1,
 				color = (0, 0, 1),
-				label = 'desired',
+				label = 'calculated',
 				)[0]
 
 		myprop = matplotlib.font_manager.FontProperties(size=10)
@@ -255,10 +255,10 @@ class ControlFrame(wx.Frame):
 		# ---------------------------------------
 		# redraws the position plot:
 		# ---------------------------------------
-		delta_long = max(self.pos_longitude) - min(self.pos_longitude)
-		long_m = 0.5*(max(self.pos_longitude) + min(self.pos_longitude))
-		delta_lat = max(self.pos_latitude) - min(self.pos_latitude)
-		lat_m = 0.5*(max(self.pos_latitude) + min(self.pos_latitude))
+		delta_long = max(max(self.pos_longitude),max(self.wyp_longitude)) - min(min(self.pos_longitude), min(self.wyp_longitude))
+		long_m = 0.5*(max(max(self.pos_longitude), max(self.wyp_longitude)) + min(min(self.pos_longitude), min(self.wyp_longitude)))
+		delta_lat = max(max(self.pos_latitude), max(self.wyp_latitude)) - min(min(self.pos_latitude), min(self.wyp_latitude))
+		lat_m = 0.5*(max(max(self.pos_latitude), max(self.wyp_latitude)) + min(min(self.pos_latitude), min(self.wyp_latitude)))
 		
 		delta_long_calc = 6.0/3.5 * delta_lat
 		delta_lat_calc = 3.5/6.0 * delta_long
@@ -281,10 +281,12 @@ class ControlFrame(wx.Frame):
 			ymax = max(self.pos_latitude) + 0.0005
 			ymin = min(self.pos_latitude) - 0.0005
 
-		print long_m
+		#print long_m
 
 		self.wypplot.set_xbound(lower=xmin, upper=xmax)
 		self.wypplot.set_ybound(lower=ymin, upper=ymax)
+		#self.wypplot.set_xbound(lower=-300, upper=300)
+		#self.wypplot.set_ybound(lower=-200, upper=200)
 
 		#grid on:
 		self.wypplot.grid(True, color='gray')
@@ -292,6 +294,9 @@ class ControlFrame(wx.Frame):
 		self.plot_posdata.set_xdata(array(self.pos_longitude))
 		self.plot_posdata.set_ydata(array(self.pos_latitude))
 		
+		self.plot_wypdata.set_xdata(array(self.wyp_longitude))
+		self.plot_wypdata.set_ydata(array(self.wyp_latitude))
+
 		self.canvas.draw()
 
 	def UpdateSpeedPlot(self):
@@ -328,6 +333,7 @@ class ControlFrame(wx.Frame):
 		menudata.Append(301, '&Initialize\tCtrl+I','Initialize Store-Data')
 		menudata.Append(302, '&Start\tCtrl+S','Start reading Data')
 		menudata.Append(303, '&Stop\tCtrl+E','Stop reading Data')
+		menudata.Append(304, '&Plot WYP\tCtrl+W','fill wyps to vector')
 
 		menuplot = wx.Menu()
 		menuplot.Append(401, '&Clear Plot\tCtrl+C','Clear the Navigation plot')
@@ -341,9 +347,10 @@ class ControlFrame(wx.Frame):
 		self.Bind(wx.EVT_MENU, self.OnInitData, id=301)
 		self.Bind(wx.EVT_MENU, self.OnStartStop, id=302)
 		self.Bind(wx.EVT_MENU, self.OnStartStop, id=303)
+		self.Bind(wx.EVT_MENU, self.OnWypFill, id=304)
 		self.Bind(wx.EVT_MENU, self.OnClearPlot, id=401)
 		self.Centre()
-	
+
 	def OnClearPlot(self, event):
 		# clear the data-arrays:
 		del self.pos_longitude[:]
@@ -352,7 +359,7 @@ class ControlFrame(wx.Frame):
 		del self.wyp_latitude[:]
 
 		msg = wx.MessageDialog(None, 'Plot data cleared!', 'Info', wx.OK)
-        	msg.ShowModal()
+		msg.ShowModal()
 
 	def OnInitData(self, event):
 		
@@ -362,13 +369,13 @@ class ControlFrame(wx.Frame):
 		
 		store = ddxInterface.ddxStore()
 		self.IMUData = store.variable("imu")
-		self.FLAGData = store.variable("flags")
-		self.WINDData = store.variable("cleanwind")
-		self.DHData = store.variable("desiredheading")
+		#self.FLAGData = store.variable("flags")
+		#self.WINDData = store.variable("cleanwind")
+		#self.DHData = store.variable("desiredheading")
 		self.WypData = store.variable("wypData")
 		self.DESTData = store.variable("destData")
-		self.RDRData = store.variable("rudderstateright")
-		self.RDLData = store.variable("rudderstateleft")
+		#self.RDRData = store.variable("rudderstateright")
+		#self.RDLData = store.variable("rudderstateleft")
 
 		#flag:
 		self.initdone = 1
@@ -376,118 +383,130 @@ class ControlFrame(wx.Frame):
 	def OnUpdate(self, event):
 		###read DDX variables and write to GUI: ####
 		self.IMUData.read()
-		self.FLAGData.read()
-		self.WINDData.read()
-		self.DHData.read()
+		#self.FLAGData.read()
+		#self.WINDData.read()
+		#self.DHData.read()
 		self.DESTData.read()
-		self.RDRData.read()
-		self.RDLData.read()
+		#self.RDRData.read()
+		#self.RDLData.read()
 
 		###sailing mode: ####
-		mode = {
-				1: 'IDLE',
-				2: 'DOCK',
-				3: 'NORMAL SAILING',
-				4: 'TACK',
-				5: 'JIBE',
-				6: 'UPWIND',
-				7: 'DOWNWIND',
-				8: 'MAX ENERGY SAVING',
-				9: 'HEADING CHANGE',
-				0: 'ERROR',
-				#}[8]
-				}[int(self.FLAGData.state)]
-		
-		self.sailMode.SetValue(mode)
-		###radio buttons: ####
+		#mode = {
+		#		1: 'IDLE',
+		#		2: 'DOCK',
+		#		3: 'NORMAL SAILING',
+		#		4: 'TACK',
+		#		5: 'JIBE',
+		#		6: 'UPWIND',
+		#		7: 'DOWNWIND',
+		#		8: 'MAX ENERGY SAVING',
+		#		9: 'HEADING CHANGE',
+		#		0: 'ERROR',
+		#		#}[8]
+		#		}[int(self.FLAGData.state)]
+		#
+		#self.sailMode.SetValue(mode)
+		####radio buttons: ####
 
-		joystick_bool = {1: False, 2: True, 0: False}[int(self.FLAGData.man_in_charge)]
-		sailor_bool = {1: True, 2: False, 0: False}[int(self.FLAGData.man_in_charge)]
-		autonomous_bool = {0: False, 1: True}[int(self.FLAGData.autonom_navigation)]
-		#print self.FLAGData.man_in_charge
-		#joystick_bool = {1: False, 2: True}[1]
-		#sailor_bool = {1: True, 2: False}[1]
-		#autonomous_bool = {0: False, 1: True}[1]
-		self.joystick.SetValue(joystick_bool)
-		self.sailor.SetValue(sailor_bool)
-		self.autonomous.SetValue(autonomous_bool)
+		#joystick_bool = {1: False, 2: True, 0: False}[int(self.FLAGData.man_in_charge)]
+		#sailor_bool = {1: True, 2: False, 0: False}[int(self.FLAGData.man_in_charge)]
+		#autonomous_bool = {0: False, 1: True}[int(self.FLAGData.autonom_navigation)]
+		##print self.FLAGData.man_in_charge
+		##joystick_bool = {1: False, 2: True}[1]
+		##sailor_bool = {1: True, 2: False}[1]
+		##autonomous_bool = {0: False, 1: True}[1]
+		#self.joystick.SetValue(joystick_bool)
+		#self.sailor.SetValue(sailor_bool)
+		#self.autonomous.SetValue(autonomous_bool)
 
-		#self.rudderright.SetValue(' %1.3f') % (float(self.RDRData.degrees_rudder))
-		self.rudderright.SetValue(str(float(self.RDRData.degrees_rudder)))
-		self.rudderleft.SetValue(str(float(self.RDLData.degrees_rudder)))
-		
-		#### performance information: ####
-		#self.speed.SetValue(str(6.34))
-		#self.des_heading.SetValue(str(130))
-		#self.cur_heading.SetValue(str(120))
-		#self.drift.SetValue(str(0.1))
-		#self.roll.SetValue(str(16))
-		self.speed.SetValue(str(float(self.IMUData.speed)))
-		self.des_heading.SetValue(str(float(self.DHData.heading)))
-		self.cur_heading.SetValue(str(float(self.IMUData.attitude.yaw)))
-		self.drift.SetValue(str(float(self.IMUData.velocity.y)))
-		self.roll.SetValue(str(float(self.IMUData.attitude.roll)))
+		##self.rudderright.SetValue(' %1.3f') % (float(self.RDRData.degrees_rudder))
+		#self.rudderright.SetValue(str(float(self.RDRData.degrees_rudder)))
+		#self.rudderleft.SetValue(str(float(self.RDLData.degrees_rudder)))
+		#
+		##### performance information: ####
+		##self.speed.SetValue(str(6.34))
+		##self.des_heading.SetValue(str(130))
+		##self.cur_heading.SetValue(str(120))
+		##self.drift.SetValue(str(0.1))
+		##self.roll.SetValue(str(16))
+		#self.speed.SetValue(str(float(self.IMUData.speed)))
+		#self.des_heading.SetValue(str(float(self.DHData.heading)))
+		#self.cur_heading.SetValue(str(float(self.IMUData.attitude.yaw)))
+		#self.drift.SetValue(str(float(self.IMUData.velocity.y)))
+		#self.roll.SetValue(str(float(self.IMUData.attitude.roll)))
 
-		#### environment information: ####
-		self.wind_speed.SetValue(str(float(self.WINDData.speed_long)))
-		self.wind_direction.SetValue(str(float(self.WINDData.global_direction_real_long)))
+		##### environment information: ####
+		#self.wind_speed.SetValue(str(float(self.WINDData.speed_long)))
+		#self.wind_direction.SetValue(str(float(self.WINDData.global_direction_real_long)))
 
 
-		#### energy panel information: ####
-		self.voltage.SetValue('--')
+		##### energy panel information: ####
+		#self.voltage.SetValue('--')
 		
 		# ------------------------------------------------------------------------------
 		# plots:
 		# ------------------------------------------------------------------------------
-		sp_length = len(self.logtime)
-		self.logtime.append((self.logtime[sp_length-1])+2)
-		self.speeddata.append(float(self.IMUData.speed))
-		if sp_length > 30:
-			self.logtime.pop(0)
-			self.speeddata.pop(0)
+		#sp_length = len(self.logtime)
+		#self.logtime.append((self.logtime[sp_length-1])+2)
+		#self.speeddata.append(float(self.IMUData.speed))
+		#if sp_length > 30:
+		#	self.logtime.pop(0)
+		#	self.speeddata.pop(0)
 
-		self.UpdateSpeedPlot()
+		#self.UpdateSpeedPlot()
 
 		# ---- position decoding (every 10 seconds)------
-		if self.plot_count > 2:
+		if self.plot_count > 1:
 			self.plot_count = 0
 			
-			#pos_x = float (EARTH_RAD * (math.pi/180)
-				#*(float(self.IMUData.position.latitude) - float(self.DESTData.latitude)))
-			#pos_y = float (EARTH_RAD 
-				#*math.cos((float(self.DESTData.latitude) * math.pi/180.0))*(math.pi/180.0)
-				#*(float(self.IMUData.position.longitude) - float(self.DESTData.longitude)))
+			pos_x = float (EARTH_RAD * (math.pi/180)
+				*(float(self.IMUData.position.latitude) - float(self.DESTData.latitude)))
+			pos_y = float (EARTH_RAD 
+				*math.cos((float(self.DESTData.latitude) * math.pi/180.0))*(math.pi/180.0)
+				*(float(self.IMUData.position.longitude) - float(self.DESTData.longitude)))
 
-			self.pos_longitude.append(float(self.IMUData.position.longitude)) #(pos_x)
-			self.pos_latitude.append(float(self.IMUData.position.latitude)) #(pos_y)
-			if len(self.pos_longitude) > 60:
-				self.pos_longitude.pop(0)
-				self.pos_latitude.pop(0)
+			self.pos_longitude.append(pos_y) #(float(self.IMUData.position.longitude))
+			self.pos_latitude.append(pos_x) #(float(self.IMUData.position.latitude)) 
+			print self.pos_longitude
+			print self.pos_latitude
 
-			# --- waypoint handling ---
-			if 0:
-				del self.wyp_longitude[:]
-				del self.wyp_latitude[:]
-
-				for i in range(0, 10):
-					self.wyp_longitude.append(float(self.WypData.Data[i].x))
-					self.wyp_latitude.append(float(self.WypData.Data[i].y))
-
-					if self.WypData.Data[i].wyp_type == 1:
-						# --- stop ---
-						break
+			#if len(self.pos_longitude) > 60:
+			#	self.pos_longitude.pop(0)
+			#	self.pos_latitude.pop(0)
 
 
 			self.UpdatePosPlot()
 
 			
 		self.plot_count += 1	
-		print self.plot_count
+		#print self.plot_count
 		
 
 
 		###debug:
 		print 'updated control panel'
+
+	def OnWypFill(self, event):
+
+		self.WypData.read()
+
+		del self.wyp_longitude[:]
+		del self.wyp_latitude[:]
+
+		for i in range(0, 18):
+			self.wyp_longitude.append(float(self.WypData.Data[i].y))
+			self.wyp_latitude.append(float(self.WypData.Data[i].x))
+
+			print self.wyp_longitude
+			print self.wyp_latitude
+			if int(self.WypData.Data[i].wyp_type) == 1:
+				# --- stop ---
+				break
+
+		self.UpdatePosPlot()
+		print self.wyp_longitude
+		print 'Wyp Data filled'
+
 
 
 	def OnStartStop(self, event):
