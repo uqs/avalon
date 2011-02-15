@@ -109,7 +109,7 @@ void * translation_thread(void * dummy)
                 velocity_z_filter = rtx_filter_median_init(100);
                 roll_filter = rtx_filter_median_init(100);
                 pitch_filter = rtx_filter_median_init(100);
-                yaw_filter = rtx_filter_median_init(100);
+                yaw_filter = rtx_filter_median_init(500);
                 firsttime = false;
             }
 
@@ -142,9 +142,9 @@ void * translation_thread(void * dummy)
             imu_clean.velocity.x = rtx_filter_median_step(velocity_x_filter, imu.velocity.x);
             imu_clean.velocity.y = rtx_filter_median_step(velocity_y_filter, imu.velocity.y);
             imu_clean.velocity.z = rtx_filter_median_step(velocity_z_filter, imu.velocity.z);
-            imu_clean.attitude.roll = rtx_filter_median_step(roll_filter, imu.attitude.roll);
-            imu_clean.attitude.pitch = rtx_filter_median_step(pitch_filter, imu.attitude.pitch);
-            imu_clean.attitude.yaw = rtx_filter_median_step(yaw_filter, imu.attitude.yaw);
+            imu_clean.attitude.roll = remainder(rtx_filter_median_step(roll_filter, imu.attitude.roll),360.0);
+            imu_clean.attitude.pitch = remainder(rtx_filter_median_step(pitch_filter, imu.attitude.pitch),360.0);
+            imu_clean.attitude.yaw = remainder(rtx_filter_median_step(yaw_filter, imu.attitude.yaw),360.0);
 
             // calculate additional values
             // drift probably not needed anymore, because IMU gives values in
