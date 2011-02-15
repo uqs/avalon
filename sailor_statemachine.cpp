@@ -270,7 +270,6 @@ void * translation_thread(void * dummy)
 
                 case AV_FLAGS_ST_DOCK:
                     //old case-version:
-#if 0
                     /* Sail: */
                     avalon.wanted_sail_angle_to_wind = 0;
                     sail.degrees = remainder((wind_clean.bearing_app
@@ -281,8 +280,8 @@ void * translation_thread(void * dummy)
                     rudder.degrees_right = 45.0;
                     last_state = AV_FLAGS_ST_DOCK;
                     break;
-#endif
 
+#if 0
                     //To test the PID-Parameters, this state only does rudder-control
 
                     /* Torque & Theta_dot initialization: */
@@ -315,6 +314,7 @@ void * translation_thread(void * dummy)
                             (remainder(desired_heading.heading - imu.attitude.yaw, 360.0)),theta_dot_des, torque_des, rudder.degrees_left,speed);
 
                     break;
+#endif
 
 
                 case AV_FLAGS_ST_NORMALSAILING:
