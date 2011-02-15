@@ -30,8 +30,8 @@
 #include "destination.h"
 
 
-//#define DEBUG_GLOBSKIPPER_EASY
-//#define DEBUG_GLOBSKIPPER
+#define DEBUG_GLOBSKIPPER_EASY
+#define DEBUG_GLOBSKIPPER
 
 /**
  * Global variable for all DDX object
@@ -116,6 +116,7 @@ void * translation_thread(void * dummy)
     SkipperFlags skipperflags;
     AisDestData ais_dest;
 
+    bool firsttime = true;
     double dest_dist = 1000;
     int i;
     unsigned int ais_dest_index_last=0;
@@ -150,15 +151,6 @@ void * translation_thread(void * dummy)
             destinationData.t_readto(destination,0,0);
             skipperFlagData.t_readto(skipperflags,0,0);
             aisDestData.t_readto(ais_dest,0,0);
-            if(destination.destNr == 0)
-            {
-                skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
-                skipperFlagData.t_writefrom(skipperflags);
-                // Put current position (the start position) as last waypoint,
-                // because there is no real last waypoint...
-                last_global_wyp_longitude = boatData.position.longitude;
-                last_global_wyp_latitude = boatData.position.latitude;
-            }
 
             // if we are on collision course, ais tells us the new destination point
             if (ais_dest.ais_dest_index != ais_dest_index_last)
@@ -211,6 +203,16 @@ void * translation_thread(void * dummy)
 #ifdef DEBUG_GLOBSKIPPER_EASY
             rtx_message("Beginning: Notorious Angle: %f ",angle_btw_boat_and_currwyp_and_lastwyp*180.0/AV_PI);
 #endif
+
+            if(destination.destNr == 0 && firsttime)
+            {
+                // Put current position (the start position) as last waypoint,
+                // because there is no real last waypoint...
+                // Only do this once (firsttime)
+                last_global_wyp_longitude = current_pos_y;
+                last_global_wyp_latitude = current_pos_x;
+                firsttime = false;
+            }
 
             //begin statemachine: /////////////////////////////////////////////////
             switch(generalflags.global_locator)
@@ -332,7 +334,7 @@ void * translation_thread(void * dummy)
                     rtx_message("Tracker: distance to destination = %f, destNr = %d ",  distance_boat_dest_loc, destination.destNr);
 #endif
                     if((distance_boat_dest < AV_GLOBALSKI_MIN_DIST_CURR_GLOB_WYP) && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END)
-                            || (angle_btw_boat_and_currwyp_and_lastwyp > AV_PI / 2.0))
+                            || ((destination.destNr > 0) && (angle_btw_boat_and_currwyp_and_lastwyp > AV_PI / 2.0)))
                     {
                         destination.destNr += 1;
                         assert((destination.destNr < 1000) && (destination.destNr>=0));
@@ -358,6 +360,10 @@ void * translation_thread(void * dummy)
                     {
                         skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
                         skipperFlagData.t_writefrom(skipperflags);
+#ifdef DEBUG_GLOBSKIPPER
+                        rtx_message("tracker: going into LOCATOR bcs destination too big ");
+#endif
+                        
                     }
 
                     break;
