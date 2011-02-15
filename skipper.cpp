@@ -232,7 +232,7 @@ void * translation_thread(void * dummy)
             }
 
 #ifdef DEBUG_SKIPPER
-            rtx_message("next WP: x= %lf, y= %lf head= %f",waypoints.Data[current_wyp].x,
+            rtx_message("next WP: x= %f, y= %f head= %f",waypoints.Data[current_wyp].x,
                     waypoints.Data[current_wyp].y, waypoints.Data[current_wyp].heading);
 #endif
 
@@ -376,7 +376,7 @@ void * translation_thread(void * dummy)
                     }
 
                     //HEAD TO THE NEXT WAYPOINT
-                    if(((dist_next_trajectory < 40.0) || (dist_curr_wyp < 40.0) 
+                    if(((dist_next_trajectory < AV_NAVI_TOLERANCE_NEXT_SOLLTRAJECTORY) || (dist_curr_wyp < AV_NAVI_TOLERANCE_CURR_WYP) 
                                 /*|| ((sign((remainder(heading_curr_to_next_wyp - heading_to_next_wyp,2*AV_PI)))
                                  *sign(remainder(heading_curr_to_next_wyp - heading_prev_to_next_wyp,2*AV_PI))) == -1)*/)
                             && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END)
@@ -396,16 +396,17 @@ void * translation_thread(void * dummy)
 #endif
                     // DO A NEWCALCULATION -> GO INTO NEWCALC MODE
                     if(((fabs(remainder(dir_wind_mean - waypoints.Data[current_wyp].winddirection,360.0)) > 10.0)
-                                || (fabs(dist_solltrajectory) > 100.0)) || (((remainder(heading_prev_to_next_wyp - heading_to_next_wyp-0.1,2*AV_PI)>0 && (remainder(heading_curr_to_next_wyp-heading_to_next_wyp-0.04,2*AV_PI)>0))
-                                    || (remainder(heading_prev_to_next_wyp-heading_to_next_wyp+0.1,2*AV_PI)<0 && (remainder(heading_curr_to_next_wyp-heading_to_next_wyp+0.04,2*AV_PI)<0)))
-                                && fabs(dist_curr_wyp) > 400.0 && (waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END)))
+                                || (fabs(dist_solltrajectory) > AV_NAVI_TOLERANCE_SOLLTRAJECTORY)) 
+                                || (((sign((remainder(heading_curr_to_next_wyp - heading_to_next_wyp,2*AV_PI)))
+                                * sign(remainder((heading_curr_to_next_wyp - desiredHeading.heading*AV_PI/180.0),2*AV_PI))) == -1)
+                                && (waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END)))
                     {
                         if(fabs(dir_wind_mean - waypoints.Data[current_wyp].winddirection) > 10.0)
                         {
                             rtx_message("normalnavi-------->newcalc: wind has changed");
                         }
 
-                        if (fabs(dist_solltrajectory) > 100.0)
+                        if (fabs(dist_solltrajectory) > AV_NAVI_TOLERANCE_SOLLTRAJECTORY)
                         {
                             rtx_message("normalnavi-------->newcalc: dist_solltrajectory too bigi (%f meters) ",dist_solltrajectory);
                         }

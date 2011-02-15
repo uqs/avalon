@@ -148,9 +148,10 @@
 
 #define AV_NAUT_MILE                    1852           //1 nautical mile in meters!!
 ////
-#define AV_NAVI_LAKE_TOLERANCE_SOLLTRAJECTORY 20             //in meters
-#define AV_NAVI_SEA_TOLERANCE_SOLLTRAJECTORY  100           //in meters
-#define AV_NAVI_LAKE_DIST_FOR_MANEUVER        3             //in meters, alter after testing!!!
+#define AV_NAVI_TOLERANCE_SOLLTRAJECTORY  100           //in meters
+#define AV_NAVI_TOLERANCE_NEXT_SOLLTRAJECTORY   20           //in meters
+#define AV_NAVI_LAKE_DIST_FOR_MANEUVER          3             //in meters, alter after testing!!!
+#define AV_NAVI_TOLERANCE_CURR_WYP              20             //in meters
 
 #define AV_NAVI_RADIUS_FOR_BUOY_MANEUVER      15             //in meters
 #define AV_NAVI_BUOY_MAN_HEADINGDEV           AV_PI/4       //in radians!
