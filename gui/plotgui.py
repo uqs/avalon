@@ -255,10 +255,14 @@ class ControlFrame(wx.Frame):
 		# ---------------------------------------
 		# redraws the position plot:
 		# ---------------------------------------
-		delta_long = max(max(self.pos_longitude),max(self.wyp_longitude)) - min(min(self.pos_longitude), min(self.wyp_longitude))
-		long_m = 0.5*(max(max(self.pos_longitude), max(self.wyp_longitude)) + min(min(self.pos_longitude), min(self.wyp_longitude)))
-		delta_lat = max(max(self.pos_latitude), max(self.wyp_latitude)) - min(min(self.pos_latitude), min(self.wyp_latitude))
-		lat_m = 0.5*(max(max(self.pos_latitude), max(self.wyp_latitude)) + min(min(self.pos_latitude), min(self.wyp_latitude)))
+		#delta_long = max(max(self.pos_longitude),max(self.wyp_longitude)) - min(min(self.pos_longitude), min(self.wyp_longitude))
+		#long_m = 0.5*(max(max(self.pos_longitude), max(self.wyp_longitude)) + min(min(self.pos_longitude), min(self.wyp_longitude)))
+		#delta_lat = max(max(self.pos_latitude), max(self.wyp_latitude)) - min(min(self.pos_latitude), min(self.wyp_latitude))
+		#lat_m = 0.5*(max(max(self.pos_latitude), max(self.wyp_latitude)) + min(min(self.pos_latitude), min(self.wyp_latitude)))
+		delta_long = max(self.pos_longitude) - min(self.pos_longitude)
+		long_m = 0.5*(max(self.pos_longitude)) + min(self.pos_longitude)
+		delta_lat = max(self.pos_latitude) - min(self.pos_latitude)
+		lat_m = 0.5*(max(self.pos_latitude)) + min(self.pos_latitude)
 		
 		delta_long_calc = 6.0/3.5 * delta_lat
 		delta_lat_calc = 3.5/6.0 * delta_long
@@ -283,10 +287,10 @@ class ControlFrame(wx.Frame):
 
 		#print long_m
 
-		self.wypplot.set_xbound(lower=xmin, upper=xmax)
-		self.wypplot.set_ybound(lower=ymin, upper=ymax)
-		#self.wypplot.set_xbound(lower=-300, upper=300)
-		#self.wypplot.set_ybound(lower=-200, upper=200)
+		#self.wypplot.set_xbound(lower=xmin, upper=xmax)
+		#self.wypplot.set_ybound(lower=ymin, upper=ymax)
+		self.wypplot.set_xbound(lower=-150, upper=150)
+		self.wypplot.set_ybound(lower=-300, upper=0)
 
 		#grid on:
 		self.wypplot.grid(True, color='gray')
@@ -294,8 +298,8 @@ class ControlFrame(wx.Frame):
 		self.plot_posdata.set_xdata(array(self.pos_longitude))
 		self.plot_posdata.set_ydata(array(self.pos_latitude))
 		
-		self.plot_wypdata.set_xdata(array(self.wyp_longitude))
-		self.plot_wypdata.set_ydata(array(self.wyp_latitude))
+		#self.plot_wypdata.set_xdata(array(self.wyp_longitude))
+		#self.plot_wypdata.set_ydata(array(self.wyp_latitude))
 
 		self.canvas.draw()
 
@@ -357,6 +361,9 @@ class ControlFrame(wx.Frame):
 		del self.pos_latitude[:]
 		del self.wyp_longitude[:]
 		del self.wyp_latitude[:]
+
+		self.wyp_latitude[0]
+		self.wyp_longitude[0]
 
 		msg = wx.MessageDialog(None, 'Plot data cleared!', 'Info', wx.OK)
 		msg.ShowModal()
@@ -459,17 +466,23 @@ class ControlFrame(wx.Frame):
 		if self.plot_count > 1:
 			self.plot_count = 0
 			
+			#pos_x = float (EARTH_RAD * (math.pi/180)
+			#	*(float(self.IMUData.position.latitude) - float(self.DESTData.latitude)))
+			#pos_y = float (EARTH_RAD 
+			#	*math.cos((float(self.DESTData.latitude) * math.pi/180.0))*(math.pi/180.0)
+			#	*(float(self.IMUData.position.longitude) - float(self.DESTData.longitude)))
 			pos_x = float (EARTH_RAD * (math.pi/180)
-				*(float(self.IMUData.position.latitude) - float(self.DESTData.latitude)))
+				*(float(47.29853) - float(self.IMUData.position.latitude)))
 			pos_y = float (EARTH_RAD 
-				*math.cos((float(self.DESTData.latitude) * math.pi/180.0))*(math.pi/180.0)
-				*(float(self.IMUData.position.longitude) - float(self.DESTData.longitude)))
+				*math.cos((float(47.29853) * math.pi/180.0))*(math.pi/180.0)
+				*(float(8.566133) -
+					float(self.IMUData.position.longitude)))
 
 			self.pos_longitude.append(pos_y) #(float(self.IMUData.position.longitude))
 			self.pos_latitude.append(pos_x) #(float(self.IMUData.position.latitude)) 
-			print self.pos_longitude
-			print self.pos_latitude
 
+			print pos_x
+			print pos_y
 			#if len(self.pos_longitude) > 60:
 			#	self.pos_longitude.pop(0)
 			#	self.pos_latitude.pop(0)
