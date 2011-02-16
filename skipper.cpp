@@ -317,7 +317,7 @@ void * translation_thread(void * dummy)
                         entry_timestamp = waypointData.timeStamp();
                         old_navi_index = generalflags.navi_index_call;
                         //current_wyp = 1;
-                        last_glob_skipper_index = destination.skipper_index_call;
+                        last_glob_skipper_call = destination.skipper_index_call;
                     }
 
 
