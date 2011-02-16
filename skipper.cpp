@@ -233,7 +233,7 @@ void * translation_thread(void * dummy)
                 break;
             }
 
-#ifdef DEBUG_SKIPPER
+#ifdef DEBUG_SKIPPER_HEAVY
             rtx_message("next WP: x= %f, y= %f head= %f",waypoints.Data[current_wyp].x,
                     waypoints.Data[current_wyp].y, waypoints.Data[current_wyp].heading);
 #endif
@@ -288,7 +288,7 @@ void * translation_thread(void * dummy)
             dist_buoy = sqrt((vec_dist_buoy_x*vec_dist_buoy_x) + (vec_dist_buoy_y*vec_dist_buoy_y));
             ///////
 
-#ifdef DEBUG_SKIPPER
+#ifdef DEBUG_SKIPPER_HEAVY
             rtx_message("current_wyp = %d, desired heading = %f \n",current_wyp,desiredHeading.heading);
 #endif
 
@@ -325,7 +325,7 @@ void * translation_thread(void * dummy)
                     if(waypoints.Data[current_wyp].wyp_type != 0)
                     {
 
-#ifdef DEBUG_SKIPPER
+#ifdef DEBUG_SKIPPER_HEAVY
                         rtx_message("newcalc: dist to next trajectory: %f meters\n", dist_next_trajectory);
                         rtx_message("newcalc: dist to curr wyp: %f meters\n", dist_curr_wyp);
 #endif
@@ -359,7 +359,7 @@ void * translation_thread(void * dummy)
                     /////////////////////////////////////////////////////////////////////////
                 case AV_FLAGS_NAVI_NORMALNAVIGATION:
 
-#ifdef DEBUG_SKIPPER
+#ifdef DEBUG_SKIPPER_HEAVY
                     rtx_message("normalnavi: dist to next trajectory: %f meters\n", dist_next_trajectory);
                     rtx_message("normalnavi: dist to curr wyp: %f meters\n", dist_curr_wyp);
 #endif
@@ -368,7 +368,7 @@ void * translation_thread(void * dummy)
                     //GO INTO GOAL APPROACH
                     if(waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END)
                     {
-#ifdef DEBUG_SKIPPER
+#ifdef DEBUG_SKIPPER_HEAVY
                         rtx_message("normalnavi: approaching the last calculated waypoint ");
 #endif
                         naviflags.navi_state = AV_FLAGS_NAVI_GOAL_APPROACH;
@@ -384,9 +384,9 @@ void * translation_thread(void * dummy)
                         waypoints.Data[current_wyp].passed = 1;
                         waypointData.t_writefrom(waypoints);
 
-                        //#ifdef DEBUG_SKIPPER
+#ifdef DEBUG_SKIPPER
                         rtx_message("normalnavi: nächster wyp ansteuern (new wyp = %d)\n", current_wyp+1);
-                        //#endif
+#endif
                         last_state = AV_FLAGS_NAVI_NORMALNAVIGATION;
                     }
 
@@ -402,7 +402,7 @@ void * translation_thread(void * dummy)
                                 * sign(remainder((heading_curr_to_next_wyp - desiredHeading.heading*AV_PI/180.0),2*AV_PI))) == -1)
                                 && (waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END) && (current_wyp > 0)))
                     {
-#ifdef DEBUG_SKIPPER_HEAVY
+#ifdef DEBUG_SKIPPER
                         if(last_glob_skipper_call != destination.skipper_index_call)
                         {
                             rtx_message("normalnavi-------->newcalc: Global Skipper calls");
