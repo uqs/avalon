@@ -30,8 +30,8 @@
 #include "destination.h"
 
 
-#define DEBUG_GLOBSKIPPER_EASY
-#define DEBUG_GLOBSKIPPER
+//#define DEBUG_GLOBSKIPPER_EASY
+//#define DEBUG_GLOBSKIPPER
 
 /**
  * Global variable for all DDX object

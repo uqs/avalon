@@ -7,9 +7,9 @@
 ./sailmain &
 ./imu &
 ./imucleaner &
-#./windsensor &
-#./windcleaner &
-./wind_faker &
+./windsensor &
+./windcleaner &
+#./wind_faker &
 ./sailor_transitions &
 ./sailor_statemachine &
 #./keepalive ./sailor_statemachine &
