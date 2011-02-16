@@ -350,6 +350,13 @@ void * translation_thread(void * dummy)
 
                     /* evaluate rudder-torquei: */
                     theta_dot_des = rtx_pid_eval(thetapid, remainder(imu.attitude.yaw-desired_heading.heading,360.),0., 0);
+
+                    // decrease theta_dot_des if we are sailing slowly
+                    if(imu_clean.velocity.x < 2.0)
+                    {
+                        theta_dot_des = 0.4 * theta_dot_des + 0.2;
+                    }
+
                     torque_des = rtx_pid_eval(mypid, imu.gyro.z, theta_dot_des, 0); //with p_max = I(3)/delta_t
                     rudder.torque_des = torque_des;
 
