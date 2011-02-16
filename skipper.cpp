@@ -166,6 +166,8 @@ void * translation_thread(void * dummy)
     double heading_curr_to_next_wyp;
     double heading_prev_to_next_wyp;
 
+    int last_glob_skipper_call = 0;
+
     dataBoat.t_readto(boatData,0,0);
     std::vector<double> headingHistory(30,boatData.attitude.yaw);
     double heading_average;
@@ -241,9 +243,6 @@ void * translation_thread(void * dummy)
             headingData.t_writefrom(desiredHeading);
 
 
-            dist_next_trajectory3 = dist_next_trajectory2;
-            dist_next_trajectory2 = dist_next_trajectory;
-
             //calculate all the distances and vectors:
             current_pos_x =double (AV_EARTHRADIUS * (AV_PI/180)
                     *(boatData.position.latitude - destination.latitude));
@@ -318,6 +317,7 @@ void * translation_thread(void * dummy)
                         entry_timestamp = waypointData.timeStamp();
                         old_navi_index = generalflags.navi_index_call;
                         //current_wyp = 1;
+                        last_glob_skipper_index = destination.skipper_index_call;
                     }
 
 
@@ -397,10 +397,17 @@ void * translation_thread(void * dummy)
                     // DO A NEWCALCULATION -> GO INTO NEWCALC MODE
                     if(((fabs(remainder(dir_wind_mean - waypoints.Data[current_wyp].winddirection,360.0)) > 10.0)
                                 || (fabs(dist_solltrajectory) > AV_NAVI_TOLERANCE_SOLLTRAJECTORY)) 
+                                || (last_glob_skipper_call != destination.skipper_index_call)
                                 || (((sign((remainder(heading_curr_to_next_wyp - heading_to_next_wyp,2*AV_PI)))
                                 * sign(remainder((heading_curr_to_next_wyp - desiredHeading.heading*AV_PI/180.0),2*AV_PI))) == -1)
                                 && (waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END) && (current_wyp > 0)))
                     {
+#ifdef DEBUG_SKIPPER_HEAVY
+                        if(last_glob_skipper_call != destination.skipper_index_call)
+                        {
+                            rtx_message("normalnavi-------->newcalc: Global Skipper calls");
+                        }
+
                         if(fabs(dir_wind_mean - waypoints.Data[current_wyp].winddirection) > 10.0)
                         {
                             rtx_message("normalnavi-------->newcalc: wind has changed");
@@ -410,6 +417,7 @@ void * translation_thread(void * dummy)
                         {
                             rtx_message("normalnavi-------->newcalc: dist_solltrajectory too bigi (%f meters) ",dist_solltrajectory);
                         }
+#endif
 
                         naviflags.navi_state = AV_FLAGS_NAVI_NEWCALCULATION;
                         naviflags.navi_index_call ++;

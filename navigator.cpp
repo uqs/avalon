@@ -185,8 +185,7 @@ void * translation_thread(void * dummy)
                 timedif = difftime(end,start_time);
             }
             // do a new path calculation if the global_skipper is asking for
-            if(((last_calc_index != generalflags.navi_index_call) || (last_dest_index != destination.skipper_index_call))
-                    && (generalflags.autonom_navigation)) 
+            if((last_calc_index != generalflags.navi_index_call) && (generalflags.autonom_navigation))
             {
                 if (last_dest_index != destination.skipper_index_call)
                 {
