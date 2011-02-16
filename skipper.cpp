@@ -35,7 +35,7 @@
 #include "desired_course.h"
 //#include "weatherdata.h"
 
-//#define DEBUG_SKIPPER
+#define DEBUG_SKIPPER
 //#define DEBUG_SKIPPER_HEAVY
 
 /**
@@ -395,7 +395,7 @@ void * translation_thread(void * dummy)
                             heading_to_next_wyp*180/AV_PI,heading_prev_to_next_wyp*180/AV_PI);
 #endif
                     // DO A NEWCALCULATION -> GO INTO NEWCALC MODE
-                    if(((fabs(remainder(dir_wind_mean - waypoints.Data[current_wyp].winddirection,360.0)) > 10.0)
+                    if(((fabs(remainder(dir_wind_mean - waypoints.Data[current_wyp].winddirection,360.0)) > 25.0)
                                 || (fabs(dist_solltrajectory) > AV_NAVI_TOLERANCE_SOLLTRAJECTORY)) 
                                 || (last_glob_skipper_call != destination.skipper_index_call)
                                 || (((sign((remainder(heading_curr_to_next_wyp - heading_to_next_wyp,2*AV_PI)))
