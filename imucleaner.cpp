@@ -109,7 +109,7 @@ void * translation_thread(void * dummy)
                 velocity_z_filter = rtx_filter_median_init(100);
                 roll_filter = rtx_filter_median_init(100);
                 pitch_filter = rtx_filter_median_init(100);
-                yaw_filter = rtx_filter_median_init(500);
+                yaw_filter = rtx_filter_median_init(100);
                 firsttime = false;
             }
 

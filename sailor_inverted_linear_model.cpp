@@ -25,12 +25,24 @@ double sailor_inverted_linear_model(double heading_speed, double torque_des,
     double d_water;
     double incid_angle;
     double rudder_angle;
+    int sign_rudder_angle = 1;
 
     //v_r_tot	= sqrt((speed_x*speed_x) + ((speed_y - dist_rudder_CenterOfRotation*heading_speed)*(speed_y - dist_rudder_CenterOfRotation*heading_speed)));
     v_r_tot = speed_x;
    // d_water     = atan2((speed_y - dist_rudder_CenterOfRotation*heading_speed),speed_x)*180/AV_PI; 
     d_water	= 0;
-    rudder_angle = torque_des / (AV_MODEL_LIN_COEFF*dist_rudder_CenterOfRotation*dens_water*v_r_tot*v_r_tot*A_rudder) *180/AV_PI;
+
+    //change rudder direction if we are sailing backwards:
+    if(v_r_tot > 0.1)
+    {
+        sign_rudder_angle = 1;
+    }
+    else if(v_r_tot < -0.1)
+    {
+        sign_rudder_angle = -1;
+    }
+
+    rudder_angle = sign_rudder_angle * (torque_des / (AV_MODEL_LIN_COEFF*dist_rudder_CenterOfRotation*dens_water*v_r_tot*v_r_tot*A_rudder) *180.0/AV_PI);
 
     if(v_r_tot < 1.0)
     {

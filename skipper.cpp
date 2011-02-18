@@ -166,6 +166,8 @@ void * translation_thread(void * dummy)
     double heading_curr_to_next_wyp;
     double heading_prev_to_next_wyp;
 
+    int last_glob_skipper_call = 0;
+
     dataBoat.t_readto(boatData,0,0);
     std::vector<double> headingHistory(30,boatData.attitude.yaw);
     double heading_average;
@@ -231,8 +233,8 @@ void * translation_thread(void * dummy)
                 break;
             }
 
-#ifdef DEBUG_SKIPPER
-            rtx_message("next WP: x= %lf, y= %lf head= %f",waypoints.Data[current_wyp].x,
+#ifdef DEBUG_SKIPPER_HEAVY
+            rtx_message("next WP: x= %f, y= %f head= %f",waypoints.Data[current_wyp].x,
                     waypoints.Data[current_wyp].y, waypoints.Data[current_wyp].heading);
 #endif
 
@@ -240,9 +242,6 @@ void * translation_thread(void * dummy)
             desiredHeading.heading = waypoints.Data[current_wyp].heading;
             headingData.t_writefrom(desiredHeading);
 
-
-            dist_next_trajectory3 = dist_next_trajectory2;
-            dist_next_trajectory2 = dist_next_trajectory;
 
             //calculate all the distances and vectors:
             current_pos_x =double (AV_EARTHRADIUS * (AV_PI/180)
@@ -289,7 +288,7 @@ void * translation_thread(void * dummy)
             dist_buoy = sqrt((vec_dist_buoy_x*vec_dist_buoy_x) + (vec_dist_buoy_y*vec_dist_buoy_y));
             ///////
 
-#ifdef DEBUG_SKIPPER
+#ifdef DEBUG_SKIPPER_HEAVY
             rtx_message("current_wyp = %d, desired heading = %f \n",current_wyp,desiredHeading.heading);
 #endif
 
@@ -318,6 +317,7 @@ void * translation_thread(void * dummy)
                         entry_timestamp = waypointData.timeStamp();
                         old_navi_index = generalflags.navi_index_call;
                         //current_wyp = 1;
+                        last_glob_skipper_call = destination.skipper_index_call;
                     }
 
 
@@ -325,7 +325,7 @@ void * translation_thread(void * dummy)
                     if(waypoints.Data[current_wyp].wyp_type != 0)
                     {
 
-#ifdef DEBUG_SKIPPER
+#ifdef DEBUG_SKIPPER_HEAVY
                         rtx_message("newcalc: dist to next trajectory: %f meters\n", dist_next_trajectory);
                         rtx_message("newcalc: dist to curr wyp: %f meters\n", dist_curr_wyp);
 #endif
@@ -359,7 +359,7 @@ void * translation_thread(void * dummy)
                     /////////////////////////////////////////////////////////////////////////
                 case AV_FLAGS_NAVI_NORMALNAVIGATION:
 
-#ifdef DEBUG_SKIPPER
+#ifdef DEBUG_SKIPPER_HEAVY
                     rtx_message("normalnavi: dist to next trajectory: %f meters\n", dist_next_trajectory);
                     rtx_message("normalnavi: dist to curr wyp: %f meters\n", dist_curr_wyp);
 #endif
@@ -368,7 +368,7 @@ void * translation_thread(void * dummy)
                     //GO INTO GOAL APPROACH
                     if(waypoints.Data[current_wyp].wyp_type == AV_WYP_TYPE_END)
                     {
-#ifdef DEBUG_SKIPPER
+#ifdef DEBUG_SKIPPER_HEAVY
                         rtx_message("normalnavi: approaching the last calculated waypoint ");
 #endif
                         naviflags.navi_state = AV_FLAGS_NAVI_GOAL_APPROACH;
@@ -376,7 +376,7 @@ void * translation_thread(void * dummy)
                     }
 
                     //HEAD TO THE NEXT WAYPOINT
-                    if(((dist_next_trajectory < 40.0) || (dist_curr_wyp < 40.0) 
+                    if(((dist_next_trajectory < AV_NAVI_TOLERANCE_NEXT_SOLLTRAJECTORY) || (dist_curr_wyp < AV_NAVI_TOLERANCE_CURR_WYP) 
                                 /*|| ((sign((remainder(heading_curr_to_next_wyp - heading_to_next_wyp,2*AV_PI)))
                                  *sign(remainder(heading_curr_to_next_wyp - heading_prev_to_next_wyp,2*AV_PI))) == -1)*/)
                             && waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END)
@@ -384,9 +384,9 @@ void * translation_thread(void * dummy)
                         waypoints.Data[current_wyp].passed = 1;
                         waypointData.t_writefrom(waypoints);
 
-                        //#ifdef DEBUG_SKIPPER
+#ifdef DEBUG_SKIPPER
                         rtx_message("normalnavi: nächster wyp ansteuern (new wyp = %d)\n", current_wyp+1);
-                        //#endif
+#endif
                         last_state = AV_FLAGS_NAVI_NORMALNAVIGATION;
                     }
 
@@ -395,20 +395,29 @@ void * translation_thread(void * dummy)
                             heading_to_next_wyp*180/AV_PI,heading_prev_to_next_wyp*180/AV_PI);
 #endif
                     // DO A NEWCALCULATION -> GO INTO NEWCALC MODE
-                    if(((fabs(remainder(dir_wind_mean - waypoints.Data[current_wyp].winddirection,360.0)) > 10.0)
-                                || (fabs(dist_solltrajectory) > 100.0)) || (((remainder(heading_prev_to_next_wyp - heading_to_next_wyp-0.1,2*AV_PI)>0 && (remainder(heading_curr_to_next_wyp-heading_to_next_wyp-0.04,2*AV_PI)>0))
-                                    || (remainder(heading_prev_to_next_wyp-heading_to_next_wyp+0.1,2*AV_PI)<0 && (remainder(heading_curr_to_next_wyp-heading_to_next_wyp+0.04,2*AV_PI)<0)))
-                                && fabs(dist_curr_wyp) > 400.0 && (waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END)))
+                    if(((fabs(remainder(dir_wind_mean - waypoints.Data[current_wyp].winddirection,360.0)) > 25.0)
+                                || (fabs(dist_solltrajectory) > AV_NAVI_TOLERANCE_SOLLTRAJECTORY)) 
+                                || (last_glob_skipper_call != destination.skipper_index_call)
+                                || (((sign((remainder(heading_curr_to_next_wyp - heading_to_next_wyp,2*AV_PI)))
+                                * sign(remainder((heading_curr_to_next_wyp - desiredHeading.heading*AV_PI/180.0),2*AV_PI))) == -1)
+                                && (waypoints.Data[current_wyp].wyp_type != AV_WYP_TYPE_END) && (current_wyp > 0)))
                     {
+#ifdef DEBUG_SKIPPER
+                        if(last_glob_skipper_call != destination.skipper_index_call)
+                        {
+                            rtx_message("normalnavi-------->newcalc: Global Skipper calls");
+                        }
+
                         if(fabs(dir_wind_mean - waypoints.Data[current_wyp].winddirection) > 10.0)
                         {
                             rtx_message("normalnavi-------->newcalc: wind has changed");
                         }
 
-                        if (fabs(dist_solltrajectory) > 100.0)
+                        if (fabs(dist_solltrajectory) > AV_NAVI_TOLERANCE_SOLLTRAJECTORY)
                         {
                             rtx_message("normalnavi-------->newcalc: dist_solltrajectory too bigi (%f meters) ",dist_solltrajectory);
                         }
+#endif
 
                         naviflags.navi_state = AV_FLAGS_NAVI_NEWCALCULATION;
                         naviflags.navi_index_call ++;

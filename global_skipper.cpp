@@ -116,6 +116,7 @@ void * translation_thread(void * dummy)
     SkipperFlags skipperflags;
     AisDestData ais_dest;
 
+    bool firsttime = true;
     double dest_dist = 1000;
     int i;
     unsigned int ais_dest_index_last=0;
@@ -150,11 +151,6 @@ void * translation_thread(void * dummy)
             destinationData.t_readto(destination,0,0);
             skipperFlagData.t_readto(skipperflags,0,0);
             aisDestData.t_readto(ais_dest,0,0);
-            if(destination.destNr == 0)
-            {
-                skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
-                skipperFlagData.t_writefrom(skipperflags);
-            }
 
             // if we are on collision course, ais tells us the new destination point
             if (ais_dest.ais_dest_index != ais_dest_index_last)
@@ -207,6 +203,16 @@ void * translation_thread(void * dummy)
 #ifdef DEBUG_GLOBSKIPPER_EASY
             rtx_message("Beginning: Notorious Angle: %f ",angle_btw_boat_and_currwyp_and_lastwyp*180.0/AV_PI);
 #endif
+
+            if(destination.destNr == 0 && firsttime)
+            {
+                // Put current position (the start position) as last waypoint,
+                // because there is no real last waypoint...
+                // Only do this once (firsttime)
+                last_global_wyp_longitude = current_pos_y;
+                last_global_wyp_latitude = current_pos_x;
+                firsttime = false;
+            }
 
             //begin statemachine: /////////////////////////////////////////////////
             switch(generalflags.global_locator)
@@ -316,100 +322,104 @@ void * translation_thread(void * dummy)
                         destinationData.t_writefrom(destination);
 
 #ifdef DEBUG_GLOBSKIPPER
-rtx_message("tracker: increased destination index to %d",destination.skipper_index_call);
+                        rtx_message("tracker: increased destination index to %d",destination.skipper_index_call);
 #endif
-}
-*/
-break;
-////////////////////////////////////////////////////////////////////////////
-case AV_FLAGS_GLOBALSK_TRACKER:
-// in this case, Avalon tries to reach the original stored destination point
+                        }
+                        */
+                    break;
+                    ////////////////////////////////////////////////////////////////////////////
+                case AV_FLAGS_GLOBALSK_TRACKER:
+                    // in this case, Avalon tries to reach the original stored destination point
 #ifdef DEBUG_GLOBSKIPPER_EASY
-rtx_message("Tracker: distance to destination = %f, destNr = %d ",  distance_boat_dest_loc, destination.destNr);
+                    rtx_message("Tracker: distance to destination = %f, destNr = %d ",  distance_boat_dest_loc, destination.destNr);
 #endif
-    if((distance_boat_dest < AV_GLOBALSKI_MIN_DIST_CURR_GLOB_WYP) && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END)
-            || (destination.destNr > 0 && angle_btw_boat_and_currwyp_and_lastwyp > AV_PI / 2.0))
-{
-    destination.destNr += 1;
-    assert((destination.destNr < 1000) && (destination.destNr>=0));
-    // save the last waypoint in a temporary variable:
-    last_global_wyp_longitude = destination.longitude;
-    last_global_wyp_latitude = destination.latitude;
+                    if((distance_boat_dest < AV_GLOBALSKI_MIN_DIST_CURR_GLOB_WYP) && (destination.Data[destination.destNr].type != AV_DEST_TYPE_END)
+                            || ((destination.destNr > 0) && (angle_btw_boat_and_currwyp_and_lastwyp > AV_PI / 2.0)))
+                    {
+                        destination.destNr += 1;
+                        assert((destination.destNr < 1000) && (destination.destNr>=0));
+                        // save the last waypoint in a temporary variable:
+                        last_global_wyp_longitude = destination.longitude;
+                        last_global_wyp_latitude = destination.latitude;
 
-    destination.longitude = destination.Data[destination.destNr].longitude;
-    destination.latitude = destination.Data[destination.destNr].latitude;
-    destination.skipper_index_call ++;
-    destination.not_in_list = 0;
-    destinationData.t_writefrom(destination);
+                        destination.longitude = destination.Data[destination.destNr].longitude;
+                        destination.latitude = destination.Data[destination.destNr].latitude;
+                        destination.skipper_index_call ++;
+                        destination.not_in_list = 0;
+                        destinationData.t_writefrom(destination);
 
-    skipperflags.global_locator = AV_FLAGS_GLOBALSK_CLOSING;
-    skipperFlagData.t_writefrom(skipperflags);
+                        skipperflags.global_locator = AV_FLAGS_GLOBALSK_CLOSING;
+                        skipperFlagData.t_writefrom(skipperflags);
 
 #ifdef DEBUG_GLOBSKIPPER
-    rtx_message("tracker: increased destination index to %d",destination.skipper_index_call);
+                        rtx_message("tracker: increased destination index to %d",destination.skipper_index_call);
 #endif
-}   
+                    }   
 
-if(distance_boat_dest_loc > 1.2*dest_dist)
-{
-    skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
-    skipperFlagData.t_writefrom(skipperflags);
-}
-
-break;
-/////////////////////////////////////////////////////////////////////////7    
-case AV_FLAGS_GLOBALSK_AVOIDANCE:
-// if aisEval computes a new destination point, we stay in this case
+                    if(distance_boat_dest_loc > 1.2*dest_dist)
+                    {
+                        skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
+                        skipperFlagData.t_writefrom(skipperflags);
 #ifdef DEBUG_GLOBSKIPPER
-rtx_message("avoidance: distance to destination = %f \n", distance_boat_dest_loc);
+                        rtx_message("tracker: going into LOCATOR bcs destination too big ");
 #endif
-if((distance_boat_dest_loc < 200) || (distance_boat_dest_loc > 2*dest_dist))
-{
-    skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
-    skipperFlagData.t_writefrom(skipperflags);
-}
+                        
+                    }
 
-break;
-////////////////////////////////////////////////////////////////////////////
-case AV_FLAGS_GLOBALSK_SURVIVE:
+                    break;
+                    /////////////////////////////////////////////////////////////////////////7    
+                case AV_FLAGS_GLOBALSK_AVOIDANCE:
+                    // if aisEval computes a new destination point, we stay in this case
+#ifdef DEBUG_GLOBSKIPPER
+                    rtx_message("avoidance: distance to destination = %f \n", distance_boat_dest_loc);
+#endif
+                    if((distance_boat_dest_loc < 200) || (distance_boat_dest_loc > 2*dest_dist))
+                    {
+                        skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
+                        skipperFlagData.t_writefrom(skipperflags);
+                    }
+
+                    break;
+                    ////////////////////////////////////////////////////////////////////////////
+                case AV_FLAGS_GLOBALSK_SURVIVE:
 
 #ifdef DEBUG_GLOBSKIPPER
-rtx_message("survive: distance to destination = %f \n", distance_boat_dest);
+                    rtx_message("survive: distance to destination = %f \n", distance_boat_dest);
 #endif
 
-if((distance_boat_dest_loc < 200) || (distance_boat_dest_loc > 600))
-{
-    skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
-    skipperFlagData.t_writefrom(skipperflags);
-}
+                    if((distance_boat_dest_loc < 200) || (distance_boat_dest_loc > 600))
+                    {
+                        skipperflags.global_locator = AV_FLAGS_GLOBALSK_LOCATOR;
+                        skipperFlagData.t_writefrom(skipperflags);
+                    }
 
-break;
-////////////////////////////////////////////////////////////////////////////
+                    break;
+                    ////////////////////////////////////////////////////////////////////////////
 
-}
+            }
 
-}
+        }
 #if 0
-else if (dataWindClean.hasTimedOut()) {
-    // Timeout. Probably no joystick connected.
+        else if (dataWindClean.hasTimedOut()) {
+            // Timeout. Probably no joystick connected.
 
-    rtx_message("Timeout while reading dataWindClean \n");}
+            rtx_message("Timeout while reading dataWindClean \n");}
 #endif
-    else if (dataBoat.hasTimedOut()) {
-        // Timeout. Probably no joystick connected.
+        else if (dataBoat.hasTimedOut()) {
+            // Timeout. Probably no joystick connected.
 
-        rtx_message("Timeout while reading IMU-Data \n");}
+            rtx_message("Timeout while reading IMU-Data \n");}
 
         else
-{
-    // Something strange happend. Critical Error.
-    rtx_error("Critical error while reading data");
-    // Emergency-Stop
-    rtx_main_signal_shutdown();
-}
-rtx_timer_sleep(0.1);
-}
-return NULL;
+        {
+            // Something strange happend. Critical Error.
+            rtx_error("Critical error while reading data");
+            // Emergency-Stop
+            rtx_main_signal_shutdown();
+        }
+        rtx_timer_sleep(0.1);
+    }
+    return NULL;
 }
 
 // Error handling for C functions (return 0 on success)
