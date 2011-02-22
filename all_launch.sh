@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 launch -c launch.conf &
 sleep 5
